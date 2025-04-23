@@ -90,8 +90,10 @@ public class main {
                     Map<String, String> data = parseJsonToMap(recivedString);
                     // Execute query
                     String result = executeQuery(data.get("database"), data.get("username"), data.get("password"), data.get("query"));
+                    
                     // Create response
-                    exchange.sendResponseHeaders(200, result.length());
+                    exchange.getResponseHeaders().add("Content-Type", "application/json");
+                    exchange.sendResponseHeaders(200, result.getBytes().length);
                     OutputStream os = exchange.getResponseBody();
                     os.write(result.getBytes());
                     os.close();
@@ -110,10 +112,48 @@ public class main {
             String url = "jdbc:mysql://localhost:3306/" + database;
             try (Connection conn = DriverManager.getConnection(url, username, password)){
                 try (Statement stmt = conn.createStatement()){
-                    ResultSet result = stmt.executeQuery(query);
+                    ResultSet resultSet = stmt.executeQuery(query);
+                    StringBuilder jsonBuilder = new StringBuilder();
+                    ResultSetMetaData metaData = resultSet.getMetaData();
+                    int columnCount = metaData.getColumnCount();
+
+                    jsonBuilder.append("{");
+
+                    boolean firstColumn = true;
+                    // Append column names
+                    for (int i = 1; i <= columnCount; i++) {
+                        if (!firstColumn) {
+                            jsonBuilder.append("\", ");
+                        }
+                        firstColumn = false;
+                        jsonBuilder.append("\"").append(metaData.getColumnName(i)).append("\": \"");
+                    }
+
+                    // Append rows
+                    boolean hasRows = false;
+                    boolean firstValue = true;
+                    while (resultSet.next()) {
+                        hasRows = true;
+                        if (!firstValue) {
+                            jsonBuilder.append(", ");
+                        }
+                        firstValue = false;
+                        for (int i = 1; i <= columnCount; i++) {
+                            jsonBuilder.append(resultSet.getString(i));
+                        }
+                    }
+
+                    if (!hasRows) {
+                        jsonBuilder.append("\"Empty set\"");
+                    }
+
+                    jsonBuilder.append("\"");
+
+                    jsonBuilder.append("}");
+
                     System.out.println("Executing: " + query);
-                    System.out.println("Result: " + result.toString());
-                    return result.toString();
+                    System.out.println("Result: " + jsonBuilder.toString());
+                    return jsonBuilder.toString();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
