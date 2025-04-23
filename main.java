@@ -19,6 +19,7 @@ public class main {
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext("/", new RootHandler());
         server.createContext("/static", new StaticFileHandler());
+        server.createContext("/query", new QueryHandler());
         server.setExecutor(null);
         server.start();
         System.out.println("Server started on port " + port);
@@ -73,5 +74,70 @@ public class main {
             os.write(response);
             os.close();
         }
+    }
+
+    static class QueryHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            try {
+                if ("POST".equals(exchange.getRequestMethod())) {
+                    // Read the request body
+                    InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), "UTF-8");
+                    BufferedReader reader = new BufferedReader(isr);
+                    String recivedString = reader.lines().collect(Collectors.joining());
+                    System.out.println("Recived string: " + recivedString); // Debug 
+                    // Parse JSON into a map
+                    Map<String, String> data = parseJsonToMap(recivedString);
+                    // Execute query
+                    String result = executeQuery(data.get("database"), data.get("username"), data.get("password"), data.get("query"));
+                    // Create response
+                    exchange.sendResponseHeaders(200, result.length());
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(result.getBytes());
+                    os.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                try {
+                    exchange.sendResponseHeaders(500, -1);
+                } catch (Exception ignored) {
+
+                }
+            }
+        }
+
+        private String executeQuery(String database, String username, String password, String query){
+            String url = "jdbc:mysql://localhost:3306/" + database;
+            try (Connection conn = DriverManager.getConnection(url, username, password)){
+                try (Statement stmt = conn.createStatement()){
+                    ResultSet result = stmt.executeQuery(query);
+                    System.out.println("Executing: " + query);
+                    System.out.println("Result: " + result.toString());
+                    return result.toString();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return "executeQuery";
+        }
+    }
+
+    private static Map<String, String> parseJsonToMap(String json){
+        Map<String, String> map = new HashMap<>();
+        json = json.trim();
+
+        if (json.startsWith("{") && json.endsWith("}")) {
+            json = json.substring(1, json.length() - 1); // Remove the outer curly braces
+        }
+        String[] pairs = json.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)"); // Split key-value pairs
+        for (String pair : pairs) {
+            String[] keyValue = pair.split(":(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", 2); // Split key and value
+            if (keyValue.length == 2) {
+                String key = keyValue[0].trim().replaceAll("^\"|\"$", ""); // Remove quotes from key
+                String value = keyValue[1].trim().replaceAll("^\"|\"$", ""); // Remove quotes from value
+                map.put(key, value);
+            }
+        }
+        return map;
     }
 }

@@ -1,1 +1,1 @@
-java main.java
+java -cp ".;mysql-conn.jar" main
