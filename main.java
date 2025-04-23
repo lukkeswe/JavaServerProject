@@ -18,6 +18,7 @@ public class main {
         int port = 80;
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext("/", new RootHandler());
+        server.createContext("/static", new StaticFileHandler());
         server.setExecutor(null);
         server.start();
         System.out.println("Server started on port " + port);
@@ -33,6 +34,40 @@ public class main {
             // Set the Content-Type header for HTML
             exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
             // Create the response
+            exchange.sendResponseHeaders(200, response.length);
+            OutputStream os = exchange.getResponseBody();
+            os.write(response);
+            os.close();
+        }
+    }
+
+    static class StaticFileHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            // Get the requested path
+            String requestPath = exchange.getRequestURI().getPath();
+            String filePath = "html" + requestPath;
+            // Check if the file exist before reading
+            if(!Files.exists(Paths.get(filePath))) {
+                System.out.println("File not found: " + filePath); // Debug print
+                exchange.sendResponseHeaders(404, -1);
+                return;
+            } else {
+                System.out.println("Loaded file: " + filePath);
+            }
+            // Load the file
+            byte[] response = Files.readAllBytes(Paths.get(filePath));
+            // Determine the MIME type
+            String contentType = "application/octet-stream";
+            if (filePath.endsWith(".js")) {
+                contentType = "application/javascript";
+            } else if (filePath.endsWith(".css")) {
+                contentType = "text/css";
+            } else if (filePath.endsWith(".html")) {
+                contentType = "text/html; charset=UTF-8";
+            }
+            // Create the response
+            exchange.getResponseHeaders().set("Content-type", contentType);
             exchange.sendResponseHeaders(200, response.length);
             OutputStream os = exchange.getResponseBody();
             os.write(response);
