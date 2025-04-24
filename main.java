@@ -138,6 +138,7 @@ public class main {
                                 jsonBuilder.append(", ");
                             }
                             firstColumn = false;
+                            // Append the column name and value
                             jsonBuilder.append("\"").append(metaData.getColumnName(i)).append("\": ");
                             jsonBuilder.append("\"").append(resultSet.getString(i)).append("\"");
                         }

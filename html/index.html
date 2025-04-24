@@ -1,15 +1,26 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="static/css/style.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="static/css/style.css" />
     <script src="static/js/dbmanager.js"></script>
+    <script src="static/js/docmanager.js"></script>
     <title>Admin</title>
-</head>
-<body>
-    <h1>サーバー管理</h1>
-    <input type="text" id="input">
-    <button onclick="db.executeQuery()">お呼び</button>
-</body>
+  </head>
+  <body>
+    <div id="container">
+      <h1>サーバー管理</h1>
+      <input type="text" id="input" />
+      <button id="run">実行</button>
+    </div>
+    <script type="text/javascript">
+        const db = new DBmanager();
+        const dm = new DocumentManager();
+        document.getElementById("run").addEventListener("click", async function(){
+            let data = await db.executeQuery();
+            dm.makeTable(data);
+        });
+    </script>
+  </body>
 </html>

@@ -24,11 +24,10 @@ class DBmanager {
             }
             const data = await response.json();
             console.log("Response from server:", data);
+            return data;
         } catch (error) {
             console.error('Error executing query:', error);
         }
     }
 
 }
-
-const db = new DBmanager();
