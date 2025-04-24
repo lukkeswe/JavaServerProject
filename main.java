@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
+import java.util.ArrayList;
 
 public class main {
 
@@ -116,41 +117,40 @@ public class main {
                     StringBuilder jsonBuilder = new StringBuilder();
                     ResultSetMetaData metaData = resultSet.getMetaData();
                     int columnCount = metaData.getColumnCount();
-
-                    jsonBuilder.append("{");
-
-                    boolean firstColumn = true;
-                    // Append column names
-                    for (int i = 1; i <= columnCount; i++) {
-                        if (!firstColumn) {
-                            jsonBuilder.append("\", ");
-                        }
-                        firstColumn = false;
-                        jsonBuilder.append("\"").append(metaData.getColumnName(i)).append("\": \"");
-                    }
-
+                    // Append first bracket
+                    jsonBuilder.append("[\n");
                     // Append rows
                     boolean hasRows = false;
-                    boolean firstValue = true;
+                    boolean firstRow = true;
+                    // "while" is for each row
                     while (resultSet.next()) {
                         hasRows = true;
-                        if (!firstValue) {
-                            jsonBuilder.append(", ");
+                        if (!firstRow) {
+                            jsonBuilder.append(",\n");
                         }
-                        firstValue = false;
+                        firstRow = false;
+                        // Append first bracket of the row
+                        jsonBuilder.append("{");
+                        boolean firstColumn = true;
+                        // "for" is for each column
                         for (int i = 1; i <= columnCount; i++) {
-                            jsonBuilder.append(resultSet.getString(i));
+                            if (!firstColumn) {
+                                jsonBuilder.append(", ");
+                            }
+                            firstColumn = false;
+                            jsonBuilder.append("\"").append(metaData.getColumnName(i)).append("\": ");
+                            jsonBuilder.append("\"").append(resultSet.getString(i)).append("\"");
                         }
+                        // Close the row
+                        jsonBuilder.append("}");
                     }
 
                     if (!hasRows) {
                         jsonBuilder.append("\"Empty set\"");
                     }
 
-                    jsonBuilder.append("\"");
-
-                    jsonBuilder.append("}");
-
+                    jsonBuilder.append("\n]"); // Close the JSON array
+                    // Print the query and result for debugging
                     System.out.println("Executing: " + query);
                     System.out.println("Result: " + jsonBuilder.toString());
                     return jsonBuilder.toString();
