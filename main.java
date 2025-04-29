@@ -21,6 +21,7 @@ public class main {
         server.createContext("/", new RootHandler());
         server.createContext("/static", new StaticFileHandler());
         server.createContext("/query", new QueryHandler());
+        server.createContext("/deleteRows", new DeleteHandler());
         server.setExecutor(null);
         server.start();
         System.out.println("Server started on port " + port);
@@ -82,6 +83,7 @@ public class main {
         public void handle(HttpExchange exchange) throws IOException {
             try {
                 if ("POST".equals(exchange.getRequestMethod())) {
+                    System.out.println("QueryHandler");
                     // Read the request body
                     InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), "UTF-8");
                     BufferedReader reader = new BufferedReader(isr);
@@ -115,6 +117,7 @@ public class main {
         public void handle(HttpExchange exchange) throws IOException {
             try {
                 if ("POST".equals(exchange.getRequestMethod())) {
+                    System.out.println("DeleteHandler");
                      // Read the request body
                     InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), "UTF-8");
                     BufferedReader reader = new BufferedReader(isr);
@@ -123,8 +126,8 @@ public class main {
                     // Parse JSON into map
                     Map<String, String> data = parseJsonToMap(recivedString);
                     // Execute delete request
-                    deleteData(data.get("database"), data.get("username"), data.get("password"), data.get("table"), data.get("column"), data.get("value"));
-                    String select = "SELECT FROM " + data.get("table") + " WHERE " + data.get("column") + " = " + data.get("value");
+                    deleteData(data.get("database"), data.get("username"), data.get("password"), data.get("table"), data.get("column"), data.get("id"));
+                    String select = "SELECT * FROM " + data.get("table") + " WHERE " + data.get("column") + " = " + data.get("id");
                     // Check if there is any data left
                     String result = executeQuery(data.get("database"), data.get("username"), data.get("password"), select);
                     // Create response
@@ -215,8 +218,10 @@ public class main {
         return "executeQuery";
     }
     private static void deleteData(String database, String username, String password, String table, String column, String value){
+        System.out.println("deleteData");
         String url = "jdbc:mysql://localhost:3306/" + database;
-        String query = "DELETE FROM " + table + " WHERE " + column + " = \'" + value + "\'"; 
+        String query = "DELETE FROM " + table + " WHERE " + column + " = " + value; 
+        System.out.println("Query: " + query);
         try(Connection conn = DriverManager.getConnection(url, username, password)){
             try (Statement stmt = conn.createStatement()){
                 stmt.executeUpdate(query);

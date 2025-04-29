@@ -30,4 +30,30 @@ class DBmanager {
         }
     }
 
+    async deleteRowById(table, column, id){
+        let requestObject = {
+            "database"  : this.database,
+            "username"  : this.username,
+            "password"  : this.password,
+            "table"     : table,
+            "column"    : column,
+            "id"        : id
+        }
+        try {
+            const response = await fetch('/deleteRows', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(requestObject)
+            });
+            if (!response.ok){
+                throw new Error(`Server responded with status ${response.status}`);
+            }
+            const data = await response.json();
+            console.log("Response from server:", data);
+            return data;
+        } catch (error){
+            console.error('Error deleting row:', error);
+        }
+    }
+
 }

@@ -4,6 +4,7 @@ class DocumentManager {
         this.table      = "table"; 
     }
     makeTable(data) {
+        const dm = new DBmanager();
         const container = document.getElementById(this.container);
         let table       = document.getElementById(this.table);
         if (!table) {
@@ -22,6 +23,8 @@ class DocumentManager {
             // Extract the keys from the rows
             let keys = Object.keys(data[0]);
             const tableHead = document.createElement("tr");
+            const cornerTd = document.createElement("td");
+            tableHead.append(cornerTd);
             for(let col = 0; col < keys.length; col++){
                 const td = document.createElement("td");
                 td.innerHTML = keys[col];
@@ -31,6 +34,13 @@ class DocumentManager {
             for(let row = 0; row < data.length; row++){
                 // Create a table row for each row in the dataset
                 const tr = document.createElement("tr");
+                const btn = document.createElement("button");
+                btn.textContent = "削除";
+                console.log(`data[row][\"${keys[0]}\"]: `, data[row][keys[0]]);
+                btn.addEventListener("click", function(){dm.deleteRowById("test", keys[0], data[row][keys[0]]);});
+                const eraseTd = document.createElement("td");
+                eraseTd.append(btn);
+                tr.append(eraseTd);
                 for(let col = 0; col < keys.length; col++){
                     // Create a table value for each column in the targeted data row
                     const td = document.createElement("td");
