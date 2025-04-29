@@ -11,6 +11,7 @@
   <body>
     <div id="container">
       <h1>サーバー管理</h1>
+      <button id="showTables">接続</button>
       <input type="text" id="input" />
       <button id="run">実行</button>
     </div>
@@ -20,6 +21,10 @@
         document.getElementById("run").addEventListener("click", async function(){
             let data = await db.executeQuery();
             dm.makeTable(data);
+        });
+        document.getElementById("showTables").addEventListener("click", async function(){
+          let data = await db.getTables();
+          dm.makeTable(data);
         });
     </script>
   </body>

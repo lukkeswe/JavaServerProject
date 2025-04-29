@@ -77,7 +77,6 @@ public class main {
             os.close();
         }
     }
-
     static class QueryHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
@@ -111,7 +110,6 @@ public class main {
             }
         }
     }
-
     static class DeleteHandler implements HttpHandler{
         @Override
         public void handle(HttpExchange exchange) throws IOException {
@@ -126,7 +124,7 @@ public class main {
                     // Parse JSON into map
                     Map<String, String> data = parseJsonToMap(recivedString);
                     // Execute delete request
-                    deleteData(data.get("database"), data.get("username"), data.get("password"), data.get("table"), data.get("column"), data.get("id"));
+                    deleteRow(data.get("database"), data.get("username"), data.get("password"), data.get("table"), data.get("column"), data.get("id"));
                     String select = "SELECT * FROM " + data.get("table") + " WHERE " + data.get("column") + " = " + data.get("id");
                     // Check if there is any data left
                     String result = executeQuery(data.get("database"), data.get("username"), data.get("password"), select);
@@ -217,7 +215,7 @@ public class main {
         }
         return "executeQuery";
     }
-    private static void deleteData(String database, String username, String password, String table, String column, String value){
+    private static void deleteRow(String database, String username, String password, String table, String column, String value){
         System.out.println("deleteData");
         String url = "jdbc:mysql://localhost:3306/" + database;
         String query = "DELETE FROM " + table + " WHERE " + column + " = " + value; 
