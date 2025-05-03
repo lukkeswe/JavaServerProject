@@ -20,6 +20,9 @@ public class main {
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext("/", new RootHandler());
         server.createContext("/static", new StaticFileHandler());
+        server.createContext("/css", new StaticFileHandler());
+        server.createContext("/img", new StaticFileHandler());
+        server.createContext("/js", new StaticFileHandler());
         server.createContext("/query", new QueryHandler());
         server.createContext("/deleteRows", new DeleteHandler());
         server.setExecutor(null);
