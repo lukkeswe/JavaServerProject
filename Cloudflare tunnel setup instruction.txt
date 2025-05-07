@@ -1,0 +1,53 @@
+Cloudflare tunnel setup instructions.
+
+1. Install cloudflared on Your Mini PC
+On Ubuntu/Debian:
+
+wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+sudo dpkg -i cloudflared-linux-amd64.deb
+On Windows:
+Download from:
+https://developers.cloudflare.com/cloudflared/install/
+
+2. Authenticate cloudflared with Your Cloudflare Account
+Run:
+
+cloudflared login
+This opens a browser to authenticate with your Cloudflare account.
+
+Select your domain: norlund-johan-lukas.com.
+
+Cloudflare creates a certificate at ~/.cloudflared/cert.pem.
+
+3. Create a Tunnel
+
+cloudflared tunnel create mytunnel
+This registers the tunnel and creates credentials.
+
+4. Create a Tunnel Configuration File
+In ~/.cloudflared/config.yml (Linux/macOS) or %HOMEPATH%\.cloudflared\config.yml (Windows), write:
+
+tunnel: mytunnel
+credentials-file: /home/YOURUSER/.cloudflared/YOUR-TUNNEL-ID.json
+
+ingress:
+  - hostname: norlund-johan-lukas.com
+    service: http://localhost:80
+  - service: http_status:404
+Replace paths and hostname accordingly.
+
+5. Create a DNS Record Automatically
+Run:
+
+cloudflared tunnel route dns mytunnel norlund-johan-lukas.com
+This maps your domain to the tunnel.
+
+6. Start the Tunnel
+You can start it manually:
+
+cloudflared tunnel run mytunnel
+Or set it up as a service:
+
+sudo cloudflared service install
+7. You're Live!
+Now https://norlund-johan-lukas.com securely tunnels traffic to your local Java server — no port forwarding, no public IP, and no external libraries needed.

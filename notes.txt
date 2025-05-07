@@ -1,0 +1,14 @@
+Server notes:
+	Directory: /home/lukas/JavaServerProject
+	
+	Tunnel config. file: ~/.cloudflared/config.yml
+	Start tunnel: cloudflared tunnel run mytunnel
+	
+	Services:
+		Name: jlnserver
+		Configfile: /etc/systemd/system/jlnserver.service
+		Status: disabled (not working ✖)
+		
+		Name: cloudflared-tunnel
+		Configfile: /etc/systemd/system/cloudflared-tunnel.service
+		Status: disabled (not working ✖)
