@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="static/css/style.css" />
+    <link rel="stylesheet" href="static/css/reset.css" />
     <script src="static/js/dbmanager.js"></script>
     <script src="static/js/docmanager.js"></script>
     <title>Admin</title>
@@ -13,15 +14,15 @@
       <h1>サーバー管理</h1>
       <div id="loginContainer">
         <p>ユーザー：</p>
-        <input type="text" id="user">
+        <input type="text" id="user" class="textInput">
         <p>パスワード：</p>
-        <input type="password" id="password">
-        <button id="login">ログイン</button>
+        <input type="password" id="password" class="textInput">
+        <button id="login" class="btn">ログイン</button>
       </div>
       <div id="dbManager">
         <button id="showTables">接続</button>
-        <input type="text" id="input" />
-        <button id="run">実行</button>
+        <input type="text" id="input" class="textInput">
+        <button id="run" class="btn">実行</button>
       </div>
     </div>
     <script type="text/javascript">

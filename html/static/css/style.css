@@ -11,3 +11,16 @@ body {
 #dbManager {
     display: none;
 }
+
+.btn {
+    border: solid black 1px;
+    background-color: gainsboro;
+}
+
+.btn:hover {
+    background-color: grey;
+}
+
+.textInput {
+    border: solid black 1px;
+}
