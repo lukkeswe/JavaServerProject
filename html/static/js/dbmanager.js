@@ -1,8 +1,8 @@
 class DBmanager {
     constructor (
         database = "webserver", 
-        username = "root", 
-        password = "tvtittaren", 
+        username, 
+        password, 
         table
     ){
         this.database   = database;

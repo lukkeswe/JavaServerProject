@@ -3,3 +3,11 @@ body {
     font-size: 32px;
     border: solid red 1px;
 }
+
+#loginContainer {
+    display: block;
+}
+
+#dbManager {
+    display: none;
+}

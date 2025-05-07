@@ -11,13 +11,37 @@
   <body>
     <div id="container">
       <h1>サーバー管理</h1>
-      <button id="showTables">接続</button>
-      <input type="text" id="input" />
-      <button id="run">実行</button>
+      <div id="loginContainer">
+        <p>ユーザー：</p>
+        <input type="text" id="user">
+        <p>パスワード：</p>
+        <input type="password" id="password">
+        <button id="login">ログイン</button>
+      </div>
+      <div id="dbManager">
+        <button id="showTables">接続</button>
+        <input type="text" id="input" />
+        <button id="run">実行</button>
+      </div>
     </div>
     <script type="text/javascript">
         const db = new DBmanager();
         const dm = new DocumentManager();
+        document.getElementById("login").addEventListener('click', async function(){
+          db.username = document.getElementById("user").value;
+          db.password = document.getElementById("password").value;
+          console.log("db username:", db.username);
+          console.log("db password:", db.password);
+          let data = await db.getTables();
+          if(data){
+            document.getElementById("loginContainer").style.display = "none";
+            document.getElementById("dbManager").style.display = "block";
+            dm.makeTable(data);
+          } else {
+            alert("Error");
+          }
+          
+        });
         document.getElementById("run").addEventListener("click", async function(){
             let data = await db.executeQuery();
             dm.makeTable(data);
