@@ -2,16 +2,10 @@ class DocumentManager {
     constructor() {
         this.container  = document.getElementById("container");
         this.table      = document.getElementById("table");
-        this.db         = new DBmanager();
+        this.db;
     }
     makeTable(data) {
-        this.table = document.getElementById("table");
-        if (!this.table) {
-            this.table = document.createElement("table");
-            this.table.id = "table";
-        } else {
-            this.table.innerHTML = "";
-        }
+        this.resetTable();
         if (typeof data[0] === "string") {
             const tr = document.createElement("tr");
             const td = document.createElement("td");
@@ -22,13 +16,13 @@ class DocumentManager {
             // Extract the keys from the rows
             let keys = Object.keys(data[0]);
             let rowCount = data.length;
-            const tableHead = document.createElement("tr");
+            const tableHead = document.createElement("thead");
             // Append a filler td element for the upper left corner
             const cornerTd = document.createElement("td");
-            if (keys.length > 1) {
-                rowCount -= 1;
-                cornerTd.innerHTML = data[rowCount];
-            }
+            // if (keys.length > 1) {
+            //     rowCount -= 1;
+            //     cornerTd.innerHTML = data[rowCount];
+            // }
             tableHead.append(cornerTd);
             for(let col = 0; col < keys.length; col++){
                 const td = document.createElement("td");
@@ -82,6 +76,42 @@ class DocumentManager {
                 table.deleteRow(i);
                 break;
             }
+        }
+    }
+    showTables(data){
+        this.resetTable();
+        let tableHead = document.createElement("thead");
+        tableHead.append(document.createElement("td").innerHTML = "Tables");
+        this.table.append(tableHead);
+        for (let row =  0; row < data.length; row++){
+            // Create a table row for each row in the dataset
+            const tr = document.createElement("tr");
+            // Create a table value for the table
+            const td = document.createElement("td");
+            // Create a select button for fetching the data from that table
+            const btn = document.createElement("button");
+            btn.className = "tableBtn";
+            btn.innerHTML = data[row]["Tables_in_webserver"];
+            // Add a function that will fetch data
+            btn.addEventListener('click', async () => {
+                console.log("Fetching data...");
+                let result = await db.selectEverything(data[row]["Tables_in_webserver"]);
+                console.log("Data:", result);
+                this.makeTable(result);
+            });
+            td.append(btn);
+            tr.append(td);
+            this.table.append(tr);
+        }
+        this.container.append(this.table);
+    }
+    resetTable(){
+        this.table = document.getElementById("table");
+        if (!this.table) {
+            this.table = document.createElement("table");
+            this.table.id = "table";
+        } else {
+            this.table.innerHTML = "";
         }
     }
 }

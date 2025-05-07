@@ -10,6 +10,7 @@ class DBmanager {
         this.password   = password;
         this.table      = table;
     }
+    // Show the tables in a database
     async getTables(){
         let requestObject = {
             "database"  : this.database,
@@ -33,6 +34,7 @@ class DBmanager {
             console.error('Error execution query:', error);
         }
     }
+    // Free query
     async executeQuery(){
         const input = document.getElementById("input");
         let query = input.value;
@@ -63,7 +65,30 @@ class DBmanager {
             console.error('Error executing query:', error);
         }
     }
-
+    // Select everything from a table
+    async selectEverything(table){
+        let requestObject = {
+            "database"  : this.database,
+            "username"  : this.username,
+            "password"  : this.password,
+            "query"     : "SELECT * FROM " + table
+        };
+        try {
+            const response = await fetch('/query', {
+                method  : 'POST',
+                headers : {'Content-Type': 'application/json'},
+                body    : JSON.stringify(requestObject)
+            });
+            if (!response.ok) {
+                throw new Error(`Server responded with status ${response.status}`);
+            }
+            const data = await response.json();
+            console.log("Response from server:", data);
+            return data;
+        } catch (error) {
+            console.error('Error execution query:', error);
+        }
+    }
     async deleteRowById(column, id){
         let requestObject = {
             "database"  : this.database,

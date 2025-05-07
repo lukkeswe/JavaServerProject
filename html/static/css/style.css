@@ -24,3 +24,19 @@ body {
 .textInput {
     border: solid black 1px;
 }
+
+#container thead {
+    border-right: solid black 1px;
+    border-top: solid black 1px;
+}
+
+#container td {
+    border-right: solid black 1px;
+    border-bottom: solid black 1px;
+    padding: 5px;
+}
+
+#container table {
+    border-left: solid black 1px;
+    margin: 0 auto;
+}

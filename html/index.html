@@ -33,11 +33,12 @@
           db.password = document.getElementById("password").value;
           console.log("db username:", db.username);
           console.log("db password:", db.password);
+          dm.db = db;
           let data = await db.getTables();
           if(data){
             document.getElementById("loginContainer").style.display = "none";
             document.getElementById("dbManager").style.display = "block";
-            dm.makeTable(data);
+            dm.showTables(data);
           } else {
             alert("Error");
           }
