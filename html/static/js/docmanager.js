@@ -37,8 +37,6 @@ class DocumentManager {
                 const btn = document.createElement("button");
                 btn.textContent = "削除";
                 btn.addEventListener("click", () =>{
-                    // Set the table name to the db manager instance
-                    this.db.table = data[rowCount];
                     // Delete the row from the database
                     this.db.deleteRowById(keys[0], data[row][keys[0]]);
                     // Delete the row from the table
@@ -80,6 +78,9 @@ class DocumentManager {
     }
     showTables(data){
         this.resetTable();
+        // Get table key
+        let keys = Object.keys(data[0]);
+        let key = keys[0];
         let tableHead = document.createElement("thead");
         tableHead.append(document.createElement("td").innerHTML = "Tables");
         this.table.append(tableHead);
@@ -91,12 +92,13 @@ class DocumentManager {
             // Create a select button for fetching the data from that table
             const btn = document.createElement("button");
             btn.className = "tableBtn";
-            btn.innerHTML = data[row]["Tables_in_webserver"];
+            btn.innerHTML = data[row][key];
             // Add a function that will fetch data
             btn.addEventListener('click', async () => {
-                console.log("Fetching data...");
-                let result = await db.selectEverything(data[row]["Tables_in_webserver"]);
-                console.log("Data:", result);
+                // Set the DBmanager's table
+                this.db.table = data[row][key];
+                let result = await db.selectEverything(data[row][key]);
+                // Make a table out of the result
                 this.makeTable(result);
             });
             td.append(btn);
