@@ -1,16 +1,20 @@
 Server notes:
-	Directory: /home/lukas/JavaServerProject
-	
-	Tunnel config. file: ~/.cloudflared/config.yml
-	Start tunnel: cloudflared tunnel run mytunnel
 
-	MariaDB: https://www.digitalocean.com/community/tutorials/how-to-install-mariadb-on-ubuntu-20-04
+Directory: /home/lukas/JavaServerProject
 	
-	Services:
-		Name: jlnserver
-		Configfile: /etc/systemd/system/jlnserver.service
-		Status: disabled (not working ✖)
-		
-		Name: cloudflared-tunnel
-		Configfile: /etc/systemd/system/cloudflared-tunnel.service
-		Status: disabled (not working ✖)
+Tunnel config. file: ~/.cloudflared/config.yml
+Start tunnel: cloudflared tunnel run mytunnel
+
+MariaDB: https://www.digitalocean.com/community/tutorials/how-to-install-mariadb-on-ubuntu-20-04
+	 User: lukas Password: Tvt!77@ren
+	
+Services:
+	Name: jlnserver
+	Configfile: /etc/systemd/system/jlnserver.service
+	Status: active (working ✅)
+	Reload: sudo systemctl daemon-reload
+		sudo systemctl restart jlnserver
+	
+	Name: cloudflared-tunnel
+	Configfile: /etc/systemd/system/cloudflared-tunnel.service
+	Status: active (working ✅)
