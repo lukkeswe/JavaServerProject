@@ -1,17 +1,13 @@
 import java.io.*;
 import java.sql.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.net.InetSocketAddress;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
-import java.util.ArrayList;
 
 public class main {
 
@@ -20,6 +16,7 @@ public class main {
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext("/", new RootHandler());
         server.createContext("/static", new StaticFileHandler());
+        server.createContext("/databasemanager", new DatabaseHandler());
         server.createContext("/css", new StaticFileHandler());
         server.createContext("/img", new StaticFileHandler());
         server.createContext("/js", new StaticFileHandler());
@@ -31,7 +28,6 @@ public class main {
     }
 
     static class RootHandler implements HttpHandler {
-    
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             // Define the path to the index file
@@ -74,6 +70,21 @@ public class main {
             }
             // Create the response
             exchange.getResponseHeaders().set("Content-type", contentType);
+            exchange.sendResponseHeaders(200, response.length);
+            OutputStream os = exchange.getResponseBody();
+            os.write(response);
+            os.close();
+        }
+    }
+    static class DatabaseHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            // Define the path to the html file
+            String htmlFilePath = "html/databasemanager.html";
+            byte[] response = Files.readAllBytes(Paths.get(htmlFilePath));
+            // Set the Content-Type header for HTML
+            exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+            // Create the response
             exchange.sendResponseHeaders(200, response.length);
             OutputStream os = exchange.getResponseBody();
             os.write(response);

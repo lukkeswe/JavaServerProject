@@ -1,57 +1,16 @@
 <!DOCTYPE html>
 <html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="static/css/style.css" />
-    <link rel="stylesheet" href="static/css/reset.css" />
-    <script src="static/js/dbmanager.js"></script>
-    <script src="static/js/docmanager.js"></script>
-    <title>Admin</title>
-  </head>
-  <body>
-    <div id="container">
-      <h1>サーバー管理</h1>
-      <div id="loginContainer">
-        <p>ユーザー：</p>
-        <input type="text" id="user" class="textInput">
-        <p>パスワード：</p>
-        <input type="password" id="password" class="textInput">
-        <button id="login" class="btn">ログイン</button>
-      </div>
-      <div id="dbManager">
-        <button id="showTables">接続</button>
-        <input type="text" id="input" class="textInput">
-        <button id="run" class="btn">実行</button>
-      </div>
-    </div>
-    <script type="text/javascript">
-        const db = new DBmanager();
-        const dm = new DocumentManager();
-        document.getElementById("login").addEventListener('click', async function(){
-          db.username = document.getElementById("user").value;
-          db.password = document.getElementById("password").value;
-          console.log("db username:", db.username);
-          console.log("db password:", db.password);
-          dm.db = db;
-          let data = await db.getTables();
-          if(data){
-            document.getElementById("loginContainer").style.display = "none";
-            document.getElementById("dbManager").style.display = "block";
-            dm.showTables(data);
-          } else {
-            alert("Error");
-          }
-          
-        });
-        document.getElementById("run").addEventListener("click", async function(){
-            let data = await db.executeQuery();
-            dm.makeTable(data);
-        });
-        document.getElementById("showTables").addEventListener("click", async function(){
-          let data = await db.getTables();
-          dm.makeTable(data);
-        });
-    </script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/css/reset.css">
+    <link rel="stylesheet" href="static/css/style.css">
+    <title>index</title>
+</head>
+<body>
+    <h1>ようこそ！</h1>
+    <ul>
+        <li><a href="/databasemanager">データベース管理</a></li>
+    </ul>
+</body>
 </html>
