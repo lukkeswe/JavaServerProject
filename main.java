@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 
 public class main {
@@ -17,6 +18,8 @@ public class main {
         server.createContext("/", new RootHandler());
         server.createContext("/static", new StaticFileHandler());
         server.createContext("/databasemanager", new DatabaseHandler());
+        server.createContext("/fileUpload", new FileUploadPageHandler());
+        server.createContext("/upload", new UploadHandler());
         server.createContext("/css", new StaticFileHandler());
         server.createContext("/img", new StaticFileHandler());
         server.createContext("/js", new StaticFileHandler());
@@ -81,6 +84,21 @@ public class main {
         public void handle(HttpExchange exchange) throws IOException {
             // Define the path to the html file
             String htmlFilePath = "html/databasemanager.html";
+            byte[] response = Files.readAllBytes(Paths.get(htmlFilePath));
+            // Set the Content-Type header for HTML
+            exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+            // Create the response
+            exchange.sendResponseHeaders(200, response.length);
+            OutputStream os = exchange.getResponseBody();
+            os.write(response);
+            os.close();
+        }
+    }
+    static class FileUploadPageHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            // Define the path to the html file
+            String htmlFilePath = "html/fileupload.html";
             byte[] response = Files.readAllBytes(Paths.get(htmlFilePath));
             // Set the Content-Type header for HTML
             exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
@@ -158,7 +176,40 @@ public class main {
            
         }
     }
+    static class UploadHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                try {
+                    // InputStream body = exchange.getRequestBody();
+                    Headers headers = exchange.getRequestHeaders();
+                    String contentType = headers.getFirst("Content-Type");
 
+                    System.out.println("Reciving upload...");
+                    System.out.println("Content-Type: " + contentType);
+
+                    byte[] body = inputStreamToBytes(exchange.getRequestBody());
+                    handleMultipartFormData(body, contentType);
+                    String response = "File uploaded";
+
+                    exchange.sendResponseHeaders(200, response.length());
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(response.getBytes());
+                    os.close();
+                    } catch (Exception e){
+                        e.printStackTrace();
+                        String response = "Upload failed: " + e.getMessage();
+                        exchange.sendResponseHeaders(500, response.length());
+                        OutputStream os = exchange.getResponseBody();
+                        os.write(response.getBytes());
+                        os.close();
+                    }
+            } else {
+                exchange.sendResponseHeaders(405, -1);
+            }
+        }
+    }
+    
     private static Map<String, String> parseJsonToMap(String json){
         Map<String, String> map = new HashMap<>();
         json = json.trim();
@@ -242,5 +293,103 @@ public class main {
         } catch (Exception e){
             e.printStackTrace();
         }
+    }
+    private static byte[] inputStreamToBytes(InputStream is) throws IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        byte[] data = new byte[4096];
+        int bytesRead;
+        while((bytesRead = is.read(data)) != -1){
+            buffer.write(data, 0, bytesRead);
+        }
+        return buffer.toByteArray();
+    }
+    private static void handleMultipartFormData(byte[] body, String contentType) throws IOException {
+        String boundary = contentType.split("boundary=")[1];
+        byte[] boundaryBytes = ("--" + boundary).getBytes(StandardCharsets.UTF_8);
+        byte[] closingBoundaryBytes = ("--" + boundary + "--").getBytes(StandardCharsets.UTF_8);
+
+        int pos = 0;
+        while (true) {
+            // Find next boundary
+            int boundaryIndex = indexOf(body, boundaryBytes, pos);
+            if (boundaryIndex == -1) break;
+
+            // Check if it's the closing boundary
+            if (startsWith(body, boundaryIndex, closingBoundaryBytes)) {
+                break; // Done
+            }
+
+            // Move to content after boundary and CRLF
+            pos = boundaryIndex + boundaryBytes.length;
+            if (pos + 1 < body.length && body[pos] == '\r' && body[pos + 1] == '\n') {
+                pos += 2;
+            }
+
+            // Find the start of the next boundary (i.e., end of this part)
+            int nextBoundary = indexOf(body, boundaryBytes, pos);
+            if (nextBoundary == -1) break;
+
+            byte[] part = Arrays.copyOfRange(body, pos, nextBoundary);
+
+            // Trim trailing newlines
+            while (part.length > 0 && (part[part.length - 1] == '\n' || part[part.length - 1] == '\r')) {
+                part = Arrays.copyOf(part, part.length - 1);
+            }
+
+            String preview = new String(part, 0, Math.min(part.length, 200), StandardCharsets.UTF_8);
+            System.out.println("Part preview:\n" + preview);
+
+            int headerEnd = indexOf(part, "\r\n\r\n".getBytes(StandardCharsets.UTF_8), 0);
+            if (headerEnd == -1) {
+                System.err.println("Failed to find header/content separator in part.");
+                continue; // Skip this part to avoid crashing
+            }
+
+            String headers = new String(part, 0, headerEnd, StandardCharsets.UTF_8);
+            byte[] fileContent = Arrays.copyOfRange(part, headerEnd + 4, part.length);
+
+            if (headers.contains("filename=\"")) {
+                String fileName = extractFileName(headers);
+                if (fileName != null) {
+                    saveFile(fileName, fileContent);
+                }
+            }
+
+            pos = nextBoundary;
+        }
+    }
+    private static void saveFile(String fileName, byte[] data) throws IOException {
+        Path uploadDir = Paths.get("uploads");
+        if (!Files.exists(uploadDir)) {
+            Files.createDirectories(uploadDir);
+        }
+        Path filPath = uploadDir.resolve(sanitizeFileName(fileName));
+        Files.write(filPath, data);
+        System.out.println("Saved file: " + filPath);
+    }
+    private static String sanitizeFileName(String name){
+        return name.replaceAll("[^a-zA-Z0-9._-]", "_");
+    }
+    private static String extractFileName(String headers) {
+        int start = headers.indexOf("filename=\"") + 10;
+        int end = headers.indexOf("\"", start);
+        if (start < 10 || end <= start) return null;
+        return sanitizeFileName(headers.substring(start, end));
+    }
+    private static int indexOf(byte[] data, byte[] target, int from) {
+        for (int i = from; i <= data.length - target.length; i++) {
+            if (matchBytes(data, target, i)) return i;
+        }
+        return -1;
+    }
+    private static boolean matchBytes(byte[] data, byte[] target, int offset) {
+        if (offset + target.length > data.length) return false;
+        for (int i = 0; i < target.length; i++) {
+            if (data[offset + i] != target[i]) return false;
+        }
+        return true;
+    }
+    private static boolean startsWith(byte[] data, int offset, byte[] prefix) {
+        return matchBytes(data, prefix, offset);
     }
 }
