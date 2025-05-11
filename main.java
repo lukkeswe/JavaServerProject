@@ -181,21 +181,31 @@ public class main {
         public void handle(HttpExchange exchange) throws IOException {
             if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 try {
-                    // InputStream body = exchange.getRequestBody();
-                    Headers headers = exchange.getRequestHeaders();
-                    String contentType = headers.getFirst("Content-Type");
-
                     System.out.println("Reciving upload...");
-                    System.out.println("Content-Type: " + contentType);
-
+                    // Get the request headers
+                    Headers requestHeaders = exchange.getRequestHeaders();
+                    // Get the request content type
+                    String requestContentType = requestHeaders.getFirst("Content-Type");
+                    // Get the body in bytes
                     byte[] body = inputStreamToBytes(exchange.getRequestBody());
-                    handleMultipartFormData(body, contentType);
-                    String response = "File uploaded";
-
-                    exchange.sendResponseHeaders(200, response.length());
-                    OutputStream os = exchange.getResponseBody();
-                    os.write(response.getBytes());
-                    os.close();
+                    // Extract the headers from the body
+                    String bodyHeaders = extractHeaders(body, requestContentType);
+                    // Extract the body's content type
+                    String bodyContentType = extractContentType(bodyHeaders);
+                    System.out.println("bodyContentType: " + bodyContentType);
+                    String response = "";
+                    // Check if it is a html file
+                    if (bodyContentType.equals("text/html")) {
+                        // Save the file
+                        handleMultipartFormData(body, requestContentType);
+                        response = "File uploaded successfully";
+                    } else {
+                        response = "File is the wrong format: " + bodyContentType;
+                    }
+                        exchange.sendResponseHeaders(200, response.length());
+                        OutputStream os = exchange.getResponseBody();
+                        os.write(response.getBytes());
+                        os.close();
                     } catch (Exception e){
                         e.printStackTrace();
                         String response = "Upload failed: " + e.getMessage();
@@ -363,9 +373,39 @@ public class main {
         if (!Files.exists(uploadDir)) {
             Files.createDirectories(uploadDir);
         }
-        Path filPath = uploadDir.resolve(sanitizeFileName(fileName));
-        Files.write(filPath, data);
-        System.out.println("Saved file: " + filPath);
+        Path filePath = uploadDir.resolve(sanitizeFileName(fileName));
+        Files.write(filePath, data);
+        System.out.println("Saved file: " + filePath);
+    }
+    private static String extractHeaders(byte[] body, String contentType) throws IOException{
+        String boundary = contentType.split("boundary=")[1];
+        byte[] boundaryBytes = ("--" + boundary).getBytes(StandardCharsets.UTF_8);
+        int pos = 0;
+        // Find next boundary
+        int boundaryIndex = indexOf(body, boundaryBytes, pos);
+
+        // Move to content after boundary and CRLF
+        pos = boundaryIndex + boundaryBytes.length;
+
+        // Find the start of the next boundary (i.e., end of this part)
+        int nextBoundary = indexOf(body, boundaryBytes, pos);
+
+        byte[] part = Arrays.copyOfRange(body, pos, nextBoundary);
+
+        // Trim trailing newlines
+        while (part.length > 0 && (part[part.length - 1] == '\n' || part[part.length - 1] == '\r')) {
+            part = Arrays.copyOf(part, part.length - 1);
+        }
+
+        int headerEnd = indexOf(part, "\r\n\r\n".getBytes(StandardCharsets.UTF_8), 0);
+            
+        return new String(part, 0, headerEnd, StandardCharsets.UTF_8);
+    }
+    private static String extractContentType(String headers){
+        return headers.split(":")[2].trim();
+    }
+    private static String extractDisposition(String headers){
+        return headers.split(":")[1].trim();
     }
     private static String sanitizeFileName(String name){
         return name.replaceAll("[^a-zA-Z0-9._-]", "_");
