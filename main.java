@@ -34,7 +34,7 @@ public class main {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             // Define the path to the index file
-            String indexFilePath = "html/index.html";
+            String indexFilePath = "www/static/html/index.html";
             byte[] response = Files.readAllBytes(Paths.get(indexFilePath));
             // Set the Content-Type header for HTML
             exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
@@ -51,7 +51,11 @@ public class main {
         public void handle(HttpExchange exchange) throws IOException {
             // Get the requested path
             String requestPath = exchange.getRequestURI().getPath();
-            String filePath = "html" + requestPath;
+            String filePath = "www" + requestPath;
+            if (filePath.endsWith(".html")){
+                filePath = "www/static/html" + requestPath;
+                System.out.println("Requesting: " + filePath);
+            }
             // Check if the file exist before reading
             if(!Files.exists(Paths.get(filePath))) {
                 System.out.println("File not found: " + filePath); // Debug print
@@ -83,7 +87,7 @@ public class main {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             // Define the path to the html file
-            String htmlFilePath = "html/databasemanager.html";
+            String htmlFilePath = "www/static/html/databasemanager.html";
             byte[] response = Files.readAllBytes(Paths.get(htmlFilePath));
             // Set the Content-Type header for HTML
             exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
@@ -98,7 +102,7 @@ public class main {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             // Define the path to the html file
-            String htmlFilePath = "html/fileupload.html";
+            String htmlFilePath = "www/static/html/fileupload.html";
             byte[] response = Files.readAllBytes(Paths.get(htmlFilePath));
             // Set the Content-Type header for HTML
             exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
@@ -181,27 +185,23 @@ public class main {
         public void handle(HttpExchange exchange) throws IOException {
             if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 try {
-                    System.out.println("Reciving upload...");
-                    // Get the request headers
-                    Headers requestHeaders = exchange.getRequestHeaders();
-                    // Get the request content type
-                    String requestContentType = requestHeaders.getFirst("Content-Type");
-                    // Get the body in bytes
-                    byte[] body = inputStreamToBytes(exchange.getRequestBody());
-                    // Extract the headers from the body
-                    String bodyHeaders = extractHeaders(body, requestContentType);
-                    // Extract the body's content type
-                    String bodyContentType = extractContentType(bodyHeaders);
-                    System.out.println("bodyContentType: " + bodyContentType);
-                    String response = "";
-                    // Check if it is a html file
-                    if (bodyContentType.equals("text/html")) {
-                        // Save the file
+                        System.out.println("Reciving upload...");
+                        // Get the request headers
+                        Headers requestHeaders = exchange.getRequestHeaders();
+                        // Get the request content type
+                        String requestContentType = requestHeaders.getFirst("Content-Type");
+                        // Get the body in bytes
+                        byte[] body = inputStreamToBytes(exchange.getRequestBody());
+                        // Extract the headers from the body
+                        String bodyHeaders = extractHeaders(body, requestContentType);
+                        // Extract the body's content type
+                        String bodyContentType = extractContentType(bodyHeaders);
+                        System.out.println("bodyContentType: " + bodyContentType);
+                        String response = "";
+                        
                         handleMultipartFormData(body, requestContentType);
                         response = "File uploaded successfully";
-                    } else {
-                        response = "File is the wrong format: " + bodyContentType;
-                    }
+                    
                         exchange.sendResponseHeaders(200, response.length());
                         OutputStream os = exchange.getResponseBody();
                         os.write(response.getBytes());
@@ -360,16 +360,26 @@ public class main {
 
             if (headers.contains("filename=\"")) {
                 String fileName = extractFileName(headers);
+                String fileType = "img";
+                if (fileName.endsWith(".html")) {
+                    fileType = "html";
+                } else if (fileName.endsWith(".css")) {
+                    fileType = "css";
+                } else if(fileName.endsWith(".js")){
+                    fileType = "js";
+                }
                 if (fileName != null) {
-                    saveFile(fileName, fileContent);
+                    saveFile(fileName, fileContent, fileType);
                 }
             }
 
             pos = nextBoundary;
         }
     }
-    private static void saveFile(String fileName, byte[] data) throws IOException {
-        Path uploadDir = Paths.get("uploads");
+    private static void saveFile(String fileName, byte[] data, String path) throws IOException {
+        // Path uploadDir = Paths.get("uploads");
+        Path uploadDir = Paths.get("www", "static", path);
+        
         if (!Files.exists(uploadDir)) {
             Files.createDirectories(uploadDir);
         }
