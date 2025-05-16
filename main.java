@@ -2,6 +2,7 @@ import java.io.*;
 import java.sql.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.security.KeyStore.Entry;
 import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,6 +26,7 @@ public class main {
         server.createContext("/js", new StaticFileHandler());
         server.createContext("/query", new QueryHandler());
         server.createContext("/deleteRows", new DeleteHandler());
+        server.createContext("/login", new LoginHandler());
         server.setExecutor(null);
         server.start();
         System.out.println("Server started on port " + port);
@@ -81,6 +83,43 @@ public class main {
             OutputStream os = exchange.getResponseBody();
             os.write(response);
             os.close();
+        }
+    }
+    static class LoginHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            try {
+                if ("POST".equals(exchange.getRequestMethod())) {
+                    // Read the request body
+                    InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), "UTF-8");
+                    BufferedReader reader = new BufferedReader(isr);
+                    String recievedString = reader.lines().collect(Collectors.joining());
+                    System.out.println("Recieved string: " + recievedString);
+                    // Parse JSON into a map
+                    Map<String, String> data = parseJsonToMap(recievedString);
+                    Map<String, String> result = getUser(data.get("username"), data.get("password"));
+                    String json;
+                    // Check if the result is ok
+                    if (result.get("exist").equals("yes")) {
+                        // Parse result (Map<String, String>) into JSON
+                        json = parseMapToJson(result);
+                    } else {
+                        json = "[{\"status\": \"failed\"}]";
+                    }
+                    System.out.println("Sending: " + json);
+                    // Create response
+                    exchange.getResponseHeaders().add("Content-Type", "application/json");
+                    exchange.sendResponseHeaders(200, json.getBytes().length);
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(json.getBytes());
+                    os.close();
+                } 
+            } catch (Exception e){
+                e.printStackTrace();
+                try {
+                    exchange.sendResponseHeaders(500, -1);
+                } catch (Exception ignored){}
+            }
         }
     }
     static class DatabaseHandler implements HttpHandler {
@@ -238,6 +277,57 @@ public class main {
         }
         return map;
     }
+    private static String parseMapToJson(Map<String, String> map){
+        StringBuilder jsonBuilder = new StringBuilder();
+        jsonBuilder.append("[{");
+        boolean firstValue = true;
+        // Loop through the map and extract key and value
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            if (!firstValue) {
+                jsonBuilder.append(", ");
+            }
+            jsonBuilder.append("\"" + entry.getKey() + "\": ");
+            jsonBuilder.append("\"" + entry.getValue() + "\"");
+            firstValue = false;
+            // String key = entry.getKey();
+            // String value = entry.getValue();
+            // System.out.println("Key: " + key + ", Value: " + value);
+        }
+        jsonBuilder.append("}]");
+        System.out.println("JSON: " + jsonBuilder.toString());
+        return jsonBuilder.toString();
+    }
+    private static Map<String, String> getUser(String username, String password){
+        String url = "jdbc:mysql://localhost:3306/webserver";
+        try(Connection conn = DriverManager.getConnection(url, "root", "tvtittaren")){
+            String sql = "SELECT * FROM users WHERE name = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            pstmt.setString(1, username);
+            ResultSet resultSet = pstmt.executeQuery();
+            Map<String, String> user = new HashMap<>();
+            while (resultSet.next()){
+                if (resultSet.getString("name").equals(username) && 
+                    resultSet.getString("password").equals(password)) {
+                    user.put("exist", "yes");
+                    user.put("id", resultSet.getString("id"));
+                    user.put("name", resultSet.getString("name"));
+                    user.put("password", resultSet.getString("password"));
+                    user.put("domain", resultSet.getString("domain"));
+                    user.put("email", resultSet.getString("email"));
+                    user.put("phone", resultSet.getString("phone"));
+                    return user;
+                }
+            }
+            user.put("exist", "no");
+            return user;
+            
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        Map<String, String> user = new HashMap<>();
+        user.put("exist", "no");
+        return user;
+    }
     private static String executeQuery(String database, String username, String password, String query){
         String url = "jdbc:mysql://localhost:3306/" + database;
         try (Connection conn = DriverManager.getConnection(url, username, password)){
@@ -289,6 +379,46 @@ public class main {
             e.printStackTrace();
         }
         return "executeQuery";
+    }
+    private static String resultSetToString(ResultSet resultSet) throws SQLException{
+        StringBuilder jsonBuilder = new StringBuilder();
+        ResultSetMetaData metaData = resultSet.getMetaData();
+        int columnCount = metaData.getColumnCount();
+        // Append first bracket
+        jsonBuilder.append("[\n");
+        // Append rows
+        boolean hasRows = false;
+        boolean firstRow = true;
+        // "while" is for each row
+        while (resultSet.next()) {
+            hasRows = true;
+            if (!firstRow) {
+                jsonBuilder.append(",\n");
+            }
+            firstRow = false;
+            // Append first bracket of the row
+            jsonBuilder.append("{");
+            boolean firstColumn = true;
+            // "for" is for each column
+            for (int i = 1; i <= columnCount; i++) {
+                if (!firstColumn) {
+                    jsonBuilder.append(", ");
+                }
+                firstColumn = false;
+                // Append the column name and value
+                jsonBuilder.append("\"").append(metaData.getColumnName(i)).append("\": ");
+                jsonBuilder.append("\"").append(resultSet.getString(i)).append("\"");
+            }
+            // Close the row
+            jsonBuilder.append("}");
+        }
+
+        if (!hasRows) {
+            jsonBuilder.append("\"Empty set\"");
+        }
+
+        jsonBuilder.append("\n]"); // Close the JSON array
+        return jsonBuilder.toString();
     }
     private static void deleteRow(String database, String username, String password, String table, String column, String value){
         System.out.println("deleteData");
