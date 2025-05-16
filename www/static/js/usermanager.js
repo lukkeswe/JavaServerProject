@@ -29,7 +29,7 @@ class UserManager{
                 sessionStorage.setItem("email", data[0]["email"]);
                 sessionStorage.setItem("phone", data[0]["phone"]);
                 console.log(sessionStorage.getItem("username") + " logged in.");
-                
+                window.location.href = "/home";
             }
         } catch (error){
             console.error('Error loging in:', error);            

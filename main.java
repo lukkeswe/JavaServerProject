@@ -27,6 +27,7 @@ public class main {
         server.createContext("/query", new QueryHandler());
         server.createContext("/deleteRows", new DeleteHandler());
         server.createContext("/login", new LoginHandler());
+        server.createContext("/home", new HomeHandler());
         server.setExecutor(null);
         server.start();
         System.out.println("Server started on port " + port);
@@ -121,6 +122,22 @@ public class main {
                 } catch (Exception ignored){}
             }
         }
+    }
+    static class HomeHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            // Define the path to the html file
+            String htmlFilePath = "www/static/html/home.html";
+            byte[] response = Files.readAllBytes(Paths.get(htmlFilePath));
+            // Set the Content-Type header for HTML
+            exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+            // Create the response
+            exchange.sendResponseHeaders(200, response.length);
+            OutputStream os = exchange.getResponseBody();
+            os.write(response);
+            os.close();
+        }
+        
     }
     static class DatabaseHandler implements HttpHandler {
         @Override

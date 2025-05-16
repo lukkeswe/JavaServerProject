@@ -116,4 +116,91 @@ class DocumentManager {
             this.table.innerHTML = "";
         }
     }
+    showUserDash(){
+        // Create elements
+        const dashBoard = document.createElement("table");
+        const username  = document.createElement("td");
+        const domain    = document.createElement("td");
+        const row1      = document.createElement("tr");
+        const row2      = document.createElement("tr");
+        // Asign ids
+        dashBoard.id    = "dashBoard";
+        username.id     = "username";
+        domain.id       = "domain";
+        // Add content text
+        username.innerHTML  = sessionStorage.getItem("username");
+        domain.innerHTML    = sessionStorage.getItem("domain");
+        // Add eventlistener
+        username.addEventListener("click", () => {
+            dashBoard.remove();
+            this.showUserInfo();
+        });
+        domain.addEventListener("click", () => {
+            dashBoard.remove();
+            this.showDomainInfo();
+        });
+        // Append elements
+        row1.append(username);
+        row2.append(domain);
+        dashBoard.append(row1);
+        dashBoard.append(row2);
+        this.container.append(dashBoard);
+
+    }
+    showUserInfo(){
+        // Create elements
+        const backBtn = document.createElement("button");
+        const dashBoard = document.createElement("table");
+        const username  = document.createElement("td");
+        const email     = document.createElement("td");
+        const phone     = document.createElement("td");
+        const row1      = document.createElement("tr");
+        const row2      = document.createElement("tr");
+        const row3      = document.createElement("tr");
+        // Asign ids
+        username.id = "username";
+        email.id    = "email";
+        phone.id    = "phone";
+        // Add content text
+        backBtn.textContent = "戻る";
+        username.innerHTML  = sessionStorage.getItem("username");
+        email.innerHTML     = sessionStorage.getItem("email");
+        phone.innerHTML     = sessionStorage.getItem("phone");
+        // Add eventlistener
+        backBtn.addEventListener("click", () => {
+            dashBoard.remove();
+            this.showUserDash();
+        });
+        // Append elements
+        row1.append(username);
+        row2.append(email);
+        row3.append(phone);
+        dashBoard.append(backBtn);
+        dashBoard.append(row1);
+        dashBoard.append(row2);
+        dashBoard.append(row3);
+        this.container.append(dashBoard);
+    }
+    showDomainInfo(){
+        // Create elements
+        const backBtn = document.createElement("button");
+        const dashBoard = document.createElement("table");
+        const domain  = document.createElement("td");
+        const row1      = document.createElement("tr");
+        // Asign ids
+        domain.id = "domain";
+        // Add content text
+        backBtn.textContent = "戻る";
+        domain.innerHTML  = sessionStorage.getItem("domain");
+        // Add eventlistener
+        backBtn.addEventListener("click", () => {
+            dashBoard.remove();
+            this.showUserDash();
+        });
+        // Append elements
+        row1.append(domain);
+        dashBoard.append(backBtn);
+        dashBoard.append(row1);
+        this.container.append(dashBoard);
+    }
 }
