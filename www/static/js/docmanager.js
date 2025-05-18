@@ -158,9 +158,10 @@ class DocumentManager {
         const row2      = document.createElement("tr");
         const row3      = document.createElement("tr");
         // Asign ids
-        username.id = "username";
-        email.id    = "email";
-        phone.id    = "phone";
+        dashBoard.id    = "dashBoard";
+        username.id     = "username";
+        email.id        = "email";
+        phone.id        = "phone";
         // Add content text
         backBtn.textContent = "戻る";
         username.innerHTML  = sessionStorage.getItem("username");
@@ -188,7 +189,8 @@ class DocumentManager {
         const domain  = document.createElement("td");
         const row1      = document.createElement("tr");
         // Asign ids
-        domain.id = "domain";
+        dashBoard.id    = "dashBoard";
+        domain.id       = "domain";
         // Add content text
         backBtn.textContent = "戻る";
         domain.innerHTML  = sessionStorage.getItem("domain");
@@ -202,5 +204,52 @@ class DocumentManager {
         dashBoard.append(backBtn);
         dashBoard.append(row1);
         this.container.append(dashBoard);
+    }
+    burgerMenu(){
+        // Create the elements
+        const burgerBtn = document.createElement("button");
+        const burger    = document.createElement("ul");
+        const user      = document.createElement("li");
+        const domain    = document.createElement("li");
+        const database  = document.createElement("li");
+        // Add ids
+        burgerBtn.id    = "burgerBtn";
+        burger.id       = "burger";
+        user.id         = "userBurger";
+        domain.id       = "domainBurger";
+        database.id     = "databaseBurger";
+        // Add text content
+        burgerBtn.innerHTML = "🈪";
+        user.innerHTML      = "View/edit user";
+        domain.innerHTML    = "Domain";
+        database.innerHTML  = "Database tool";
+        // Add event listeners
+        burgerBtn.addEventListener("click", () => {
+            burger.style.display = "block";
+        });
+        user.addEventListener("click", ()=> {
+            const dash = document.getElementById("dashBoard");
+            if (dash) {
+                console.log("dash found");
+                
+                dash.remove();}
+            else {console.log("dash not found");
+            }
+            this.showUserInfo();
+        });
+        domain.addEventListener("click", () => {
+            const dash = document.getElementById("dashBoard");
+            if (dash){dash.remove();}
+            this.showDomainInfo();
+        });
+        database.addEventListener("click", () => {
+            window.location.href = "/databasemanager";
+        });
+        // Append elements
+        burger.append(user);
+        burger.append(domain);
+        burger.append(database);
+        this.container.append(burgerBtn);
+        this.container.append(burger);
     }
 }
