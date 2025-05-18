@@ -36,8 +36,13 @@ public class main {
     static class RootHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+            String requestPath = exchange.getRequestURI().getPath();
+            String[] requestSplit = requestPath.split("/");
             // Define the path to the index file
             String indexFilePath = "www/static/html/index.html";
+            if (requestPath.endsWith(".html")) {
+                indexFilePath = "www/static/html/" + requestSplit[requestSplit.length - 1];
+            }
             byte[] response = Files.readAllBytes(Paths.get(indexFilePath));
             // Set the Content-Type header for HTML
             exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
