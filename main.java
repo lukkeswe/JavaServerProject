@@ -54,11 +54,22 @@ public class main {
         public void handle(HttpExchange exchange) throws IOException {
             // Get the requested path
             String requestPath = exchange.getRequestURI().getPath();
+            String[] requestPathSplits = requestPath.split("/");
+            String fileName = requestPathSplits[requestPathSplits.length - 1];
+            String contentType = "application/octet-stream";
             String filePath = "www" + requestPath;
-            if (filePath.endsWith(".html")){
-                filePath = "www/static/html" + requestPath;
-                System.out.println("Requesting: " + filePath);
+            // Determine the MIME type and file path
+            if (requestPath.endsWith(".js")) {
+                filePath = "www/static/js/" + fileName;
+                contentType = "application/javascript";
+            } else if (requestPath.endsWith(".css")) {
+                filePath = "www/static/css/" + fileName;
+                contentType = "text/css";
+            } else if (requestPath.endsWith(".html")) {
+                filePath = "www/static/html/" + fileName;
+                contentType = "text/html; charset=UTF-8";
             }
+            System.out.println("File path: " + filePath);
             // Check if the file exist before reading
             if(!Files.exists(Paths.get(filePath))) {
                 System.out.println("File not found: " + filePath); // Debug print
@@ -69,15 +80,6 @@ public class main {
             }
             // Load the file
             byte[] response = Files.readAllBytes(Paths.get(filePath));
-            // Determine the MIME type
-            String contentType = "application/octet-stream";
-            if (filePath.endsWith(".js")) {
-                contentType = "application/javascript";
-            } else if (filePath.endsWith(".css")) {
-                contentType = "text/css";
-            } else if (filePath.endsWith(".html")) {
-                contentType = "text/html; charset=UTF-8";
-            }
             // Create the response
             exchange.getResponseHeaders().set("Content-type", contentType);
             exchange.sendResponseHeaders(200, response.length);
