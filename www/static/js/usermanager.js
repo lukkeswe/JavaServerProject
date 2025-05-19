@@ -23,13 +23,14 @@ class UserManager{
             if (data[0]["status"] == "failed") {
                 alert("Login failed :(");
             } else if (data[0]["id"]){
+                sessionStorage.setItem("userStatus", "ok");
                 sessionStorage.setItem("username", data[0]["name"]);
                 sessionStorage.setItem("password", data[0]["password"]);
                 sessionStorage.setItem("domain", data[0]["domain"]);
                 sessionStorage.setItem("email", data[0]["email"]);
                 sessionStorage.setItem("phone", data[0]["phone"]);
                 console.log(sessionStorage.getItem("username") + " logged in.");
-                window.location.href = "/home";
+                window.location.href = "home.html";
             }
         } catch (error){
             console.error('Error loging in:', error);            

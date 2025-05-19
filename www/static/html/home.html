@@ -6,11 +6,18 @@
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/style.css">
     <script src="static/js/docmanager.js"></script>
+    <script src="static/js/usermanager.js"></script>
+    <script src="static/js/security.js"></script>
     <title>Home</title>
 </head>
 <body>
     <div id="container"></div>
     <script type="text/javascript">
+        bouncer();
+        const usr = new UserManager(
+            sessionStorage.getItem("username"),
+            sessionStorage.getItem("password")
+        );
         const dm = new DocumentManager();
         dm.burgerMenu();
         dm.showUserDash();

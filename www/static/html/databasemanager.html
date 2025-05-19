@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="static/css/reset.css" />
     <script src="static/js/dbmanager.js"></script>
     <script src="static/js/docmanager.js"></script>
+    <script src="static/js/usermanager.js"></script>
+    <script src="static/js/security.js"></script>
     <title>Admin</title>
   </head>
   <body>
@@ -26,32 +28,33 @@
       </div>
     </div>
     <script type="text/javascript">
-        const db = new DBmanager();
-        const dm = new DocumentManager();
-        document.getElementById("login").addEventListener('click', async function(){
-          db.username = document.getElementById("user").value;
-          db.password = document.getElementById("password").value;
-          console.log("db username:", db.username);
-          console.log("db password:", db.password);
-          dm.db = db;
-          let data = await db.getTables();
-          if(data){
-            document.getElementById("loginContainer").style.display = "none";
-            document.getElementById("dbManager").style.display = "block";
-            dm.showTables(data);
-          } else {
-            alert("Error");
-          }
-          
-        });
-        document.getElementById("run").addEventListener("click", async function(){
-            let data = await db.executeQuery();
-            dm.makeTable(data);
-        });
-        document.getElementById("showTables").addEventListener("click", async function(){
-          let data = await db.getTables();
+      bouncer();
+      const db = new DBmanager();
+      const dm = new DocumentManager();
+      document.getElementById("login").addEventListener('click', async function(){
+        db.username = document.getElementById("user").value;
+        db.password = document.getElementById("password").value;
+        console.log("db username:", db.username);
+        console.log("db password:", db.password);
+        dm.db = db;
+        let data = await db.getTables();
+        if(data){
+          document.getElementById("loginContainer").style.display = "none";
+          document.getElementById("dbManager").style.display = "block";
+          dm.showTables(data);
+        } else {
+          alert("Error");
+        }
+        
+      });
+      document.getElementById("run").addEventListener("click", async function(){
+          let data = await db.executeQuery();
           dm.makeTable(data);
-        });
+      });
+      document.getElementById("showTables").addEventListener("click", async function(){
+        let data = await db.getTables();
+        dm.makeTable(data);
+      });
     </script>
   </body>
 </html>

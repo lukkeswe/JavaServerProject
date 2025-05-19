@@ -243,7 +243,7 @@ class DocumentManager {
             this.showDomainInfo();
         });
         database.addEventListener("click", () => {
-            window.location.href = "/databasemanager";
+            window.location.href = "databasemanager.html";
         });
         // Append elements
         burger.append(user);
