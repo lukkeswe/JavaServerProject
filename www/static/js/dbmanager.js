@@ -123,5 +123,4 @@ class DBmanager {
         }
         return null;
     }
-
 }

@@ -31,30 +31,17 @@
       bouncer();
       const db = new DBmanager();
       const dm = new DocumentManager();
-      document.getElementById("login").addEventListener('click', async function(){
-        db.username = document.getElementById("user").value;
-        db.password = document.getElementById("password").value;
-        console.log("db username:", db.username);
-        console.log("db password:", db.password);
-        dm.db = db;
-        let data = await db.getTables();
-        if(data){
-          document.getElementById("loginContainer").style.display = "none";
-          document.getElementById("dbManager").style.display = "block";
+      async function init(){
+        if(sessionStorage.getItem("username")){
+          db.username = sessionStorage.getItem("username");
+          db.password = sessionStorage.getItem("password");
+          db.database = sessionStorage.getItem("username") + "_db";
+          dm.db = db;
+          let data = await db.getTables();
           dm.showTables(data);
-        } else {
-          alert("Error");
         }
-        
-      });
-      document.getElementById("run").addEventListener("click", async function(){
-          let data = await db.executeQuery();
-          dm.makeTable(data);
-      });
-      document.getElementById("showTables").addEventListener("click", async function(){
-        let data = await db.getTables();
-        dm.makeTable(data);
-      });
+      }
+      init();
     </script>
   </body>
 </html>

@@ -27,3 +27,32 @@ async function securityCheck(){
         window.location.href = "/";
     }
 }
+
+async function invite() {
+    const params = new URLSearchParams(window.location.search);
+    const invite = params.get('invite');
+    console.log(`Invite code: ${invite}`);
+    const requsestObject = {"invite": invite};
+    try {
+        const response = await fetch('/invite', {
+            method  : 'POST',
+            headers : {'Content-Type': 'application/json'},
+            body    : JSON.stringify(requsestObject)
+        });
+        if(!response.ok){
+            throw new Error(`Server status ${response.status}`);
+        }
+        const data = await response.json();
+        if (data[0]["status"] == "ok"){
+            console.log("Invite: ok");
+            
+            return data[0]["status"];
+        } else {
+            console.log(data[0]["status"]);
+            //window.location.href = "/";
+        }
+    } catch (error){
+        console.error("Error: ", error);
+        //window.location.href = "/";
+    }
+}

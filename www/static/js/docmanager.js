@@ -252,4 +252,20 @@ class DocumentManager {
         this.container.append(burgerBtn);
         this.container.append(burger);
     }
+    userSignUp(){
+        // Create elements
+        const username  = document.createElement("input");
+        const submit    = document.createElement("button");
+        // Set the type for input elements
+        username.type = "text";
+        // Content text
+        submit.innerHTML = "Submit";
+        // Add eventlistener
+        submit.addEventListener("click", () => {
+
+        });
+        this.container.innerHTML = "";
+        this.container.append(username);
+        this.container.append(submit);
+    }
 }
