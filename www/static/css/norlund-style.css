@@ -133,3 +133,20 @@ td {
 #pr td {
     padding: 5px;
 }
+
+#seisaku {
+    border: solid black 1px;
+    width: 782px;
+    text-align: center;
+}
+
+#seisaku a {
+    color: white;
+    font-size: 16px;
+    background-color: skyblue;
+    padding: 60px 10px;
+}
+
+#seisaku a:hover {
+    background-color: rgb(92, 178, 225)
+}
