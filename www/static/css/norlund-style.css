@@ -135,16 +135,21 @@ td {
 }
 
 #seisaku {
+    display: block;
     border: solid black 1px;
     width: 782px;
     text-align: center;
+    padding: 10px;
 }
 
 #seisaku a {
+    display: block;
     color: white;
     font-size: 16px;
     background-color: skyblue;
-    padding: 60px 10px;
+    width: 762px;
+    padding: 10px 0;
+    margin: 5px auto;
 }
 
 #seisaku a:hover {
