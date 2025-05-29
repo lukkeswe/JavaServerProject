@@ -7,9 +7,9 @@ td {
     border-right: solid black 1px;
     font-size: 16px;
 }
-#basicInfo {
+/* #basicInfo {
 
-}
+} */
 
 #titleContainer {
     display: flex;
