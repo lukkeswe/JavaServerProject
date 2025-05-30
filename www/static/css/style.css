@@ -1,11 +1,28 @@
-body {
+.welcome {
     text-align: center;
-    font-size: 32px;
-    border: solid red 1px;
+    font-size: 42px;
+    margin-top: 20px;
 }
-
 #loginContainer {
     display: block;
+    text-align: left;
+    font-size: 36px;
+    background-color: ghostwhite;
+    border: solid black 1px;
+    border-radius: 3px;
+    padding: 30px;
+    width: max-content;
+    margin: 0 auto;
+    margin-top: 100px;
+}
+
+#loginContainer input{
+    background-color: white;
+}
+
+#loginBtn {
+    margin: 0 auto;
+    margin-top: 20px;
 }
 
 #dbManager {
@@ -13,12 +30,18 @@ body {
 }
 
 .btn {
+    display: block;
+    color: black;
+    width: max-content;
     border: solid black 1px;
     background-color: gainsboro;
+    border-radius: 2px;
+    padding: 5px;
 }
 
 .btn:hover {
     background-color: grey;
+    color: white;
 }
 
 .textInput {
