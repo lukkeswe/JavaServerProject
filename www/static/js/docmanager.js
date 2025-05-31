@@ -4,6 +4,9 @@ class DocumentManager {
         this.table      = document.getElementById("table");
         this.db;
     }
+    flexContainer(){
+        this.container.style.display = "flex";
+    }
     makeTable(data) {
         this.resetTable();
         if (typeof data[0] === "string") {
@@ -167,6 +170,8 @@ class DocumentManager {
         username.innerHTML  = sessionStorage.getItem("username");
         email.innerHTML     = sessionStorage.getItem("email");
         phone.innerHTML     = sessionStorage.getItem("phone");
+        // Add class name
+        backBtn.className = "btn"
         // Add eventlistener
         backBtn.addEventListener("click", () => {
             dashBoard.remove();
@@ -194,6 +199,8 @@ class DocumentManager {
         // Add content text
         backBtn.textContent = "戻る";
         domain.innerHTML  = sessionStorage.getItem("domain");
+        // Add class name
+        backBtn.className = "btn";
         // Add eventlistener
         backBtn.addEventListener("click", () => {
             dashBoard.remove();
@@ -207,25 +214,31 @@ class DocumentManager {
     }
     burgerMenu(){
         // Create the elements
-        const burgerBtn = document.createElement("button");
-        const burger    = document.createElement("ul");
-        const user      = document.createElement("li");
-        const domain    = document.createElement("li");
-        const database  = document.createElement("li");
+        const burgerContainer   = document.createElement("aside");
+        const burgerBtn         = document.createElement("button");
+        const burger            = document.createElement("ul");
+        const user              = document.createElement("li");
+        const domain            = document.createElement("li");
+        const database          = document.createElement("li");
         // Add ids
-        burgerBtn.id    = "burgerBtn";
-        burger.id       = "burger";
-        user.id         = "userBurger";
-        domain.id       = "domainBurger";
-        database.id     = "databaseBurger";
+        burgerContainer.id  = "burgerContainer";
+        burgerBtn.id        = "burgerBtn";
+        burger.id           = "burger";
+        user.id             = "userBurger";
+        domain.id           = "domainBurger";
+        database.id         = "databaseBurger";
         // Add text content
         burgerBtn.innerHTML = "🈪";
         user.innerHTML      = "View/edit user";
         domain.innerHTML    = "Domain";
         database.innerHTML  = "Database tool";
+        // Add class name
+        burger.classList.add("inactive");
         // Add event listeners
         burgerBtn.addEventListener("click", () => {
-            burger.style.display = "block";
+            // burger.style.display = "block";
+            burger.classList.toggle("active");
+            burger.classList.toggle("inactive");
         });
         user.addEventListener("click", ()=> {
             const dash = document.getElementById("dashBoard");
@@ -249,8 +262,9 @@ class DocumentManager {
         burger.append(user);
         burger.append(domain);
         burger.append(database);
-        this.container.append(burgerBtn);
-        this.container.append(burger);
+        burgerContainer.append(burgerBtn);
+        burgerContainer.append(burger);
+        this.container.append(burgerContainer);
     }
     userSignUp(){
         // Create elements

@@ -59,10 +59,41 @@
     padding: 5px;
 }
 
-#container table {
+#container tr {
     border-left: solid black 1px;
-    margin: 0 auto;
 }
+
 #burger {
+    width: 150px;
+    border: solid black 1px;
+}
+
+#burgerBtn {
+    font-size: 42px;
+}
+
+#burger li {
+    cursor: pointer;
+    font-size: 16px;
+    padding: 5px;
+}
+
+#burger li:hover {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+#dashBoard {
+    display: block;
+    border-top: solid black 1px;
+    margin-top: 50px;
+    margin-left: 10px;
+}
+
+.active {
+    display: block;
+}
+
+.inactive {
     display: none;
 }
