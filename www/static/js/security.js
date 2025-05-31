@@ -1,11 +1,11 @@
-function bouncer(){
+async function bouncer(){
     if (sessionStorage.getItem("username")){
             console.log("Security...");
-            securityCheck();
+            await securityCheck();
             console.log(`OK! Welcome ${sessionStorage.getItem("username")}`);
         } else {
             console.log("Redirecting");
-            window.location.href = "/";
+            window.location.href = "/server.html";
         }
 }
 async function securityCheck(){
@@ -20,11 +20,11 @@ async function securityCheck(){
             body    : JSON.stringify(requestObject)
         });
         if (!response.ok) {
-            window.location.href = "/";
+            window.location.href = "/server.html";
         } else {console.log("Permission granted.");}
     } catch (error){
         console.error(error);
-        window.location.href = "/";
+        window.location.href = "/server.html";
     }
 }
 
@@ -49,10 +49,17 @@ async function invite() {
             return data[0]["status"];
         } else {
             console.log(data[0]["status"]);
-            //window.location.href = "/";
+            window.location.href = "/server.html";
         }
     } catch (error){
         console.error("Error: ", error);
-        //window.location.href = "/";
+        window.location.href = "/server.html";
+    }
+}
+
+function logout(){
+    if(sessionStorage.getItem("username")){
+        sessionStorage.removeItem("username");
+        sessionStorage.removeItem("password");
     }
 }

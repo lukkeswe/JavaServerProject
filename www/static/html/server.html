@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="static/css/reset.css">
     <link rel="stylesheet" href="static/css/style.css">
     <script src="static/js/usermanager.js"></script>
+    <script src="static/js/security.js"></script>
     <title>index</title>
 </head>
 <body>
@@ -22,6 +23,7 @@
     </div>
     
 <script type="text/javascript">
+    logout();
     document.getElementById("loginBtn").addEventListener("click", ()=>{
         const username = document.getElementById("username").value;
         const password = document.getElementById("password").value;

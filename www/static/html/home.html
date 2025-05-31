@@ -14,14 +14,16 @@
     <div id="container"></div>
     <script type="text/javascript">
         bouncer();
-        const usr = new UserManager(
+        if (sessionStorage.getItem("username")){
+            const usr = new UserManager(
             sessionStorage.getItem("username"),
             sessionStorage.getItem("password")
-        );
-        const dm = new DocumentManager();
-        dm.flexContainer();
-        dm.burgerMenu();
-        dm.showUserDash();
+            );
+            const dm = new DocumentManager();
+            dm.flexContainer();
+            dm.burgerMenu();
+            dm.showUserDash();
+        }
     </script>
 </body>
 </html>
