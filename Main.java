@@ -338,7 +338,7 @@ public class Main {
     }
     private static String getInvite(String invite){
         String url = "jdbc:mysql://localhost:3306/webserver";
-        try (Connection conn = DriverManager.getConnection(url, "root", "tvtittaren")){
+        try (Connection conn = DriverManager.getConnection(url, "lukas", "Tvt!77@ren")){
             String sql = "SELECT * FROM invites WHERE invite = ?";
             PreparedStatement pstmt = conn.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             pstmt.setString(1, invite);

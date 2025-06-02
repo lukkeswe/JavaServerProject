@@ -28,7 +28,8 @@ async function securityCheck(){
     }
 }
 
-async function invite() {
+async function magproblem() {
+    console.log("in here")
     const params = new URLSearchParams(window.location.search);
     const invite = params.get('invite');
     console.log(`Invite code: ${invite}`);
