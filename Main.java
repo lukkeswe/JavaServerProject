@@ -26,6 +26,7 @@ public class Main {
         server.createContext("/deleteRows", new DeleteHandler());
         server.createContext("/login", new LoginHandler());
         server.createContext("/invite", new CheckInvite());
+        server.createContext("/newuser", new NewUser());
         server.setExecutor(null);
         server.start();
         System.out.println("Server started on port " + port);
@@ -267,6 +268,28 @@ public class Main {
             }
         }
     }
+    static class NewUser implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if("POST".equals(exchange.getRequestMethod())){
+                // Get the request body
+                InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), "UTF-8");
+                BufferedReader reader = new BufferedReader(isr);
+                String recievedString = reader.lines().collect(Collectors.joining());
+                // Parse JSON into map
+                Map<String, String> map = parseJsonToMap(recievedString);
+                // Insert new user 
+                insertRow("webserver", "lukas", "Tvt!77@ren", "users", map);
+                // Create exchange
+                String response = "[{\"status\": \"ok\"}]";
+                exchange.getResponseHeaders().add("Content-Type", "application/json");
+                exchange.sendResponseHeaders(200, response.length());
+                OutputStream os = exchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            }
+        }
+    }
     private static Map<String, String> parseJsonToMap(String json){
         Map<String, String> map = new HashMap<>();
         json = json.trim();
@@ -463,6 +486,44 @@ public class Main {
             }
         } catch (Exception e){
             e.printStackTrace();
+        }
+    }
+    private static void insertRow(String database, String username, String password, String table, Map<String, String> sql){
+        String url = "jdbc:mysql://localhost:3306/" + database;
+        StringBuilder sqlBuild = new StringBuilder();
+        sqlBuild.append("INSERT INTO ").append(table).append(" (");
+        // Append keys to the sql string
+        boolean firstKey = true;
+        for (String key : sql.keySet()){
+            if (!firstKey) {
+                sqlBuild.append(", ").append(key);
+            } else {
+                sqlBuild.append(key);
+                firstKey = false;
+            }
+        }
+        sqlBuild.append(") VALUES (");
+        // Append the values
+        boolean firstValue = true;
+        for (String key : sql.keySet()){
+            String value = sql.get(key);
+            if (!firstValue) {
+                sqlBuild.append(", ");
+            } else {
+                firstValue = false;
+            }
+            sqlBuild.append("'").append(value).append("'");
+        }
+        sqlBuild.append(")");
+        System.out.println(sqlBuild.toString());
+        // Insert the row
+        try (Connection conn = DriverManager.getConnection(url, username, password)){
+            try (Statement stmt = conn.createStatement()){
+                stmt.executeUpdate(sqlBuild.toString());
+                System.out.println("Executed: " + sqlBuild.toString());
+            }
+        } catch (Exception e){
+            //e.printStackTrace();
         }
     }
     private static byte[] inputStreamToBytes(InputStream is) throws IOException {

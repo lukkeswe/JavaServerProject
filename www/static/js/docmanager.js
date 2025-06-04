@@ -269,17 +269,92 @@ class DocumentManager {
     userSignUp(){
         // Create elements
         const username  = document.createElement("input");
+        const userLabel = document.createElement("label");
+        const password  = document.createElement("input");
+        const passLabel = document.createElement("label");
+        const passCheck = document.createElement("input");
+        const checkLabel= document.createElement("label");
+        const domain    = document.createElement("input");
+        const domLabel  = document.createElement("label");
+        const email     = document.createElement("input");
+        const emailLabel= document.createElement("label");
+        const phone     = document.createElement("input");
+        const phoneLabel= document.createElement("label");
         const submit    = document.createElement("button");
+        // Add ids
+        username.id     = "username";
+        password.id     = "password";
+        passCheck.id    = "passCheck";
+        domain.id       = "domain";
+        email.id        = "email";
+        phone.id        = "phone";
         // Set the type for input elements
-        username.type = "text";
+        username.type   = "text";
+        password.type   = "password";
+        passCheck.type  = "password";
+        domain.type     = "text";
+        email.type      = "text";
+        phone.type      = "text";
         // Content text
+        userLabel.textContent   = "Username:";
+        passLabel.textContent   = "Password:";
+        checkLabel.textContent  = "Password again:";
+        domLabel.textContent    = "Domain:";
+        emailLabel.textContent  = "Email:";
+        phoneLabel.textContent  = "Phone number:";
         submit.innerHTML = "Submit";
         // Add eventlistener
-        submit.addEventListener("click", () => {
+        submit.addEventListener("click", async () => {
+            if(password.value == passCheck.value){
+                let requestObject = {
+                "name"      : username.value,
+                "password"  : password.value,
+                "domain"    : domain.value,
+                "email"     : email.value,
+                "phone"     : phone.value
+                };
+                try {
+                    const response = await fetch('/newuser', {
+                        method  : 'POST',
+                        headers : {'Content-Type': 'application/json'},
+                        body    : JSON.stringify(requestObject)
+                    });
+                    if (!response.ok){
+                        throw new Error(`Server status ${response.status}`);
+                    }
+                    const data = await response.json();
+                    console.log("Response:", data);
+                    if (data[0]["status"] == "ok") {
+                        sessionStorage.setItem("userStatus", "ok");
+                        sessionStorage.setItem("username", username.value);
+                        sessionStorage.setItem("password", password.value);
+                        sessionStorage.setItem("domain", domain.value);
+                        sessionStorage.setItem("email", email.value);
+                        sessionStorage.setItem("phone", phone.value);
 
+                        window.location.href = "/home.html";
+                    }
+                } catch (error){
+                    console.error("Error: ", error);
+                    alert("Error: ", error);
+                }
+            } else {
+                alert("Passwords don't match");
+            }
         });
         this.container.innerHTML = "";
+        this.container.append(userLabel);
         this.container.append(username);
+        this.container.append(passLabel);
+        this.container.append(password);
+        this.container.append(checkLabel);
+        this.container.append(passCheck);
+        this.container.append(domLabel);
+        this.container.append(domain);
+        this.container.append(emailLabel);
+        this.container.append(email);
+        this.container.append(phoneLabel);
+        this.container.append(phone);
         this.container.append(submit);
     }
 }
