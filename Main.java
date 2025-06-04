@@ -280,6 +280,8 @@ public class Main {
                 Map<String, String> map = parseJsonToMap(recievedString);
                 // Insert new user 
                 insertRow("webserver", "lukas", "Tvt!77@ren", "users", map);
+                // Create the user's database
+                createNewUser("lukas", "Tvt!77@ren", map.get("name"), map.get("password"));
                 // Create exchange
                 String response = "[{\"status\": \"ok\"}]";
                 exchange.getResponseHeaders().add("Content-Type", "application/json");
@@ -523,8 +525,33 @@ public class Main {
                 System.out.println("Executed: " + sqlBuild.toString());
             }
         } catch (Exception e){
-            //e.printStackTrace();
+            e.printStackTrace();
         }
+    }
+    private static void createNewUser(String username, String password, String newuser, String newpassword){
+        // Build the statements
+        StringBuilder createUser = new StringBuilder();
+        createUser.append("CREATE USER '").append(newuser).append("'@'localhost' IDENTIFIED BY '").append(newpassword).append("'");
+        String createDatabase = "CREATE DATABASE " + newuser + "_db";
+        StringBuilder privilages = new StringBuilder();
+        privilages.append("GRANT ALL PRIVILEGES ON ").append(newuser).append("_db").append(".* TO '").append(newuser).append("'@'localhost' WITH GRANT OPTION");
+        // Start the connection and execute the statements
+        String url = "jdbc:mysql://localhost:3306/";
+        try (Connection conn = DriverManager.getConnection(url, username, password)){
+            try (Statement stmt = conn.createStatement()){
+                // Create the user
+                stmt.executeUpdate(createUser.toString());
+                // Create database
+                stmt.executeUpdate(createDatabase);
+                // Grant privileges
+                stmt.executeUpdate(privilages.toString());
+                // Flush privileges
+                stmt.executeUpdate("FLUSH PRIVILEGES");
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
     private static byte[] inputStreamToBytes(InputStream is) throws IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
