@@ -35,14 +35,40 @@ public class Main {
     static class RootHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+            // Get the headers
+            Headers headers = exchange.getRequestHeaders();
+            // Get the host
+            String host = headers.getFirst("Host");
+            System.out.println("Host: " + host);
+            // If there is no host
+            if (host == null) host = "unknown";
+            
             String requestPath = exchange.getRequestURI().getPath();
             String[] requestSplit = requestPath.split("/");
             // Define the path to the index file
-            String indexFilePath = "www/static/html/index.html";
-            if (requestPath.endsWith(".html")) {
-                indexFilePath = "www/static/html/" + requestSplit[requestSplit.length - 1];
+            String htmlFilePath = "www/static/html/index.html";
+            // If no html file is specified target the index file
+            String targetFile = "index.html";
+            // Initial path
+            String userPath;
+
+            if (host.equalsIgnoreCase("norlund-johan-lukas.com")) {
+                userPath = "www";
+            } else if (host.equalsIgnoreCase("www.norlund-johan-lukas.com")) {
+                userPath = "www";
+            } else { 
+                targetFile = "notfound.html";
+                userPath = "www";
             }
-            byte[] response = Files.readAllBytes(Paths.get(indexFilePath));
+
+            if (requestPath.endsWith(".html")) {
+                targetFile = requestSplit[requestSplit.length - 1];
+            }
+
+            htmlFilePath = userPath + "/static/html/" + targetFile;
+
+            System.out.println("Target file path: " + htmlFilePath);
+            byte[] response = Files.readAllBytes(Paths.get(htmlFilePath));
             // Set the Content-Type header for HTML
             exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
             // Create the response
@@ -75,7 +101,7 @@ public class Main {
             } else if (requestPath.endsWith(".gif")){
                 filePath = "www/static/img/" + fileName;
             }
-            System.out.println("File path: " + filePath);
+            // System.out.println("File path: " + filePath);
             // Check if the file exist before reading
             if(!Files.exists(Paths.get(filePath))) {
                 System.out.println("File not found: " + filePath); // Debug print
