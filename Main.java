@@ -27,6 +27,7 @@ public class Main {
         server.createContext("/login", new LoginHandler());
         server.createContext("/invite", new CheckInvite());
         server.createContext("/newuser", new NewUser());
+        server.createContext("/questionForm", new QuestionForm());
         server.setExecutor(null);
         server.start();
         System.out.println("Server started on port " + port);
@@ -266,8 +267,6 @@ public class Main {
     static class CheckInvite implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            System.out.println("Request method: " + exchange.getRequestMethod());
-            System.out.println("Path: " + exchange.getRequestURI().getPath());
             if("POST".equals(exchange.getRequestMethod())){
                 // Read request body
                 InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), "UTF-8");
@@ -316,6 +315,51 @@ public class Main {
                 os.write(response.getBytes());
                 os.close();
             }
+        }
+    }
+    static class QuestionForm implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if("POST".equals(exchange.getRequestMethod())){
+                InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), "UTF-8");
+                BufferedReader reader = new BufferedReader(isr);
+                String request = reader.lines().collect(Collectors.joining());
+                System.out.println("Request: " + request);
+                // Parse JSON into map
+                Map<String, String> map = parseJsonToMap(request);
+                // Insert the message into the database
+                String insert = insertMessage(map.get("name"), map.get("email"), map.get("content"));
+                String response;
+                if (insert.equals("ok")) {
+                    response = "[{\"status\": \"ok\"}]";
+                } else {
+                    response = "[{\"status\": \"fail\"}]";
+                }
+                // Create exchange
+                exchange.getRequestHeaders().add("Content-Type", "application/json");
+                exchange.sendResponseHeaders(200, response.length());
+                OutputStream os = exchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            } else {
+                exchange.sendResponseHeaders(405, -1);
+            }
+        }
+    }
+    
+    private static String insertMessage(String name, String email, String message){
+        String url = "jdbc:mysql://localhost:3306/webserver";
+        try (Connection conn = DriverManager.getConnection(url, "lukas", "Tvt!77@ren")){
+            String sql = "INSERT INTO messages (name, email, message) VALUES (?, ?, ?)";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, name);
+            pstmt.setString(2, email);
+            pstmt.setString(3, message);
+            pstmt.execute();
+            return "ok";
+        } catch (Exception e){
+            e.printStackTrace();
+            return "fail";
         }
     }
     private static Map<String, String> parseJsonToMap(String json){

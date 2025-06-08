@@ -123,4 +123,27 @@ class DBmanager {
         }
         return null;
     }
+    async contact(name, email, content){
+        const requestObject = {
+            "name"  : name,
+            "email" : email,
+            "content": content
+        };
+        try {
+            const response = await fetch('/questionForm', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(requestObject)
+            });
+            if (!response.ok){
+                throw new Error(`Server status ${response.status}`);
+            }
+            const data = await response.json();
+            console.log("Response from server:", data);
+            
+        } catch (error){
+            console.error("Error:", error);
+            
+        }
+    }
 }
