@@ -1,0 +1,247 @@
+body {
+    margin: 0;
+}
+
+p {
+    margin: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    background-color: white;
+    color: black;
+    padding: 20px;
+    margin: 0;
+}
+header nav ul{
+    display: flex;
+    gap: 20px;
+    list-style: none;
+    margin: 0;
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}
+
+.mainvisual {
+    background-image: url(img/flower.jpg);
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    padding: 200px 0;
+}
+.mainvisual h1 {
+    font-size: 30px;
+    text-align: center;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 0 10px black;
+}
+.content {
+    display: flex;
+    max-width: 900px;
+    margin: 0 auto;
+    margin-top: 20px;
+
+}
+main {
+    flex: 3;
+    display: block;
+    width: 100%;
+}
+
+h2{
+    font-weight: bold;
+    border-bottom: solid black 1px;
+    border-style: dotted;
+    padding-bottom: 5px;
+}
+.big-content img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    margin-top: 20px;
+}
+.big-content p {
+    margin-top: 10px;
+    padding: 0 10px;
+}
+
+.small-content {
+    display: block;
+    margin: 20px 0;
+}
+
+.articles {
+    display: flex;
+    gap: 10px;
+}
+.article{
+    flex: 1;
+    padding: 10px;
+    border: solid black 1px;
+    margin-top: 20px;
+    min-width: 200px;
+}
+.article img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    margin-top: 15px;
+    border: solid black 1px;
+}
+
+.article p {
+    margin-top: 10px;
+}
+#art1 {
+    background-color: rgb(217, 109, 109);
+    margin-left: 0;
+}
+#art2 {
+    background-color: rgb(146, 124, 234);
+}
+aside {
+    flex: 1;
+    display: block;
+    border: solid black 1px;
+    padding: 15px;
+    margin-left: 20px;
+    text-align: left;
+}
+aside h2{
+    border-style: none;
+    margin-bottom: 15px;
+}
+aside a {
+    font-size: 16px;
+}
+aside a:hover {
+    font-weight: bolder;
+}
+aside img {
+    width: 100%;
+    border-radius: 50%;
+    margin-top: 20px;
+}
+.form {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    border: solid black 1px;
+    margin: 0 auto;
+    width: 500px;
+}
+.form-txt {
+    display: flex;
+    margin-bottom: 10px;
+}
+.form label {
+    margin-right: 50px;
+}
+.form span {
+    color: white;
+    font-size: 12px;
+    padding: 3px;
+    border-radius: 2px;
+    background-color: red;
+    margin-left: 10px;
+}
+
+.form input{
+    background-color: white;
+    padding: 5px;
+    border: solid black 1px;
+    margin-left: auto;
+    width: 225px;
+}
+textarea {
+    background-color: white;
+    border: solid black 1px;
+    margin-left: auto;
+    padding: 5px;
+    width: 225px;
+}
+button {
+    border: solid black 1px;
+    width: fit-content;
+    padding: 10px 20px;
+}
+button:hover{
+    opacity: 0.8;
+    transition: 0.3s;
+}
+#link{
+    display: block;
+    background-color: rgb(76, 166, 196);
+    color: white;
+    border-radius: 20px;
+    margin: 20px auto;
+}
+
+#link a {
+    color: white;
+}
+
+#submit {
+    background-color: navy;
+    color: aliceblue;
+    margin: 10px auto;
+}
+footer {
+    padding: 5px;
+    text-align: center;
+    background-color: black;
+    margin-top: 50px;
+    color: white;
+}
+
+@media screen and (max-width: 870px) {
+    header {
+        min-width: 300px;
+    }
+    .mainvisual{
+        min-width: 300px;
+        padding: 400px 0;
+    }
+    .content {
+        flex-direction: column-reverse;
+        max-width: 500px;
+        min-width: 300px;
+    }
+    .big-content h2 {
+        padding: 0 10px;
+    }
+    .small-content h2{
+        padding: 0 10px;
+    }
+    .articles {
+        flex-direction: column;
+    }
+    .article {
+        margin-left: 0;
+    }
+    aside {
+        width: 90%;
+        height: 200px;
+        max-width: none;
+        margin: 20px auto;
+    }
+    aside h2 {
+        font-size: 20px;
+    }
+    aside a {
+        font-size: 16px;
+    }
+    footer {
+        min-width: 300px;
+    }
+    
+}

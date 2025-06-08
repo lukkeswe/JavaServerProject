@@ -99,7 +99,7 @@ public class Main {
             } else if (requestPath.endsWith(".html")) {
                 filePath = "www/static/html/" + fileName;
                 contentType = "text/html; charset=UTF-8";
-            } else if (requestPath.endsWith(".gif")){
+            } else if (requestPath.endsWith(".gif") || requestPath.endsWith(".jpg")){
                 filePath = "www/static/img/" + fileName;
             }
             // System.out.println("File path: " + filePath);
