@@ -49,13 +49,17 @@
                 const email = document.getElementById("email");
                 const content = document.getElementById("content-area");
 
-                await db.contact(name.value, email.value, content.value);
+                if (!name.value || !email.value || !content.value){
+                    alert("Fill all of the fields please.")
+                } else {
+                    await db.contact(name.value, email.value, content.value);
 
-                name.value = "";
-                email.value = "";
-                content.value = "";
+                    name.value = "";
+                    email.value = "";
+                    content.value = "";
 
-                alert("Your message has been sent to us. We will be contacting you shortly. Have a nice day.");
+                    alert("Your message has been sent to us. We will be contacting you shortly. Have a nice day.");
+                }
             });
         </script>
     </body>
