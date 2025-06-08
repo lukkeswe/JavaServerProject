@@ -278,7 +278,7 @@ public class Main {
                 // Check if the invite exsist in the database
                 String result = getInvite(map.get("invite"));
                 String response = "[{\"status\": \"fail\"}]";
-                if (result == "ok") {
+                if (result.equals("ok")) {
                     response = "[{\"status\": \"ok\"}]";
                 }
                 // Create exchange
@@ -329,14 +329,12 @@ public class Main {
                 Map<String, String> map = parseJsonToMap(request);
                 // Insert the message into the database
                 String insert = insertMessage(map.get("name"), map.get("email"), map.get("content"));
-                String response;
+                String response = "[{\"status\": \"fail\"}]";
                 if (insert.equals("ok")) {
                     response = "[{\"status\": \"ok\"}]";
-                } else {
-                    response = "[{\"status\": \"fail\"}]";
                 }
                 // Create exchange
-                exchange.getRequestHeaders().add("Content-Type", "application/json");
+                exchange.getResponseHeaders().add("Content-Type", "application/json");
                 exchange.sendResponseHeaders(200, response.length());
                 OutputStream os = exchange.getResponseBody();
                 os.write(response.getBytes());
