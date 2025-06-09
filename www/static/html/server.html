@@ -13,7 +13,7 @@
     <h1 class="welcome">ようこそ！</h1>
     <div id="loginContainer">
         <label for="username">ユーザー名：</label><br>
-        <input type="text" id="username" class="textInput"><br>
+        <input type="text" id="email" class="textInput"><br>
         <label for="password">パスワード：</label><br>
         <input type="password" id="password" class="textInput"><br>
         <button class="btn" id="loginBtn">ログイン</button><br>
@@ -25,9 +25,9 @@
 <script type="text/javascript">
     logout();
     document.getElementById("loginBtn").addEventListener("click", ()=>{
-        const username = document.getElementById("username").value;
+        const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
-        const usr = new UserManager(username, password);
+        const usr = new UserManager(email, password);
         usr.login();
     });
 </script>

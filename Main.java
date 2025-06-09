@@ -133,7 +133,7 @@ public class Main {
                     System.out.println("Recieved string: " + recievedString);
                     // Parse JSON into a map
                     Map<String, String> data = parseJsonToMap(recievedString);
-                    Map<String, String> result = getUser(data.get("username"), data.get("password"));
+                    Map<String, String> result = getUser(data.get("email"), data.get("password"));
                     String json;
                     // Check if the result is ok
                     if (result.get("exist").equals("yes")) {
@@ -303,10 +303,12 @@ public class Main {
                 String recievedString = reader.lines().collect(Collectors.joining());
                 // Parse JSON into map
                 Map<String, String> map = parseJsonToMap(recievedString);
+                map.put("name", emailToName(map.get("email")));
                 // Insert new user 
                 insertRow("webserver", "lukas", "Tvt!77@ren", "users", map);
                 // Create the user's database
-                createNewUser("lukas", "Tvt!77@ren", map.get("name"), map.get("password"));
+                createNewUser("lukas", "Tvt!77@ren", emailToName(map.get("email")), map.get("password"));
+                System.out.println("New user: " + emailToName(map.get("email")));
                 // Create exchange
                 String response = "[{\"status\": \"ok\"}]";
                 exchange.getResponseHeaders().add("Content-Type", "application/json");
@@ -345,6 +347,11 @@ public class Main {
         }
     }
     
+    
+    private static String emailToName(String email){
+        String[] parts = email.split("@");
+        return sanitizeUserName(parts[0]);
+    }
     private static String insertMessage(String name, String email, String message){
         String url = "jdbc:mysql://localhost:3306/webserver";
         try (Connection conn = DriverManager.getConnection(url, "lukas", "Tvt!77@ren")){
@@ -398,16 +405,16 @@ public class Main {
         System.out.println("JSON: " + jsonBuilder.toString());
         return jsonBuilder.toString();
     }
-    private static Map<String, String> getUser(String username, String password){
+    private static Map<String, String> getUser(String email, String password){
         String url = "jdbc:mysql://localhost:3306/webserver";
         try(Connection conn = DriverManager.getConnection(url, "lukas", "Tvt!77@ren")){
-            String sql = "SELECT * FROM users WHERE name = ?";
+            String sql = "SELECT * FROM users WHERE email = ?";
             PreparedStatement pstmt = conn.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            pstmt.setString(1, username);
+            pstmt.setString(1, email);
             ResultSet resultSet = pstmt.executeQuery();
             Map<String, String> user = new HashMap<>();
             while (resultSet.next()){
-                if (resultSet.getString("name").equals(username) && 
+                if (resultSet.getString("email").equals(email) && 
                     resultSet.getString("password").equals(password)) {
                     user.put("exist", "yes");
                     user.put("id", resultSet.getString("id"));
@@ -736,6 +743,9 @@ public class Main {
     }
     private static String sanitizeFileName(String name){
         return name.replaceAll("[^a-zA-Z0-9._-]", "_");
+    }
+    private static String sanitizeUserName(String name){
+        return name.replaceAll("[^a-zA-Z0-9]", "_");
     }
     private static String extractFileName(String headers) {
         int start = headers.indexOf("filename=\"") + 10;

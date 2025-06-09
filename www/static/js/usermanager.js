@@ -1,13 +1,13 @@
 class UserManager{
-    constructor(username, password){
-        this.username = username,
+    constructor(email, password){
+        this.email = email,
         this.password = password
     }
     async login(){
         let requestObject = {
-            "username"  : this.username,
+            "email"  : this.email,
             "password"  : this.password
-        }
+        };
         try {
             const response = await fetch('/login', {
                 method  : 'POST',
@@ -29,7 +29,7 @@ class UserManager{
                 sessionStorage.setItem("domain", data[0]["domain"]);
                 sessionStorage.setItem("email", data[0]["email"]);
                 sessionStorage.setItem("phone", data[0]["phone"]);
-                console.log(sessionStorage.getItem("username") + " logged in.");
+                console.log(sessionStorage.getItem("email") + " logged in.");
                 window.location.href = "home.html";
             }
         } catch (error){

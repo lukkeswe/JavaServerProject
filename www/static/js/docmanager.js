@@ -122,31 +122,21 @@ class DocumentManager {
     showUserDash(){
         // Create elements
         const dashBoard = document.createElement("table");
-        const username  = document.createElement("td");
         const domain    = document.createElement("td");
-        const row1      = document.createElement("tr");
-        const row2      = document.createElement("tr");
+        const row      = document.createElement("tr");
         // Asign ids
         dashBoard.id    = "dashBoard";
-        username.id     = "username";
         domain.id       = "domain";
         // Add content text
-        username.innerHTML  = sessionStorage.getItem("username");
         domain.innerHTML    = sessionStorage.getItem("domain");
         // Add eventlistener
-        username.addEventListener("click", () => {
-            dashBoard.remove();
-            this.showUserInfo();
-        });
         domain.addEventListener("click", () => {
             dashBoard.remove();
             this.showDomainInfo();
         });
         // Append elements
-        row1.append(username);
-        row2.append(domain);
-        dashBoard.append(row1);
-        dashBoard.append(row2);
+        row.append(domain);
+        dashBoard.append(row);
         this.container.append(dashBoard);
 
     }
@@ -268,8 +258,6 @@ class DocumentManager {
     }
     userSignUp(){
         // Create elements
-        const username  = document.createElement("input");
-        const userLabel = document.createElement("label");
         const password  = document.createElement("input");
         const passLabel = document.createElement("label");
         const passCheck = document.createElement("input");
@@ -282,21 +270,18 @@ class DocumentManager {
         const phoneLabel= document.createElement("label");
         const submit    = document.createElement("button");
         // Add ids
-        username.id     = "username";
         password.id     = "password";
         passCheck.id    = "passCheck";
         domain.id       = "domain";
         email.id        = "email";
         phone.id        = "phone";
         // Set the type for input elements
-        username.type   = "text";
         password.type   = "password";
         passCheck.type  = "password";
         domain.type     = "text";
         email.type      = "text";
         phone.type      = "text";
         // Content text
-        userLabel.textContent   = "Username:";
         passLabel.textContent   = "Password:";
         checkLabel.textContent  = "Password again:";
         domLabel.textContent    = "Domain:";
@@ -307,7 +292,6 @@ class DocumentManager {
         submit.addEventListener("click", async () => {
             if(password.value == passCheck.value){
                 let requestObject = {
-                "name"      : username.value,
                 "password"  : password.value,
                 "domain"    : domain.value,
                 "email"     : email.value,
@@ -325,14 +309,34 @@ class DocumentManager {
                     const data = await response.json();
                     console.log("Response:", data);
                     if (data[0]["status"] == "ok") {
-                        sessionStorage.setItem("userStatus", "ok");
-                        sessionStorage.setItem("username", username.value);
-                        sessionStorage.setItem("password", password.value);
-                        sessionStorage.setItem("domain", domain.value);
-                        sessionStorage.setItem("email", email.value);
-                        sessionStorage.setItem("phone", phone.value);
-
-                        window.location.href = "/home.html";
+                        let requestObject = {
+                            "email" : email.value,
+                            "password" : password.value
+                        };
+                        try {
+                            const response = await fetch('/login', {
+                                method: 'Post',
+                                headers: {'Content-Type': 'application/json'},
+                                body : JSON.stringify(requestObject)
+                            });
+                            const data = await response.json();
+                            console.log("Response:", data);
+                            
+                            if (data[0]["status"] == "failed"){
+                                alert("Failed to log in :(");
+                            } else if(data[0]["id"]){
+                                sessionStorage.setItem("userStatus", "ok");
+                                sessionStorage.setItem("username", data[0]["name"]);
+                                sessionStorage.setItem("password", data[0]["password"]);
+                                sessionStorage.setItem("domain", data[0]["domain"]);
+                                sessionStorage.setItem("email", data[0]["email"]);
+                                sessionStorage.setItem("phone", data[0]["phone"]);
+                                console.log(sessionStorage.getItem("email") + " logged in.");
+                                window.location.href = "/home.html";
+                            }
+                        } catch (error){
+                            console.error("Error", error);
+                        }
                     }
                 } catch (error){
                     console.error("Error: ", error);
@@ -343,16 +347,14 @@ class DocumentManager {
             }
         });
         this.container.innerHTML = "";
-        this.container.append(userLabel);
-        this.container.append(username);
+        this.container.append(emailLabel);
+        this.container.append(email);
         this.container.append(passLabel);
         this.container.append(password);
         this.container.append(checkLabel);
         this.container.append(passCheck);
         this.container.append(domLabel);
         this.container.append(domain);
-        this.container.append(emailLabel);
-        this.container.append(email);
         this.container.append(phoneLabel);
         this.container.append(phone);
         this.container.append(submit);
