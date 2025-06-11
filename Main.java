@@ -29,6 +29,7 @@ public class Main {
         server.createContext("/newuser", new NewUser());
         server.createContext("/questionForm", new QuestionForm());
         server.createContext("/createTable", new CreateNewTable());
+        server.createContext("/game", new GameAssetsHandler());
         server.setExecutor(null);
         server.start();
         System.out.println("Server started on port " + port);
@@ -58,6 +59,8 @@ public class Main {
                 userPath = "www";
             } else if (host.equalsIgnoreCase("www.norlund-johan-lukas.com")) {
                 userPath = "www";
+            } else if(host.equalsIgnoreCase("dev.norlund-johan-lukas.com")){
+                userPath = "/home/lukas/UnityBuilds/NuggetsBuild/index.html";
             } else { 
                 targetFile = "notfound.html";
                 userPath = "www";
@@ -67,7 +70,11 @@ public class Main {
                 targetFile = requestSplit[requestSplit.length - 1];
             }
 
-            htmlFilePath = userPath + "/static/html/" + targetFile;
+            if (host.equalsIgnoreCase("dev.norlund-johan-lukas.com")){
+                htmlFilePath = userPath;
+            } else {
+                htmlFilePath = userPath + "/static/html/" + targetFile;
+            }
 
             System.out.println("Target file path: " + htmlFilePath);
             byte[] response = Files.readAllBytes(Paths.get(htmlFilePath));
@@ -378,7 +385,43 @@ public class Main {
             }
         }
     }
-    
+    static class GameAssetsHandler implements HttpHandler{
+        @Override
+        public void handle(HttpExchange exchange) throws IOException{
+            String requestPath = exchange.getRequestURI().getPath();
+            String filePath = requestPath.replace("game", "/home/lukas/UnityBuilds/NuggetsBuild");
+            String contentType = "application/octet-stream";
+            if (requestPath.endsWith(".js")) {
+                contentType = "application/javascript";
+            } else if (requestPath.endsWith(".css")){
+                contentType = "text/css";
+            }
+            // Read the file
+            byte[] response = Files.readAllBytes(Paths.get(filePath));
+            // Set the encoding if it is a "unityweb" file and decide the content-type
+            if (requestPath.endsWith(".unityweb")){
+                exchange.getResponseHeaders().set("Content-Encoding", "gzip");
+
+                if (filePath.contains(".wasm")) {
+                    contentType = "application/wasm";
+                } else if (filePath.contains(".js")){
+                    contentType = "application/javascript";
+                } else if (filePath.contains(".data")){
+                    contentType = "application/octet-stream";
+                } else {
+                    contentType = "application/octet-stream";
+                }
+            }
+            // Create the response
+            exchange.getResponseHeaders().set("Content-Type", contentType);
+            exchange.sendResponseHeaders(200, response.length);
+            OutputStream os = exchange.getResponseBody();
+            os.write(response);
+            os.close();
+
+        }
+    }
+
     private static String createTable(Map<String, String> columns, String table, String database, String username, String password){
         String url = "jdbc:mysql://localhost:3306/" + database;
         System.out.println("Using: " + database);
