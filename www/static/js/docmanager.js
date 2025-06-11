@@ -359,4 +359,139 @@ class DocumentManager {
         this.container.append(phone);
         this.container.append(submit);
     }
+    dataBurgerMenu(){
+        // Create the elements
+        const burgerContainer   = document.createElement("aside");
+        const burgerBtn         = document.createElement("button");
+        const burger            = document.createElement("ul");
+        const table             = document.createElement("li");
+        // Add ids
+        burgerContainer.id  = "burgerContainer";
+        burgerBtn.id        = "burgerBtn";
+        burger.id           = "burger";
+        table.id             = "userBurger";
+        // Add text content
+        burgerBtn.innerHTML = "🈪";
+        table.innerHTML      = "Create table";
+        // Add class name
+        burger.classList.add("inactive");
+        // Add event listeners
+        burgerBtn.addEventListener("click", () => {
+            // burger.style.display = "block";
+            burger.classList.toggle("active");
+            burger.classList.toggle("inactive");
+        });
+        table.addEventListener("click", () => {
+            this.showNewTableOptions();
+        });
+        // Append elements
+        burger.append(table);
+        burgerContainer.append(burgerBtn);
+        burgerContainer.append(burger);
+        this.container.append(burgerContainer);
+    }
+    showNewTableOptions(){
+        // Empty the table
+        this.resetTable();
+        // Create the emlements
+        const editContainer     = document.createElement("div");
+        const tabelNameLabel    = document.createElement("label");
+        const nameInput         = document.createElement("input");
+        const columnAdder       = document.createElement("button");
+        const columnContainer   = document.createElement("table");
+        const createBtn         = document.createElement("button");
+        // Add ids
+        editContainer.id        = "editContainer";
+        nameInput.id            = "nameInput";
+        columnAdder.id          = "columnAdder";
+        columnContainer.id      = "columnContainer";
+        // Add text-content
+        tabelNameLabel.textContent  = "Table name";
+        columnAdder.textContent     = "Add +";
+        createBtn.textContent       = "Run";
+        // Set type for inputs
+        nameInput.type      = "text";
+        // Add eventlisteners
+        columnAdder.addEventListener("click", ()=> {
+            // Create the elements for the column options
+            const columnRow         = document.createElement("tr");
+            const columnNameTd      = document.createElement("td");
+            const columnNameLabel   = document.createElement("label");
+            const columnName        = document.createElement("input");
+            const columnTypeTd      = document.createElement("td");
+            const columnTypeLabel   = document.createElement("label");
+            const columnType        = document.createElement("select");
+            // Add class names
+            columnName.classList.add("columnName");
+            columnType.classList.add("columnType");
+            // Set the type for the inputs
+            columnName.type     = "text";
+            // Create the options for the type select
+            const varcharOption       = document.createElement("option");
+            const intOption           = document.createElement("option");
+            // Set values
+            varcharOption.value       = "VARCHAR";
+            intOption.value           = "INT";
+            // Add text-content
+            varcharOption.textContent = "VARCHAR";
+            intOption.textContent     = "INT";
+            // Append into the select element
+            columnType.append(varcharOption);
+            columnType.append(intOption);
+            // Append the elements
+            columnNameTd.append(columnNameLabel);
+            columnNameTd.append(columnName);
+            columnTypeTd.append(columnTypeLabel);
+            columnTypeTd.append(columnType);
+            columnRow.append(columnNameTd);
+            columnRow.append(columnTypeTd);
+            columnContainer.append(columnRow);
+        });
+        createBtn.addEventListener("click", async ()=> {
+            let requestObject = {
+                "username"  : sessionStorage.getItem("username"),
+                "password"  : sessionStorage.getItem("password"),
+                "table"     : nameInput.value
+            };
+            // Select all input elements
+            const columnNameElements = document.querySelectorAll(".columnName");
+            const columnTypeElements = document.querySelectorAll(".columnType");
+            // Put the values of the inputs into array lists
+            const columnNames = Array.from(columnNameElements).map(element => element.value);
+            const columnTypes = Array.from(columnTypeElements).map(element => element.value);
+            // Take the values and put them into the request object
+            for(let i = 0; i < columnNames.length; i++){
+                requestObject[columnNames[i]] = columnTypes[i];
+            }
+            try {
+                const response = await fetch('/createTable', {
+                    method  : 'POST',
+                    headers : {'Content-Type': 'application/json'},
+                    body    : JSON.stringify(requestObject)
+                });
+                if (!response.ok) {
+                    throw new Error(`Server status ${response.status}`);
+                }
+                const data = await response.json();
+                console.log("Server response:", data);
+                if (data[0]["status"] == "ok"){
+                    alert(`Created ${nameInput.value} successfully!`);
+                    nameInput.value = "";
+                    columnContainer.innerHTML = "";
+                } else {
+                    alert("Could not create the table :(");
+                }
+            } catch (error){
+                console.error(error);
+            }
+            
+        });
+        // Append elements
+        editContainer.append(tabelNameLabel);
+        editContainer.append(nameInput);
+        editContainer.append(columnAdder);
+        editContainer.append(columnContainer);
+        editContainer.append(createBtn);
+        this.container.append(editContainer);
+    }
 }

@@ -28,6 +28,7 @@ public class Main {
         server.createContext("/invite", new CheckInvite());
         server.createContext("/newuser", new NewUser());
         server.createContext("/questionForm", new QuestionForm());
+        server.createContext("/createTable", new CreateNewTable());
         server.setExecutor(null);
         server.start();
         System.out.println("Server started on port " + port);
@@ -346,8 +347,62 @@ public class Main {
             }
         }
     }
+    static class CreateNewTable implements HttpHandler{
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if("POST".equals(exchange.getRequestMethod())){
+                InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), "UTF-8");
+                BufferedReader reader = new BufferedReader(isr);
+                String request = reader.lines().collect(Collectors.joining());
+                // Parse JSON into map
+                Map<String, String> map = parseJsonToMap(request);
+                // Extract the columns whitout the username and password
+                Map<String, String> columns = new HashMap<>();
+                for (Map.Entry<String, String> entry : map.entrySet()){
+                    String key = entry.getKey();
+                    String value = entry.getValue();
+                    if (!key.equals("username") && !key.equals("password") && !key.equals("table")){
+                        columns.put(key, value);
+                    }
+                }
+                // Create the new table
+                String response = createTable(columns, map.get("table"), map.get("username") + "_db", map.get("username"), map.get("password"));
+                // Make the exchange
+                exchange.getResponseHeaders().add("Content-Type", "application/json");
+                exchange.sendResponseHeaders(200, response.length());
+                OutputStream os = exchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            } else {
+                exchange.sendResponseHeaders(405, -1);
+            }
+        }
+    }
     
-    
+    private static String createTable(Map<String, String> columns, String table, String database, String username, String password){
+        String url = "jdbc:mysql://localhost:3306/" + database;
+        System.out.println("Using: " + database);
+        try (Connection conn = DriverManager.getConnection(url, username, password)){
+            StringBuilder sql = new StringBuilder();
+            sql.append("CREATE TABLE ").append(sanitizeUserName(table)).append(" (");
+            sql.append("id INT NOT NULL PRIMARY KEY AUTO_INCREMENT");
+            for (Map.Entry<String, String> entry : columns.entrySet()){
+                String columnName = entry.getKey();
+                String setting = entry.getValue();
+                sql.append(", ").append(sanitizeUserName(columnName)).append(" ").append(sanitizeUserName(setting));
+                if (sanitizeUserName(setting).equals("VARCHAR")) { sql.append("(255)");}
+            }
+            sql.append(")");
+            System.out.println("Executing: " + sql.toString());
+            try (Statement stmt = conn.createStatement()){
+                stmt.executeUpdate(sql.toString());
+                return "[{\"status\": \"ok\"}]";
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+            return "[{\"status\": \"fail\"}]";
+        }
+    }
     private static String emailToName(String email){
         String[] parts = email.split("@");
         return sanitizeUserName(parts[0]);
@@ -409,11 +464,13 @@ public class Main {
         String url = "jdbc:mysql://localhost:3306/webserver";
         try(Connection conn = DriverManager.getConnection(url, "lukas", "Tvt!77@ren")){
             String sql = "SELECT * FROM users WHERE email = ?";
+            System.out.println("SELECT * FROM users WHERE email = '" + email + "'");
             PreparedStatement pstmt = conn.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             pstmt.setString(1, email);
             ResultSet resultSet = pstmt.executeQuery();
             Map<String, String> user = new HashMap<>();
             while (resultSet.next()){
+                System.out.println(resultSet.getString("email") + " : " + email);
                 if (resultSet.getString("email").equals(email) && 
                     resultSet.getString("password").equals(password)) {
                     user.put("exist", "yes");

@@ -14,13 +14,6 @@
   <body>
     <div id="container">
       <h1>データベース管理</h1>
-      <!-- <div id="loginContainer">
-        <p>ユーザー：</p>
-        <input type="text" id="user" class="textInput">
-        <p>パスワード：</p>
-        <input type="password" id="password" class="textInput">
-        <button id="login" class="btn">ログイン</button>
-      </div> -->
       <div id="dbManager">
         <button id="showTables">接続</button>
         <input type="text" id="input" class="textInput">
@@ -31,6 +24,7 @@
       bouncer();
       const db = new DBmanager();
       const dm = new DocumentManager();
+      dm.dataBurgerMenu();
       async function init(){
         if(sessionStorage.getItem("username")){
           db.username = sessionStorage.getItem("username");
