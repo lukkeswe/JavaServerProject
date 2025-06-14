@@ -316,6 +316,15 @@ public class Main {
                 insertRow("webserver", "lukas", "Tvt!77@ren", "users", map);
                 // Create the user's database
                 createNewUser("lukas", "Tvt!77@ren", emailToName(map.get("email")), map.get("password"));
+                // Create a new directory with folders for the user
+                String userPath = "users/" + emailToName(map.get("email"));
+                createPath(userPath);
+                createPath(userPath + "/static");
+                createPath(userPath + "/static/html");
+                createPath(userPath + "/static/css");
+                createPath(userPath + "/static/js");
+                createPath(userPath + "/static/img");
+                createPath(userPath + "/static/php");
                 System.out.println("New user: " + emailToName(map.get("email")));
                 // Create exchange
                 String response = "[{\"status\": \"ok\"}]";
@@ -727,6 +736,17 @@ public class Main {
             e.printStackTrace();
         }
 
+    }
+    private static void createPath(String path) throws IOException{
+        Path newPath = Paths.get(path);
+        try {
+            Files.createDirectory(newPath);
+            System.out.println("Directory created: " + newPath.toAbsolutePath());
+        } catch (FileAlreadyExistsException e) {
+            System.out.println("Directory already exsists.");
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
     }
     private static byte[] inputStreamToBytes(InputStream is) throws IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
