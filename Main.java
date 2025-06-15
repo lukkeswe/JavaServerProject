@@ -763,6 +763,11 @@ public class Main {
         byte[] closingBoundaryBytes = ("--" + boundary + "--").getBytes(StandardCharsets.UTF_8);
 
         int pos = 0;
+        byte[] data = null;
+        String user = "temp";
+        String fileName = "placeholder.jpg";
+        String fileType = "img";
+
         while (true) {
             // Find next boundary
             int boundaryIndex = indexOf(body, boundaryBytes, pos);
@@ -802,27 +807,43 @@ public class Main {
             String headers = new String(part, 0, headerEnd, StandardCharsets.UTF_8);
             byte[] fileContent = Arrays.copyOfRange(part, headerEnd + 4, part.length);
 
+
             if (headers.contains("filename=\"")) {
-                String fileName = extractFileName(headers);
-                String fileType = "img";
+                fileName = extractFileName(headers);
+                System.out.println("File name: " + fileName);
+                data = fileContent;
+                
                 if (fileName.endsWith(".html")) {
                     fileType = "html";
                 } else if (fileName.endsWith(".css")) {
                     fileType = "css";
                 } else if(fileName.endsWith(".js")){
                     fileType = "js";
+                } else if (
+                    fileName.endsWith(".jpg") ||
+                    fileName.endsWith(".gif") ||
+                    fileName.endsWith(".png") ||
+                    fileName.endsWith(".HEIC")
+                ) {
+                    fileType = "img";
                 }
-                if (fileName != null) {
-                    saveFile(fileName, fileContent, fileType);
-                }
+                continue;
             }
 
+            if (headers.contains("name=\"user\"")) {
+                user = new String(fileContent, StandardCharsets.UTF_8).trim();
+                System.out.println("Received user: " + user);
+                continue;
+            }
             pos = nextBoundary;
         }
+        if (data != null) {
+            saveFile(fileName, data, fileType, user);
+        }
     }
-    private static void saveFile(String fileName, byte[] data, String path) throws IOException {
+    private static void saveFile(String fileName, byte[] data, String fileType, String user) throws IOException {
         // Path uploadDir = Paths.get("uploads");
-        Path uploadDir = Paths.get("www", "static", path);
+        Path uploadDir = Paths.get("users", user, "static", fileType);
         
         if (!Files.exists(uploadDir)) {
             Files.createDirectories(uploadDir);

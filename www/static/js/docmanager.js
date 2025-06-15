@@ -210,6 +210,7 @@ class DocumentManager {
         const user              = document.createElement("li");
         const domain            = document.createElement("li");
         const database          = document.createElement("li");
+        const file              = document.createElement("li");
         // Add ids
         burgerContainer.id  = "burgerContainer";
         burgerBtn.id        = "burgerBtn";
@@ -217,11 +218,13 @@ class DocumentManager {
         user.id             = "userBurger";
         domain.id           = "domainBurger";
         database.id         = "databaseBurger";
+        file.id             = "fileBurger";
         // Add text content
         burgerBtn.innerHTML = "🈪";
         user.innerHTML      = "View/edit user";
         domain.innerHTML    = "Domain";
         database.innerHTML  = "Database tool";
+        file.innerHTML      = "File manager";
         // Add class name
         burger.classList.add("inactive");
         // Add event listeners
@@ -248,10 +251,14 @@ class DocumentManager {
         database.addEventListener("click", () => {
             window.location.href = "databasemanager.html";
         });
+        file.addEventListener("click", () => {
+            window.location.href = "filemanager.html";
+        });
         // Append elements
         burger.append(user);
         burger.append(domain);
         burger.append(database);
+        burger.append(file);
         burgerContainer.append(burgerBtn);
         burgerContainer.append(burger);
         this.container.append(burgerContainer);

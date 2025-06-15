@@ -4,6 +4,10 @@ function uploadFile() {
     for (let file of files) {
         formData.append("files", file);
     }
+
+    const user = sessionStorage.getItem("username");
+    formData.append("user", user);
+
     console.log("Uploading file...");
     
     fetch('/upload', {
