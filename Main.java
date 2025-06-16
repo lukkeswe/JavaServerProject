@@ -325,13 +325,13 @@ public class Main {
                 String recievedString = reader.lines().collect(Collectors.joining());
                 // Parse JSON into map
                 Map<String, String> map = parseJsonToMap(recievedString);
-                map.put("name", emailToName(map.get("email")));
+                map.put("name", domainToName(map.get("domain")));
                 // Insert new user 
                 insertRow("webserver", "lukas", "Tvt!77@ren", "users", map);
                 // Create the user's database
-                createNewUser("lukas", "Tvt!77@ren", emailToName(map.get("email")), map.get("password"));
+                createNewUser("lukas", "Tvt!77@ren", domainToName(map.get("domain")), map.get("password"));
                 // Create a new directory with folders for the user
-                String userPath = "users/" + emailToName(map.get("email"));
+                String userPath = "/home/lukas/users/" + domainToName(map.get("domain"));
                 createPath(userPath);
                 createPath(userPath + "/static");
                 createPath(userPath + "/static/html");
@@ -339,7 +339,7 @@ public class Main {
                 createPath(userPath + "/static/js");
                 createPath(userPath + "/static/img");
                 createPath(userPath + "/static/php");
-                System.out.println("New user: " + emailToName(map.get("email")));
+                System.out.println("New user: " + domainToName(map.get("domain")));
                 // Create exchange
                 String response = "[{\"status\": \"ok\"}]";
                 exchange.getResponseHeaders().add("Content-Type", "application/json");
@@ -468,6 +468,10 @@ public class Main {
             e.printStackTrace();
             return "[{\"status\": \"fail\"}]";
         }
+    }
+    private static String domainToName(String domain){
+        String name = domain.replace("www.", "");
+        return sanitizeUserName(name);
     }
     private static String emailToName(String email){
         String[] parts = email.split("@");
