@@ -826,6 +826,8 @@ public class Main {
                     fileName.endsWith(".HEIC")
                 ) {
                     fileType = "img";
+                } else {
+                    fileType = "prohibited";
                 }
                 continue;
             }
