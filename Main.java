@@ -61,6 +61,8 @@ public class Main {
                 userPath = "www";
             } else if(host.equalsIgnoreCase("dev.norlund-johan-lukas.com")){
                 userPath = "/home/lukas/UnityBuilds/NuggetsBuild/index.html";
+            } else if(host.equalsIgnoreCase("newdomain1.norlund-johan-lukas.com")){
+                userPath = "users/new_user1";
             } else { 
                 targetFile = "notfound.html";
                 userPath = "www";
@@ -91,27 +93,39 @@ public class Main {
     static class StaticFileHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+            // Get headers
+            Headers headers = exchange.getRequestHeaders();
+            // Get the host
+            String host = headers.getFirst("Host");
+            System.out.println("Static host: " + host);
             // Get the requested path
             String requestPath = exchange.getRequestURI().getPath();
             String[] requestPathSplits = requestPath.split("/");
             String fileName = requestPathSplits[requestPathSplits.length - 1];
             String contentType = "application/octet-stream";
+            String user = "www";
+            if (host.equalsIgnoreCase("newdomain1.norlund-johan-lukas.com")) {
+                user = "users/new_user1";
+            }
             String filePath = "www" + requestPath;
             // Determine the MIME type and file path
             if (requestPath.endsWith(".js")) {
-                filePath = "www/static/js/" + fileName;
+                filePath = user + "/static/js/" + fileName;
                 contentType = "application/javascript";
             } else if (requestPath.endsWith(".css")) {
-                filePath = "www/static/css/" + fileName;
+                filePath = user + "/static/css/" + fileName;
                 contentType = "text/css";
             } else if (requestPath.endsWith(".html")) {
-                filePath = "www/static/html/" + fileName;
+                filePath = user + "/static/html/" + fileName;
                 contentType = "text/html; charset=UTF-8";
-            } else if (requestPath.endsWith(".gif") || requestPath.endsWith(".jpg")){
-                filePath = "www/static/img/" + fileName;
-            }
-            // System.out.println("File path: " + filePath);
-            // Check if the file exist before reading
+            } else if (
+                requestPath.endsWith(".gif") || 
+                requestPath.endsWith(".jpg") ||
+                requestPath.endsWith(".png") ||
+                requestPath.endsWith(".webp")
+                ){
+                filePath = user + "/static/img/" + fileName;
+            } 
             if(!Files.exists(Paths.get(filePath))) {
                 System.out.println("File not found: " + filePath); // Debug print
                 exchange.sendResponseHeaders(404, -1);
@@ -823,7 +837,7 @@ public class Main {
                     fileName.endsWith(".jpg") ||
                     fileName.endsWith(".gif") ||
                     fileName.endsWith(".png") ||
-                    fileName.endsWith(".HEIC")
+                    fileName.endsWith(".webp")
                 ) {
                     fileType = "img";
                 } else {
