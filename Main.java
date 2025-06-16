@@ -54,6 +54,7 @@ public class Main {
             String targetFile = "index.html";
             // Initial path
             String userPath;
+            String rootPath = "/home/lukas/users/";
 
             if (host.equalsIgnoreCase("norlund-johan-lukas.com")) {
                 userPath = "www";
@@ -62,14 +63,26 @@ public class Main {
             } else if(host.equalsIgnoreCase("dev.norlund-johan-lukas.com")){
                 userPath = "/home/lukas/UnityBuilds/NuggetsBuild/index.html";
             } else if(host.equalsIgnoreCase("newdomain1.norlund-johan-lukas.com")){
-                userPath = "users/new_user1";
+                userPath = rootPath + "new_user1";
             } else { 
                 targetFile = "notfound.html";
                 userPath = "www";
             }
 
+            byte[] response = null;
+
             if (requestPath.endsWith(".html")) {
                 targetFile = requestSplit[requestSplit.length - 1];
+            } else if (requestPath.endsWith(".php")){
+                System.out.println("Starting php:" + userPath + "/static/php/" + requestSplit[requestSplit.length - 1]);
+                // Process the file with PHP if it is a PHP file
+                Process p = Runtime.getRuntime().exec("php " + userPath + "/static/php/" + requestSplit[requestSplit.length - 1]);
+                // Get the output from the proccess
+                BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                String output = in.lines().collect(Collectors.joining("\n"));
+                in.close();
+                // Create the response
+                response = output.getBytes(StandardCharsets.UTF_8);
             }
 
             if (host.equalsIgnoreCase("dev.norlund-johan-lukas.com")){
@@ -79,7 +92,14 @@ public class Main {
             }
 
             System.out.println("Target file path: " + htmlFilePath);
-            byte[] response = Files.readAllBytes(Paths.get(htmlFilePath));
+            if (!requestPath.endsWith(".php")){
+                Path path = Paths.get(htmlFilePath);
+                if (!Files.exists(path) || !Files.isRegularFile(path)){
+                    response = Files.readAllBytes(Paths.get("www/static/html/notfound.html"));
+                } else {
+                    response = Files.readAllBytes(Paths.get(htmlFilePath));
+                }
+            }
             // Set the Content-Type header for HTML
             exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
             // Create the response
