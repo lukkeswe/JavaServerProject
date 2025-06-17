@@ -55,7 +55,7 @@ public class Main {
             // Initial path
             String userPath;
             String rootPath = "/home/lukas/users/";
-
+            // The registered hosts
             if (host.equalsIgnoreCase("norlund-johan-lukas.com")) {
                 userPath = "www";
             } else if (host.equalsIgnoreCase("www.norlund-johan-lukas.com")) {
@@ -68,68 +68,82 @@ public class Main {
                 targetFile = "notfound.html";
                 userPath = "www";
             }
-
+            // Initial response
             byte[] response = null;
-
+            // If the requested file is a html file
             if (requestPath.endsWith(".html")) {
                 targetFile = requestSplit[requestSplit.length - 1];
             } else if (requestPath.endsWith(".php")){
-                System.out.println("Starting php:" + userPath + "/static/php/" + requestSplit[requestSplit.length - 1]);
-                // Process the file with PHP if it is a PHP file
-                Process p = Runtime.getRuntime().exec("php-cgi " + userPath + "/static/php/" + requestSplit[requestSplit.length - 1]);
-                // Get the output from the proccess
-                BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                
-                //String output = in.lines().collect(Collectors.joining("\n"));
-                //in.close();
-                // Create the response
-                //response = output.getBytes(StandardCharsets.UTF_8);
+                // If the requested file is a php file
+                // Check if the file exist
+                Path phpPath = Paths.get(userPath + "/static/php/" + requestSplit[requestSplit.length - 1]);
+                if (!Files.exists(phpPath) || !Files.isRegularFile(phpPath)) {
+                    response = Files.readAllBytes(Paths.get("www/static/html/notfound.html"));
+                } else {
+                    // Process the file with PHP if it is a PHP file
+                    Process p = Runtime.getRuntime().exec("php-cgi " + userPath + "/static/php/" + requestSplit[requestSplit.length - 1]);
+                    // Get the output from the proccess
+                    BufferedReader output = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                    // Collect the headers from the php output
+                    Map<String, String> phpHeaders = new LinkedHashMap<>();
+                    // Build the HTML body
+                    StringBuilder bodyBuilder = new StringBuilder();
 
-                Map<String, String> phpHeaders = new LinkedHashMap<>();
-                StringBuilder bodyBuilder = new StringBuilder();
-
-                boolean inHeaders = true;
-                String line;
-                while ((line = in.readLine()) != null){
-                    if (inHeaders) {
-                        if (line.trim().isEmpty()){
-                            inHeaders = false;
+                    boolean inHeaders = true;
+                    String line;
+                    // Read every line in the output
+                    while ((line = output.readLine()) != null){
+                        // Collect the headers
+                        if (inHeaders) {
+                            // Look for the end of the headers
+                            if (line.trim().isEmpty()){
+                                inHeaders = false;
+                            } else {
+                                // Find the index of the colon dividing key and value of the headers
+                                int colonIndex = line.indexOf(":");
+                                // If there is a colon
+                                if (colonIndex > 0) {
+                                    // Extract the key (name)
+                                    String name = line.substring(0, colonIndex).trim();
+                                    // Extract the value
+                                    String value = line.substring(colonIndex + 1).trim();
+                                    // Append the key and value to the map
+                                    phpHeaders.put(name, value);
+                                }
+                            }
                         } else {
-                            int colonIndex = line.indexOf(":");
-                            if (colonIndex > 0) {
-                                String name = line.substring(0, colonIndex).trim();
-                                String value = line.substring(colonIndex + 1).trim();
-                                phpHeaders.put(name, value);
-                             }
+                            // After the end of the headers append all of the lines of the body
+                            bodyBuilder.append(line).append("\n");
                         }
+                    }
+                    output.close();
+                    // Check for redirecting headers
+                    if (phpHeaders.containsKey("Location")){
+                        exchange.getResponseHeaders().add("Location", phpHeaders.get("Location"));
+                        exchange.sendResponseHeaders(302, -1); // -1 = no body
+                        return; // Break the process after the headers are being sent
                     } else {
-                        bodyBuilder.append(line).append("\n");
+                        // If there is no redirecting header then collect the body into the response
+                        response = bodyBuilder.toString().getBytes(StandardCharsets.UTF_8);
                     }
                 }
-                in.close();
-
-                // Check for redirect
-                if (phpHeaders.containsKey("Location")){
-                    exchange.getResponseHeaders().add("Location", phpHeaders.get("Location"));
-                    exchange.sendResponseHeaders(302, -1);
-                    return;
-                } else {
-                    response = bodyBuilder.toString().getBytes(StandardCharsets.UTF_8);
-                }
             }
-
+            // If the host is the development url
             if (host.equalsIgnoreCase("dev.norlund-johan-lukas.com")){
                 htmlFilePath = userPath;
             } else {
+                // Every other case other than the develpment url
                 htmlFilePath = userPath + "/static/html/" + targetFile;
             }
-
-            System.out.println("Target file path: " + htmlFilePath);
+            // If the requested file isn't a PHP file
             if (!requestPath.endsWith(".php")){
                 Path path = Paths.get(htmlFilePath);
+                // Check if the  file exists
                 if (!Files.exists(path) || !Files.isRegularFile(path)){
+                    // Fallback if the file does not exist (404: not found :( )
                     response = Files.readAllBytes(Paths.get("www/static/html/notfound.html"));
                 } else {
+                    // If the file exist, load it into the response
                     response = Files.readAllBytes(Paths.get(htmlFilePath));
                 }
             }
