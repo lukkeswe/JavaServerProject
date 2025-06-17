@@ -1,3 +1,7 @@
+<?php
+header("Location:server.php");
+exit();
+?>
 <!DOCTYPE html>
 <html lang="ja">
   <head>

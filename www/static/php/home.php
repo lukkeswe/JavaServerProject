@@ -1,3 +1,7 @@
+<?php
+header("Location:server.php");
+exit();
+?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -9,11 +13,12 @@
     <script src="static/js/usermanager.js"></script>
     <script src="static/js/security.js"></script>
     <title>Home</title>
+    
 </head>
 <body>
-    <div id="container"></div>
+    <div id="container"><?php echo "hello"; ?></div>
     <script type="text/javascript">
-        bouncer();
+        //bouncer();
         if (sessionStorage.getItem("username")){
             const usr = new UserManager(
             sessionStorage.getItem("username"),

@@ -76,13 +76,46 @@ public class Main {
             } else if (requestPath.endsWith(".php")){
                 System.out.println("Starting php:" + userPath + "/static/php/" + requestSplit[requestSplit.length - 1]);
                 // Process the file with PHP if it is a PHP file
-                Process p = Runtime.getRuntime().exec("php " + userPath + "/static/php/" + requestSplit[requestSplit.length - 1]);
+                Process p = Runtime.getRuntime().exec("php-cgi " + userPath + "/static/php/" + requestSplit[requestSplit.length - 1]);
                 // Get the output from the proccess
                 BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                String output = in.lines().collect(Collectors.joining("\n"));
-                in.close();
+                
+                //String output = in.lines().collect(Collectors.joining("\n"));
+                //in.close();
                 // Create the response
-                response = output.getBytes(StandardCharsets.UTF_8);
+                //response = output.getBytes(StandardCharsets.UTF_8);
+
+                Map<String, String> phpHeaders = new LinkedHashMap<>();
+                StringBuilder bodyBuilder = new StringBuilder();
+
+                boolean inHeaders = true;
+                String line;
+                while ((line = in.readLine()) != null){
+                    if (inHeaders) {
+                        if (line.trim().isEmpty()){
+                            inHeaders = false;
+                        } else {
+                            int colonIndex = line.indexOf(":");
+                            if (colonIndex > 0) {
+                                String name = line.substring(0, colonIndex).trim();
+                                String value = line.substring(colonIndex + 1).trim();
+                                phpHeaders.put(name, value);
+                             }
+                        }
+                    } else {
+                        bodyBuilder.append(line).append("\n");
+                    }
+                }
+                in.close();
+
+                // Check for redirect
+                if (phpHeaders.containsKey("Location")){
+                    exchange.getResponseHeaders().add("Location", phpHeaders.get("Location"));
+                    exchange.sendResponseHeaders(302, -1);
+                    return;
+                } else {
+                    response = bodyBuilder.toString().getBytes(StandardCharsets.UTF_8);
+                }
             }
 
             if (host.equalsIgnoreCase("dev.norlund-johan-lukas.com")){
