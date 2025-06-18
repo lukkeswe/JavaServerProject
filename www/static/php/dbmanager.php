@@ -13,7 +13,8 @@ class DBmanager {
     } 
     public function login(){
         try {
-            $conn = new PDO("mysql:host=localhost;dbname=webserver", "lukas", "Tvt!77@ren");
+            $config = require(__DIR__ . "/db.php");
+            $conn = new PDO("mysql:host=localhost;dbname=webserver", $config["user"], $config["password"]);
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $sql = "SELECT * FROM users WHERE email = :email";
             $stmt = $conn->prepare($sql);
