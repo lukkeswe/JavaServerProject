@@ -1,11 +1,11 @@
 <?php
 require_once(__DIR__ . "/dbmanager.php");
 $msg = "no message";
-if (!isset($_COOKIE["username"]) && !isset($_COOKIE["password"])){
+if (!isset($_COOKIE["email"]) && !isset($_COOKIE["password"])){
     header("Location:test2.php");
     exit();
 } else {
-    $db = new DBmanager($_COOKIE["username"], $_COOKIE["password"]);
+    $db = new DBmanager($_COOKIE["email"], $_COOKIE["password"]);
     if (!$db->login()) {
         header("Location:test2.php");
         exit();
@@ -20,6 +20,6 @@ if (!isset($_COOKIE["username"]) && !isset($_COOKIE["password"])){
     <title>test</title>
 </head>
 <body>
-<p>Welcome <?= htmlspecialchars($_COOKIE['username']) ?>!</p>
+<p>Welcome <?= htmlspecialchars($_COOKIE['email']) ?>!</p>
 </body>
 </html>

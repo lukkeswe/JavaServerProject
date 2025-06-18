@@ -5,19 +5,19 @@
     <title>Login</title>
 </head>
 <body>
-    <label>Username: </label>
-    <input type="text" id="username"><br>
+    <label>Email: </label>
+    <input type="text" id="email"><br>
     <label>Password: </label>
     <input type="password" id="password"><br>
     <button id="login">Login</button>
 
     <script>
         document.getElementById("login").addEventListener("click", () => {
-            const u = document.getElementById("username").value;
+            const u = document.getElementById("email").value;
             const p = document.getElementById("password").value;
 
             // Set cookies with expiration in 1 day
-            document.cookie = `username=${u}; path=/; max-age=86400`;
+            document.cookie = `email=${u}; path=/; max-age=86400`;
             document.cookie = `password=${p}; path=/; max-age=86400`;
 
             // Ensure cookie is flushed to browser before redirect
