@@ -80,8 +80,16 @@ public class Main {
                 if (!Files.exists(phpPath) || !Files.isRegularFile(phpPath)) {
                     response = Files.readAllBytes(Paths.get("www/static/html/notfound.html"));
                 } else {
+                    String phpFilePath = userPath + "/static/php/" + requestSplit[requestSplit.length - 1];
                     // Process the file with PHP if it is a PHP file
-                    Process p = Runtime.getRuntime().exec("php-cgi " + userPath + "/static/php/" + requestSplit[requestSplit.length - 1]);
+                    ProcessBuilder pb = new ProcessBuilder("php-cgi", phpFilePath);
+                    //Copy headers from the request
+                    Map<String, String> env = pb.environment();
+                    String cookieHeader = exchange.getRequestHeaders().getFirst("Cookie");
+                    if (cookieHeader != null){
+                        env.put("HTTP_COOKIE", cookieHeader);
+                    }
+                    Process p = pb.start();
                     // Get the output from the proccess
                     BufferedReader output = new BufferedReader(new InputStreamReader(p.getInputStream()));
                     // Collect the headers from the php output

@@ -1,6 +1,18 @@
 <?php
 header("Location:server.php");
 exit();
+
+$host       = "localhost";
+$db         = "webserver";
+$user       = "lukas";
+$password   = "Tvt!77@ren";
+
+try {
+    $conn = new PDO("mysql:host=$host;dbname=$db", $user, $password);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e){
+    echo $e->getMessage();
+}
 ?>
 <!DOCTYPE html>
 <html lang="ja">
