@@ -175,6 +175,11 @@ public class Main {
             System.out.println("Static host: " + host);
             // Get the requested path
             String requestPath = exchange.getRequestURI().getPath();
+            // Block access to .php files
+            if (requestPath.endsWith(".php")) {
+                System.out.println("Blocked access to: " + requestPath);
+                exchange.sendResponseHeaders(403, -1);
+            }
             String[] requestPathSplits = requestPath.split("/");
             String fileName = requestPathSplits[requestPathSplits.length - 1];
             String contentType = "application/octet-stream";
