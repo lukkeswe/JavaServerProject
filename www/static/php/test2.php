@@ -23,7 +23,7 @@
             // Ensure cookie is flushed to browser before redirect
             setTimeout(() => {
                 location.href = "test.php";
-            }, 500); // 500ms to be safe
+            }, 100); // 100ms
         });
     </script>
 </body>

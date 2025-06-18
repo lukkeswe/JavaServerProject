@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="static/css/reset.css">
     <link rel="stylesheet" href="static/css/style.css">
-    <script src="static/js/usermanager.js"></script>
-    <script src="static/js/security.js"></script>
     <title>index</title>
 </head>
 <body>
@@ -23,12 +21,12 @@
     </div>
     
 <script type="text/javascript">
-    logout();
-    document.getElementById("loginBtn").addEventListener("click", ()=>{
+    document.getElementById("loginBtn").addEventListener("click", () => {
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
-        const usr = new UserManager(email, password);
-        usr.login();
+        document.cookie = `email=${email}; path=/; max-age=86400`;
+        document.cookie = `password=${password}; path=/; max-age=86400`;
+        setTimeout(() => {window.location.href = "home.php";}, 100);
     });
 </script>
 </body>

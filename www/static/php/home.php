@@ -1,17 +1,14 @@
 <?php
-header("Location:server.php");
-exit();
-
-$host       = "localhost";
-$db         = "webserver";
-$user       = "lukas";
-$password   = "Tvt!77@ren";
-
-try {
-    $conn = new PDO("mysql:host=$host;dbname=$db", $user, $password);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e){
-    echo $e->getMessage();
+require_once(__DIR__ . "/dbmanager.php");
+if (!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
+    header("Location:server.php");
+    exit();
+} else {
+    $db = new DBmanager($_COOKIE["email"], $_COOKIE["password"]);
+    if(!$db->login()){
+        header("Location:server.php");
+        exit();
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -22,24 +19,24 @@ try {
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/style.css">
     <script src="static/js/docmanager.js"></script>
-    <script src="static/js/usermanager.js"></script>
-    <script src="static/js/security.js"></script>
     <title>Home</title>
-    
+    <script type="text/javascript">
+        sessionStorage.setItem("username", "<?php echo $db->username;?>");
+        sessionStorage.setItem("domain", "<?php echo $db->domain;?>");
+        sessionStorage.setItem("phone", <?php echo $db->phone;?>);
+    </script>
 </head>
 <body>
-    <div id="container"><?php echo "hello"; ?></div>
+    <div id="container"></div>
     <script type="text/javascript">
-        //bouncer();
         if (sessionStorage.getItem("username")){
-            const usr = new UserManager(
-            sessionStorage.getItem("username"),
-            sessionStorage.getItem("password")
-            );
             const dm = new DocumentManager();
             dm.flexContainer();
             dm.burgerMenu();
             dm.showUserDash();
+        } else {
+            console.log("No username!");
+            
         }
     </script>
 </body>

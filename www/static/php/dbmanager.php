@@ -2,6 +2,9 @@
 class DBmanager {
     public string $email;
     public string $password;
+    public string $username;
+    public string $domain;
+    public string $phone;
 
     function __construct(string $email, string $password)
     {
@@ -16,11 +19,13 @@ class DBmanager {
             $stmt = $conn->prepare($sql);
             $stmt->bindValue(":email", $this->email, PDO::PARAM_STR);
             $stmt->execute();
-            $result = $stmt->fetchAll();
-            foreach($result as $row){
-                if ($row["password"] == $this->password) {
-                    return true;
-                }
+            
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($row["password"] == $this->password) {
+                $this->username = $row["name"];
+                $this->domain = $row["domain"];
+                $this->phone = $row["phone"];
+                return true;
             }
             return false;
         } catch (PDOException $e) {
