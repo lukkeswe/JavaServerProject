@@ -64,10 +64,13 @@ public class Main {
                 userPath = "/home/lukas/UnityBuilds/NuggetsBuild/index.html";
             } else if(host.equalsIgnoreCase("newdomain1.norlund-johan-lukas.com")){
                 userPath = rootPath + "new_user1";
+            } else if(host.equalsIgnoreCase("ludwig.norlund-johan-lukas.com")){
+                userPath = "/home/lukas/UnityBuilds/BSCMM/index.html";
             } else { 
                 targetFile = "notfound.html";
                 userPath = "www";
             }
+            System.out.println("User path: " + userPath);
             // Initial response
             byte[] response = null;
             // If the requested file is a html file
@@ -137,8 +140,12 @@ public class Main {
                 }
             }
             // If the host is the development url
-            if (host.equalsIgnoreCase("dev.norlund-johan-lukas.com")){
+            if (
+                host.equalsIgnoreCase("dev.norlund-johan-lukas.com") || 
+                host.equalsIgnoreCase("ludwig.norlund-johan-lukas.com")
+                ){
                 htmlFilePath = userPath;
+                System.out.println("File path: " + htmlFilePath);
             } else {
                 // Every other case other than the develpment url
                 htmlFilePath = userPath + "/static/html/" + targetFile;
@@ -491,8 +498,14 @@ public class Main {
     static class GameAssetsHandler implements HttpHandler{
         @Override
         public void handle(HttpExchange exchange) throws IOException{
+            Headers headers = exchange.getRequestHeaders();
+            String host = headers.getFirst("Host");
+            String build = "";
+            if (host.equalsIgnoreCase("dev.norlund-johan-lukas.com")){ build = "NuggetsBuild";}
+            else if (host.equalsIgnoreCase("ludwig.norlund-johan-lukas.com")){ build = "BSCMM";}
             String requestPath = exchange.getRequestURI().getPath();
-            String filePath = requestPath.replace("game", "/home/lukas/UnityBuilds/NuggetsBuild");
+            String filePath = requestPath.replace("game", "/home/lukas/UnityBuilds/" + build);
+            System.out.println("Serving: " + filePath);
             String contentType = "application/octet-stream";
             if (requestPath.endsWith(".js")) {
                 contentType = "application/javascript";
@@ -501,6 +514,13 @@ public class Main {
             }
             // Read the file
             byte[] response = Files.readAllBytes(Paths.get(filePath));
+            //
+            if (filePath.endsWith(".br")){
+                exchange.getResponseHeaders().set("Content-Encoding", "br");
+                if (filePath.endsWith(".js.br")) contentType = "application/javascript";
+                else if (filePath.endsWith(".wasm.br")) contentType = "application/wasm";
+                else if (filePath.endsWith(".data.br")) contentType = "application/octet-stream";
+            }
             // Set the encoding if it is a "unityweb" file and decide the content-type
             if (requestPath.endsWith(".unityweb")){
                 exchange.getResponseHeaders().set("Content-Encoding", "gzip");
