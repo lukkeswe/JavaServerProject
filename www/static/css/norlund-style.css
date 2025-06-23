@@ -155,3 +155,12 @@ td {
 #seisaku a:hover {
     background-color: rgb(92, 178, 225);
 }
+
+.portfolioLink {
+    text-decoration: underline;
+    color: skyblue;
+}
+
+.portfolioLink:hover {
+    color: blue;
+} 
