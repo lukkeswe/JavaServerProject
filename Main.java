@@ -963,7 +963,7 @@ public class Main {
     }
     private static void saveFile(String fileName, byte[] data, String fileType, String user) throws IOException {
         // Path uploadDir = Paths.get("uploads");
-        Path uploadDir = Paths.get("users", user, "static", fileType);
+        Path uploadDir = Paths.get("/home/lukas/users", user, "static", fileType);
         
         if (!Files.exists(uploadDir)) {
             Files.createDirectories(uploadDir);
