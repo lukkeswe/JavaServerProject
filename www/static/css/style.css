@@ -1,3 +1,14 @@
+header {
+    border: 1px solid black;
+}
+
+header h1 {
+    color: black;
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+    padding: 32px;
+}
 .welcome {
     text-align: center;
     font-size: 42px;
@@ -48,24 +59,33 @@
     border: solid black 1px;
 }
 
-#container thead {
+main table {
+    background-color: white;
+    width: fit-content;
+    margin: 10px;
+}
+
+main thead {
     border-right: solid black 1px;
     border-top: solid black 1px;
 }
 
-#container td {
+main td {
     border-right: solid black 1px;
     border-bottom: solid black 1px;
     padding: 5px;
 }
 
-#container tr {
+main tr {
     border-left: solid black 1px;
+}
+
+#burgerContainer {
+    border: 1px solid black;
 }
 
 #burger {
     width: 150px;
-    border: solid black 1px;
 }
 
 #burgerBtn {
@@ -83,11 +103,33 @@
     font-size: 18px;
 }
 
+main {
+    flex: 4;
+    background-color: lightgrey;
+    height: 700px;
+}
+
 #dashBoard {
     display: block;
     border-top: solid black 1px;
-    margin-top: 50px;
     margin-left: 10px;
+    margin-top: 10px;
+}
+
+#editContainer {
+    background-color: white;
+    border: 1px solid black;
+    margin: 10px;
+    padding: 5px;
+    width: fit-content;
+}
+
+#editContainer input {
+    border: 1px solid black;
+}
+
+#columnContainer {
+    border-top: 1px solid black;
 }
 
 .active {
@@ -96,4 +138,15 @@
 
 .inactive {
     display: none;
+}
+
+footer {
+    border: 1px solid black;
+}
+
+footer p {
+    color: black;
+    font-size: 14px;
+    text-align: center;
+    padding: 20px;
 }

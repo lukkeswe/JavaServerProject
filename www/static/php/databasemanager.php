@@ -23,19 +23,17 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
     <title>Admin</title>
   </head>
   <body>
-    <div id="container">
-      <h1>データベース管理</h1>
-      <div id="dbManager">
-        <button id="showTables">接続</button>
-        <input type="text" id="input" class="textInput">
-        <button id="run" class="btn">実行</button>
-      </div>
-    </div>
+    <header><h1>データベース管理</h1></header>
+    <div id="container"></div>
+    <footer><p>&copy;Norlund J. Lukas</p></footer>
     <script type="text/javascript">
       (async()=>{
         const db = new DBmanager();
         const dm = new DocumentManager();
+        dm.flexContainer();
         dm.dataBurgerMenu();
+        dm.mainContainer();
+        dm.main = document.getElementById("main-content");
         db.username = sessionStorage.getItem("username");
         db.password = sessionStorage.getItem("password");
         db.database = sessionStorage.getItem("username") + "_db";

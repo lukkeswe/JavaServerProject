@@ -28,12 +28,16 @@ if (!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
     </script>
 </head>
 <body>
+    <header><h1>サーバーチーム</h1></header>
     <div id="container"></div>
+    <footer><p>&copy;Norlund J. Lukas</p></footer>
     <script type="text/javascript">
         if (sessionStorage.getItem("username")){
             const dm = new DocumentManager();
             dm.flexContainer();
             dm.burgerMenu();
+            dm.mainContainer();
+            dm.main = document.getElementById("main-content");
             dm.showUserDash();
         } else {
             console.log("No username!");

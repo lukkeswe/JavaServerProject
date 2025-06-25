@@ -1,11 +1,17 @@
 class DocumentManager {
     constructor() {
         this.container  = document.getElementById("container");
+        this.main       = document.getElementById("main-content");
         this.table      = document.getElementById("table");
         this.db;
     }
     flexContainer(){
         this.container.style.display = "flex";
+    }
+    mainContainer(){
+        const main = document.createElement("main");
+        main.id = "main-content";
+        this.container.append(main);
     }
     makeTable(data) {
         this.resetTable();
@@ -60,8 +66,8 @@ class DocumentManager {
                 this.table.append(tr);
             }
         }
-        // Append the table into the container
-        this.container.append(this.table);
+        // Append the table into the main container
+        this.main.append(this.table);
     }
     updateTable(table, targetId){
         console.log("Entered updateTable");
@@ -108,7 +114,7 @@ class DocumentManager {
             tr.append(td);
             this.table.append(tr);
         }
-        this.container.append(this.table);
+        this.main.append(this.table);
     }
     resetTable(){
         this.table = document.getElementById("table");
@@ -137,7 +143,7 @@ class DocumentManager {
         // Append elements
         row.append(domain);
         dashBoard.append(row);
-        this.container.append(dashBoard);
+        this.main.append(dashBoard);
 
     }
     showUserInfo(){
@@ -175,7 +181,7 @@ class DocumentManager {
         dashBoard.append(row1);
         dashBoard.append(row2);
         dashBoard.append(row3);
-        this.container.append(dashBoard);
+        this.main.append(dashBoard);
     }
     showDomainInfo(){
         // Create elements
@@ -200,7 +206,7 @@ class DocumentManager {
         row1.append(domain);
         dashBoard.append(backBtn);
         dashBoard.append(row1);
-        this.container.append(dashBoard);
+        this.main.append(dashBoard);
     }
     burgerMenu(){
         // Create the elements
@@ -398,8 +404,8 @@ class DocumentManager {
         this.container.append(burgerContainer);
     }
     showNewTableOptions(){
-        // Empty the table
-        this.resetTable();
+        // Remove the table
+        this.table.remove();
         // Create the emlements
         const editContainer     = document.createElement("div");
         const tabelNameLabel    = document.createElement("label");
@@ -499,6 +505,6 @@ class DocumentManager {
         editContainer.append(columnAdder);
         editContainer.append(columnContainer);
         editContainer.append(createBtn);
-        this.container.append(editContainer);
+        this.main.append(editContainer);
     }
 }
