@@ -249,10 +249,10 @@ class DocumentManager {
             this.showDomainInfo();
         });
         database.addEventListener("click", () => {
-            window.location.href = "databasemanager.html";
+            window.location.href = "databasemanager.php";
         });
         file.addEventListener("click", () => {
-            window.location.href = "filemanager.html";
+            window.location.href = "filemanager.php";
         });
         // Append elements
         burger.append(user);

@@ -1,6 +1,15 @@
 <?php
-header("Location:server.php");
-exit();
+require_once(__DIR__ . "/dbmanager.php");
+if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
+    header("Location:server.php");
+    exit();
+} else {
+    $db = new DBmanager($_COOKIE["email"], $_COOKIE["password"]);
+    if (!$db->login()){
+        header("Location:server.php");
+        exit();
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="ja">

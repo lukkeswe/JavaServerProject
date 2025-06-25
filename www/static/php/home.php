@@ -24,6 +24,7 @@ if (!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
         sessionStorage.setItem("username", "<?php echo $db->username;?>");
         sessionStorage.setItem("domain", "<?php echo $db->domain;?>");
         sessionStorage.setItem("phone", <?php echo $db->phone;?>);
+        sessionStorage.setItem("password", "<?php echo $db->password;?>");
     </script>
 </head>
 <body>
