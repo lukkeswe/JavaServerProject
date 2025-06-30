@@ -53,22 +53,10 @@ public class Main {
             // If no html file is specified target the index file
             String targetFile = "index.html";
             // Initial path
-            String userPath;
-            String rootPath = "/home/lukas/users/";
-            // The registered hosts
-            if (host.equalsIgnoreCase("norlund-johan-lukas.com")) {
+            String userPath = DomainsConfig.domainMap.getOrDefault(host, null);
+            if (userPath == null) {
                 userPath = "www";
-            } else if (host.equalsIgnoreCase("www.norlund-johan-lukas.com")) {
-                userPath = "www";
-            } else if(host.equalsIgnoreCase("dev.norlund-johan-lukas.com")){
-                userPath = "/home/lukas/UnityBuilds/NuggetsBuild/index.html";
-            } else if(host.equalsIgnoreCase("newdomain1.norlund-johan-lukas.com")){
-                userPath = rootPath + "new_user1";
-            } else if(host.equalsIgnoreCase("ludwig.norlund-johan-lukas.com")){
-                userPath = "/home/lukas/UnityBuilds/BSCMM/index.html";
-            } else { 
-                targetFile = "notfound.html";
-                userPath = "www";
+                targetFile = "norfound.html";
             }
             System.out.println("User path: " + userPath);
             // Initial response
