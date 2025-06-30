@@ -401,22 +401,29 @@ public class Main {
                 // Parse JSON into map
                 Map<String, String> map = parseJsonToMap(recievedString);
                 map.put("name", domainToName(map.get("domain")));
-                // Insert new user 
-                insertRow("webserver", "lukas", "Tvt!77@ren", "users", map);
-                // Create the user's database
-                createNewUser("lukas", "Tvt!77@ren", domainToName(map.get("domain")), map.get("password"));
-                // Create a new directory with folders for the user
-                String userPath = "/home/lukas/users/" + domainToName(map.get("domain"));
-                createPath(userPath);
-                createPath(userPath + "/static");
-                createPath(userPath + "/static/html");
-                createPath(userPath + "/static/css");
-                createPath(userPath + "/static/js");
-                createPath(userPath + "/static/img");
-                createPath(userPath + "/static/php");
-                System.out.println("New user: " + domainToName(map.get("domain")));
+                String response = "[{\"status\": \"fail\"}]";
+                boolean exists = existInTable("webserver", "users", "name", domainToName(map.get("domain")));
+                if (!exists){
+                    // Insert new user 
+                    insertRow("webserver", "lukas", "Tvt!77@ren", "users", map);
+                    // Create the user's database
+                    boolean newuser = createNewUser("lukas", "Tvt!77@ren", domainToName(map.get("domain")), map.get("password"));
+
+                    if (newuser){
+                        // Create a new directory with folders for the user
+                        String userPath = "/home/lukas/users/" + domainToName(map.get("domain"));
+                        createPath(userPath);
+                        createPath(userPath + "/static");
+                        createPath(userPath + "/static/html");
+                        createPath(userPath + "/static/css");
+                        createPath(userPath + "/static/js");
+                        createPath(userPath + "/static/img");
+                        createPath(userPath + "/static/php");
+                        System.out.println("New user: " + domainToName(map.get("domain")));
+                        response = "[{\"status\": \"ok\"}]";
+                    }
+                }
                 // Create exchange
-                String response = "[{\"status\": \"ok\"}]";
                 exchange.getResponseHeaders().add("Content-Type", "application/json");
                 exchange.sendResponseHeaders(200, response.length());
                 OutputStream os = exchange.getResponseBody();
@@ -818,7 +825,27 @@ public class Main {
             e.printStackTrace();
         }
     }
-    private static void createNewUser(String username, String password, String newuser, String newpassword){
+    private static boolean existInTable(String database, String table, String column, String value){
+        String url = "jdbc:mysql://localhost:3306/" + database;
+        String sql = "SELECT * FROM " + table + " WHERE " + column + " = ?";        
+        try (Connection conn = DriverManager.getConnection(url, "lukas", "Tvt!77@ren")){
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, value);
+            System.out.println("sql: " + pstmt.toString());
+            ResultSet result = pstmt.executeQuery();
+            int rows = 0;
+            while (result.next()) {
+                rows++;
+            }
+            if (rows > 0) {
+                return true;
+            } else return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    private static boolean createNewUser(String username, String password, String newuser, String newpassword){
         // Build the statements
         StringBuilder createUser = new StringBuilder();
         createUser.append("CREATE USER '").append(newuser).append("'@'localhost' IDENTIFIED BY '").append(newpassword).append("'");
@@ -837,9 +864,11 @@ public class Main {
                 stmt.executeUpdate(privilages.toString());
                 // Flush privileges
                 stmt.executeUpdate("FLUSH PRIVILEGES");
+                return true;
             }
         } catch (Exception e){
             e.printStackTrace();
+            return false;
         }
 
     }
