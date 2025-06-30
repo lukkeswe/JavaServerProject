@@ -107,19 +107,17 @@ main {
     flex: 4;
     background-color: lightgrey;
     height: 700px;
+    padding: 10px;
 }
 
 #dashBoard {
     display: block;
     border-top: solid black 1px;
-    margin-left: 10px;
-    margin-top: 10px;
 }
 
 #editContainer {
     background-color: white;
     border: 1px solid black;
-    margin: 10px;
     padding: 5px;
     width: fit-content;
 }
@@ -130,6 +128,13 @@ main {
 
 #columnContainer {
     border-top: 1px solid black;
+}
+
+#upload-container {
+    background-color: white;
+    width: fit-content;
+    padding: 10px;
+    border: solid black 1px;
 }
 
 .active {
