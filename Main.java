@@ -436,12 +436,16 @@ public class Main {
                 String response = "[{\"status\": \"fail\"}]";
                 boolean exists = existInTable("webserver", "users", "name", domainToName(map.get("domain")));
                 if (!exists){
+                    String invite = map.get("invite");
+                    map.remove("invite");
                     // Insert new user 
                     insertRow("webserver", "lukas", "Tvt!77@ren", "users", map);
                     // Create the user's database
                     boolean newuser = createNewUser("lukas", "Tvt!77@ren", domainToName(map.get("domain")), map.get("password"));
 
                     if (newuser){
+                        // Delete the invite so it can't be used again
+                        boolean deleted = deleteRow("webserver", "lukas", "Tvt!77@ren", "invites", "invite", invite);
                         // Create a new directory with folders for the user
                         String userPath = "/home/lukas/users/" + domainToName(map.get("domain"));
                         createPath(userPath);
@@ -805,18 +809,19 @@ public class Main {
         jsonBuilder.append("\n]"); // Close the JSON array
         return jsonBuilder.toString();
     }
-    private static void deleteRow(String database, String username, String password, String table, String column, String value){
+    private static boolean deleteRow(String database, String username, String password, String table, String column, String value){
         System.out.println("deleteData");
         String url = "jdbc:mysql://localhost:3306/" + database;
-        String query = "DELETE FROM " + table + " WHERE " + column + " = " + value; 
+        String query = "DELETE FROM " + table + " WHERE " + column + " = ?"; 
         System.out.println("Query: " + query);
         try(Connection conn = DriverManager.getConnection(url, username, password)){
-            try (Statement stmt = conn.createStatement()){
-                stmt.executeUpdate(query);
-                System.out.println("Executed: " + query);
-            }
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, value);
+            pstmt.execute();
+            return true;
         } catch (Exception e){
             e.printStackTrace();
+            return false;
         }
     }
     private static void insertRow(String database, String username, String password, String table, Map<String, String> sql){

@@ -308,11 +308,13 @@ class DocumentManager {
         // Add eventlistener
         submit.addEventListener("click", async () => {
             if(password.value == passCheck.value){
+                const invite = document.getElementById("invite");
                 let requestObject = {
                 "password"  : password.value,
                 "domain"    : domain.value,
                 "email"     : email.value,
-                "phone"     : phone.value
+                "phone"     : phone.value,
+                "invite"    : invite.value
                 };
                 try {
                     const response = await fetch('/newuser', {
@@ -342,14 +344,10 @@ class DocumentManager {
                             if (data[0]["status"] == "failed"){
                                 alert("Failed to log in :(");
                             } else if(data[0]["id"]){
-                                sessionStorage.setItem("userStatus", "ok");
-                                sessionStorage.setItem("username", data[0]["name"]);
-                                sessionStorage.setItem("password", data[0]["password"]);
-                                sessionStorage.setItem("domain", data[0]["domain"]);
-                                sessionStorage.setItem("email", data[0]["email"]);
-                                sessionStorage.setItem("phone", data[0]["phone"]);
-                                console.log(sessionStorage.getItem("email") + " logged in.");
-                                window.location.href = "/home.php";
+                                document.cookie = `email=${email.value}; path=/; max-age=86400`;
+                                document.cookie= `password=${password.value}; path=/; max-age=86400`;
+                                console.log(email.value + " logged in.");
+                                setTimeout(() => {window.location.href = "/home.php";}, 100);
                             }
                         } catch (error){
                             console.error("Error", error);

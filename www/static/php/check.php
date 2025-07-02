@@ -9,6 +9,7 @@ if (!isset($_GET["invite"])){
         header("Location:notfound.html");
         exit();
     }
+    $invite = $_GET["invite"];
 }
 ?>
 <!DOCTYPE html>
@@ -22,6 +23,7 @@ if (!isset($_GET["invite"])){
     <title>Sign up</title>
 </head>
 <body>
+    <?php echo "<input type='hidden' id='invite' value='{$invite}'>"; ?>
     <div id="container"></div>
     <script type="text/javascript">
         const dm = new DocumentManager();
