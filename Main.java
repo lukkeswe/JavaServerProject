@@ -60,7 +60,7 @@ public class Main {
             String userPath = DomainsConfig.domainMap.getOrDefault(host, null);
             if (userPath == null) {
                 userPath = "www";
-                targetFile = "norfound.html";
+                targetFile = "notfound.html";
             }
             System.out.println("User path: " + userPath);
             // Initial response
@@ -173,6 +173,8 @@ public class Main {
                 // Every other case other than the develpment url
                 htmlFilePath = userPath + "/static/html/" + targetFile;
             }
+            System.out.println("Host: " + host);
+            System.out.println("Serving file: " + htmlFilePath);
             // If the requested file isn't a PHP file
             if (!requestPath.endsWith(".php")){
                 Path path = Paths.get(htmlFilePath);
@@ -213,10 +215,7 @@ public class Main {
             String[] requestPathSplits = requestPath.split("/");
             String fileName = requestPathSplits[requestPathSplits.length - 1];
             String contentType = "application/octet-stream";
-            String user = "www";
-            if (host.equalsIgnoreCase("newdomain1.norlund-johan-lukas.com")) {
-                user = "users/new_user1";
-            }
+            String user = DomainsConfig.domainMap.getOrDefault(host, null);
             String filePath = "www" + requestPath;
             // Determine the MIME type and file path
             if (requestPath.endsWith(".js")) {
@@ -225,13 +224,11 @@ public class Main {
             } else if (requestPath.endsWith(".css")) {
                 filePath = user + "/static/css/" + fileName;
                 contentType = "text/css";
-            } else if (requestPath.endsWith(".html")) {
-                filePath = user + "/static/html/" + fileName;
-                contentType = "text/html; charset=UTF-8";
             } else if (
-                requestPath.endsWith(".gif") || 
-                requestPath.endsWith(".jpg") ||
-                requestPath.endsWith(".png") ||
+                requestPath.endsWith(".gif")    || 
+                requestPath.endsWith(".jpg")    ||
+                requestPath.endsWith(".jpeg")   ||
+                requestPath.endsWith(".png")    ||
                 requestPath.endsWith(".webp")
                 ){
                 filePath = user + "/static/img/" + fileName;
@@ -1029,9 +1026,10 @@ public class Main {
                 } else if(fileName.endsWith(".js")){
                     fileType = "js";
                 } else if (
-                    fileName.endsWith(".jpg") ||
-                    fileName.endsWith(".gif") ||
-                    fileName.endsWith(".png") ||
+                    fileName.endsWith(".jpg")   ||
+                    fileName.endsWith(".jpeg")  ||
+                    fileName.endsWith(".gif")   ||
+                    fileName.endsWith(".png")   ||
                     fileName.endsWith(".webp")
                 ) {
                     fileType = "img";

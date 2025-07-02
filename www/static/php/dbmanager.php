@@ -22,7 +22,7 @@ class DBmanager {
             $stmt->execute();
             
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($row["password"] == $this->password) {
+            if (password_verify($this->password, $row["password"])) {
                 $this->username = $row["name"];
                 $this->domain = $row["domain"];
                 $this->phone = $row["phone"];
