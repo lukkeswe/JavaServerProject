@@ -7,6 +7,9 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import javax.management.RuntimeErrorException;
+
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.Headers;
@@ -436,27 +439,38 @@ public class Main {
                 String response = "[{\"status\": \"fail\"}]";
                 boolean exists = existInTable("webserver", "users", "name", domainToName(map.get("domain")));
                 if (!exists){
-                    String invite = map.get("invite");
-                    map.remove("invite");
-                    // Insert new user 
-                    insertRow("webserver", "lukas", "Tvt!77@ren", "users", map);
-                    // Create the user's database
-                    boolean newuser = createNewUser("lukas", "Tvt!77@ren", domainToName(map.get("domain")), map.get("password"));
+                    String hash = "";
+                    boolean hashOk = false;
+                    try {
+                        hash = phpHashPass(map.get("password"));
+                        hashOk = true;
+                    } catch (RuntimeException e){
+                        System.err.println("Error hashing password: " + e.getMessage());
+                    }
+                    if (hashOk) {
+                        map.put("password", hash);
+                        String invite = map.get("invite");
+                        map.remove("invite");
+                        // Insert new user 
+                        insertRow("webserver", "lukas", "Tvt!77@ren", "users", map);
+                        // Create the user's database
+                        boolean newuser = createNewUser("lukas", "Tvt!77@ren", domainToName(map.get("domain")), map.get("password"));
 
-                    if (newuser){
-                        // Delete the invite so it can't be used again
-                        boolean deleted = deleteRow("webserver", "lukas", "Tvt!77@ren", "invites", "invite", invite);
-                        // Create a new directory with folders for the user
-                        String userPath = "/home/lukas/users/" + domainToName(map.get("domain"));
-                        createPath(userPath);
-                        createPath(userPath + "/static");
-                        createPath(userPath + "/static/html");
-                        createPath(userPath + "/static/css");
-                        createPath(userPath + "/static/js");
-                        createPath(userPath + "/static/img");
-                        createPath(userPath + "/static/php");
-                        System.out.println("New user: " + domainToName(map.get("domain")));
-                        response = "[{\"status\": \"ok\"}]";
+                        if (newuser){
+                            // Delete the invite so it can't be used again
+                            boolean deleted = deleteRow("webserver", "lukas", "Tvt!77@ren", "invites", "invite", invite);
+                            // Create a new directory with folders for the user
+                            String userPath = "/home/lukas/users/" + domainToName(map.get("domain"));
+                            createPath(userPath);
+                            createPath(userPath + "/static");
+                            createPath(userPath + "/static/html");
+                            createPath(userPath + "/static/css");
+                            createPath(userPath + "/static/js");
+                            createPath(userPath + "/static/img");
+                            createPath(userPath + "/static/php");
+                            System.out.println("New user: " + domainToName(map.get("domain")));
+                            response = "[{\"status\": \"ok\"}]";
+                        }   
                     }
                 }
                 // Create exchange
@@ -576,6 +590,29 @@ public class Main {
         }
     }
 
+    private static String phpHashPass(String password){
+        try {
+            String escapedPassword = password.replace("'", "\\'");
+            ProcessBuilder pb = new ProcessBuilder(
+                "php",
+                "-r",
+                "echo password_hash('" + escapedPassword + "', PASSWORD_DEFAULT);"
+            );
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String hashedPassword = reader.readLine();
+                if (hashedPassword != null){
+                    return hashedPassword;
+                } else {
+                    throw new RuntimeException("No output from PHP proces.");
+                }
+            }
+        } catch (IOException e){
+            throw new RuntimeException("Failed to hash password using PHP.", e);
+        }
+    }
     private static String createTable(Map<String, String> columns, String table, String database, String username, String password){
         String url = "jdbc:mysql://localhost:3306/" + database;
         System.out.println("Using: " + database);
