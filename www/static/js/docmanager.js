@@ -271,6 +271,7 @@ class DocumentManager {
     }
     userSignUp(){
         // Create elements
+        const form      = document.createElement("div");
         const password  = document.createElement("input");
         const passLabel = document.createElement("label");
         const passCheck = document.createElement("input");
@@ -283,11 +284,14 @@ class DocumentManager {
         const phoneLabel= document.createElement("label");
         const submit    = document.createElement("button");
         // Add ids
+        form.id         = "signUpForm";
         password.id     = "password";
         passCheck.id    = "passCheck";
         domain.id       = "domain";
         email.id        = "email";
         phone.id        = "phone";
+        // Set class name
+        submit.className = "btn";
         // Set the type for input elements
         password.type   = "password";
         passCheck.type  = "password";
@@ -295,12 +299,12 @@ class DocumentManager {
         email.type      = "text";
         phone.type      = "text";
         // Content text
-        passLabel.textContent   = "Password:";
-        checkLabel.textContent  = "Password again:";
-        domLabel.textContent    = "Domain:";
-        emailLabel.textContent  = "Email:";
-        phoneLabel.textContent  = "Phone number:";
-        submit.innerHTML = "Submit";
+        passLabel.textContent   = "パスワード：";
+        checkLabel.textContent  = "パスワード（確認用）：";
+        domLabel.textContent    = "ドメイン：";
+        emailLabel.textContent  = "メール：";
+        phoneLabel.textContent  = "電話番号：";
+        submit.innerHTML = "送信";
         // Add eventlistener
         submit.addEventListener("click", async () => {
             if(password.value == passCheck.value){
@@ -345,7 +349,7 @@ class DocumentManager {
                                 sessionStorage.setItem("email", data[0]["email"]);
                                 sessionStorage.setItem("phone", data[0]["phone"]);
                                 console.log(sessionStorage.getItem("email") + " logged in.");
-                                window.location.href = "/home.html";
+                                window.location.href = "/home.php";
                             }
                         } catch (error){
                             console.error("Error", error);
@@ -360,17 +364,18 @@ class DocumentManager {
             }
         });
         this.container.innerHTML = "";
-        this.container.append(emailLabel);
-        this.container.append(email);
-        this.container.append(passLabel);
-        this.container.append(password);
-        this.container.append(checkLabel);
-        this.container.append(passCheck);
-        this.container.append(domLabel);
-        this.container.append(domain);
-        this.container.append(phoneLabel);
-        this.container.append(phone);
-        this.container.append(submit);
+        form.append(emailLabel);
+        form.append(email);
+        form.append(passLabel);
+        form.append(password);
+        form.append(checkLabel);
+        form.append(passCheck);
+        form.append(domLabel);
+        form.append(domain);
+        form.append(phoneLabel);
+        form.append(phone);
+        form.append(submit);
+        this.container.append(form);
     }
     dataBurgerMenu(){
         // Create the elements

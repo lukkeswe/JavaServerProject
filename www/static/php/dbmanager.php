@@ -34,5 +34,26 @@ class DBmanager {
         }
         
     }
+
+    public function checkInvite($invite){
+        try {
+            $config = require(__DIR__ . "/db.php");
+            $conn = new PDO("mysql:host=localhost;dbname=webserver", $config["user"], $config["password"]);
+            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $sql = "SELECT * FROM invites WHERE invite = :invite";
+            $stmt = $conn->prepare($sql);
+            $stmt->bindValue(":invite", $invite, PDO::PARAM_STR);
+            $stmt->execute();
+
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($row["invite"] == $invite) {
+                return true;
+            }
+            return false;
+        } catch (PDOException $e){
+            echo $e->getMessage();
+            return false;
+        }
+    }
 }
 ?>

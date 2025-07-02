@@ -9,6 +9,7 @@ header h1 {
     text-align: center;
     padding: 32px;
 }
+/*  */
 .welcome {
     text-align: center;
     font-size: 42px;
@@ -136,6 +137,36 @@ main {
     padding: 10px;
     border: solid black 1px;
 }
+
+#signUpForm {
+    display: block;
+    width: fit-content;
+    padding: 20px;
+    background-color: ghostwhite;
+    border-radius: 5px;
+    border: solid black 1px;
+    margin: 0 auto;
+    margin-top: 50px;
+}
+
+#signUpForm label {
+    display: block;
+    margin-bottom: 3px;
+}
+
+#signUpForm input {
+    display: block;
+    background-color: white;
+    border: solid black 1px;
+    margin-bottom: 10px;
+}
+
+#signUpForm button {
+    margin: 0 auto;
+    margin-top: 20px;
+}
+
+/*  */
 
 .active {
     display: block;

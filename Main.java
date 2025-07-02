@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.security.KeyStore.Entry;
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 import com.sun.net.httpserver.HttpServer;
@@ -73,14 +74,45 @@ public class Main {
                 } else {
                     String phpFilePath = userPath + "/static/php/" + requestSplit[requestSplit.length - 1];
                     // Process the file with PHP if it is a PHP file
-                    ProcessBuilder pb = new ProcessBuilder("php-cgi", phpFilePath);
+                    ProcessBuilder pb = new ProcessBuilder("php-cgi");
                     //Copy headers from the request
                     Map<String, String> env = pb.environment();
+                    // Set common CGI variables
+                    env.put("SCRIPT_FILENAME", phpFilePath);
+                    env.put("REQUEST_METHOD", exchange.getRequestMethod());
+                    env.put("REDIRECT_STATUS", "200");
+                    // Handle GET
+                    if ("GET".equalsIgnoreCase(exchange.getRequestMethod())) {
+                        URI uri = exchange.getRequestURI();
+                        String query = uri.getRawQuery(); // Encoded query string
+                        if (query != null) {
+                            env.put("QUERY_STRING", query);
+                        }
+                    }
+                    //Handle POST
+                    byte[] postData = null;
+                    if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                        Headers reqHeaders = exchange.getRequestHeaders();
+                        String contentType = reqHeaders.getFirst("Content-Type");
+                        int contentLength = Integer.parseInt(reqHeaders.getFirst("Content-Length"));
+                        env.put("CONTENT_LENGTH", Integer.toString(contentLength));
+                        env.put("CONTENT_TYPE", contentType != null ? contentType : "application/x-www-form-urlencoded");
+                        postData = exchange.getRequestBody().readNBytes(contentLength);
+                    }
+                    // Get cookies
                     String cookieHeader = exchange.getRequestHeaders().getFirst("Cookie");
                     if (cookieHeader != null){
                         env.put("HTTP_COOKIE", cookieHeader);
                     }
+                    // Start the PHP process
                     Process p = pb.start();
+                    // Write POST data into php-cgi's stdin
+                    if (postData != null){
+                        try (OutputStream stdin = p.getOutputStream()){
+                            stdin.write(postData);
+                            stdin.flush();
+                        }
+                    }
                     // Get the output from the proccess
                     BufferedReader output = new BufferedReader(new InputStreamReader(p.getInputStream()));
                     // Collect the headers from the php output
