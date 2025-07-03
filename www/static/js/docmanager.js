@@ -510,4 +510,44 @@ class DocumentManager {
         editContainer.append(createBtn);
         this.main.append(editContainer);
     }
+    async getFiles(user){
+        console.log("Fetching files...");
+        
+        let requestObject = {"user" : user};
+        try {
+            const response = await fetch("/listAllFiles", {
+                method  : 'POST',
+                headers : {"Content-Type": "application/json"},
+                body    : JSON.stringify(requestObject)
+            });
+            if (!response.ok){
+                throw new Error(`Server responded with status ${response.status}`);
+            }
+            const data = await response.json();
+            console.log("Response from server:", data);
+            
+            const filesContainer    = document.getElementById("filesContainer");
+            const htmlUl            = document.createElement("ul");
+            const cssUl             = document.createElement("ul");
+            htmlUl.id               = "htmlList";
+            cssUl.id                = "cssList";
+            for (let file = 0; file < data[0]["html"].length; file++){
+                const htmlFile = document.createElement("li");
+                htmlFile.innerHTML = data[0]["html"][file];
+                htmlUl.append(htmlFile);
+            }
+
+            for (let file = 0; file < data[0]["css"].length; file++){
+                const cssFile = document.createElement("li");
+                cssFile.innerHTML = data[0]["css"][file];
+                cssUl.append(cssFile);
+            }
+
+            filesContainer.append(htmlUl);
+            filesContainer.append(cssUl);
+
+        } catch (error) {
+            console.error(error);
+        }
+    }
 }

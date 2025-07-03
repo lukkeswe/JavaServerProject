@@ -6,6 +6,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.nio.*;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.Headers;
@@ -30,6 +31,7 @@ public class Main {
         server.createContext("/questionForm", new QuestionForm());
         server.createContext("/createTable", new CreateNewTable());
         server.createContext("/game", new GameAssetsHandler());
+        server.createContext("/listAllFiles", new ListAllFiles());
         server.setExecutor(null);
         server.start();
         System.out.println("Server started on port " + port);
@@ -582,7 +584,85 @@ public class Main {
 
         }
     }
+    static class ListAllFiles implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException{
+            if ("POST".equals(exchange.getRequestMethod())) {
+                // Read request body
+                InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), "UTF-8");
+                BufferedReader reader = new BufferedReader(isr);
+                String recivedString = reader.lines().collect(Collectors.joining());
+                System.out.println("Recieved string: " + recivedString);
+                // Parse JSON into map
+                Map<String, String> map = parseJsonToMap(recivedString);
+                // Get lists of the files depending on the user
+                String userPath = "/home/lukas/users/" + map.get("user") + "/static/";
+                System.out.println("Listing files in: " + userPath);
 
+                StringBuilder json = new StringBuilder();
+                String response = "";
+
+                json.append("[{");
+                String[] htmlFiles;
+                boolean success = true;
+                try {
+                    htmlFiles = filesList(userPath + "html");
+                    json.append("\"html\": [");
+                    boolean first = true;
+                    for (String file : htmlFiles) {
+                        if (!first) {
+                            json.append(", ");
+                        }
+                        json.append("\"").append(file).append("\"");
+                        first = false;
+                    }
+                    json.append("], ");
+                } catch (RuntimeException e){response = "[{\"status\": \"fail\"}]"; success = false;}
+                String[] cssFiles;
+                try {
+                    cssFiles = filesList(userPath + "css");
+                    json.append("\"css\": [");
+                    boolean first = true;
+                    for (String file : cssFiles){
+                        if (!first){
+                            json.append(", ");
+                        }
+                        json.append("\"").append(file).append("\"");
+                        first = false;
+                    }
+                    json.append("], ");
+                } catch (RuntimeException e){response = "[{\"status\": \"fail\"}]"; success = false;}
+
+                if (success) {
+                    json.append("\"status\": \"ok\"").append("}]");
+                    response = json.toString();
+                }
+
+                // Create exchange
+                exchange.getResponseHeaders().add("Content-Type", "application/json");
+                exchange.sendResponseHeaders(200, response.length());
+                OutputStream os = exchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            } else {
+                exchange.sendResponseHeaders(405, -1);
+            }
+        }
+    }
+
+    private static String[] filesList(String path){
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(path))){
+            List<String> files = new ArrayList<>();
+            for (Path entry : stream){
+                if (!Files.isDirectory(entry)){
+                    files.add(entry.getFileName().toString());
+                }
+            }
+            return files.toArray(new String[0]);
+        } catch (IOException | DirectoryIteratorException e){
+            throw new RuntimeException();
+        }
+    }
     private static String phpHashPass(String password){
         try {
             String escapedPassword = password.replace("'", "\\'");

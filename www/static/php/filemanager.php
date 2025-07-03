@@ -20,7 +20,7 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
     <link rel="stylesheet" href="css/style.css">
     <title>File manager</title>
     <script src="static/upmanager.js"></script>
-    <script src="static/docmaanager.js"></script>
+    <script src="static/docmanager.js"></script>
 </head>
 <body>
     <header><h1>ファイル管理</h1></header>
@@ -31,13 +31,15 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
                 <br>
                 <button onclick="uploadFile()">Upload</button>
             </div>
+            <div id="filesContainer"></div>
         </main>
     </div>
     
     <footer><p>&copy;Norlund J. Lukas</p></footer>
-    <script type="text/javasccript">
+    <script type="text/javascript">
         const dm = new DocumentManager();
         dm.flexContainer();
+        dm.getFiles(sessionStorage.getItem("username"));
     </script>
 </body>
 </html>
