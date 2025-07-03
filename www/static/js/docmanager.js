@@ -527,45 +527,33 @@ class DocumentManager {
             console.log("Response from server:", data);
             
             const filesContainer    = document.getElementById("filesContainer");
-            const htmlUl            = document.createElement("ul");
-            const cssUl             = document.createElement("ul");
-            const imgUl             = document.createElement("ul");
-            htmlUl.id               = "htmlList";
-            cssUl.id                = "cssList";
-            imgUl.id                = "imgList";
-            let htmlList = [];
-            let cssList = [];
-            let imgList = [];
-            for (let file = 0; file < data[0]["html"].length; file++){
-                const htmlFile = document.createElement("li");
-                htmlFile.innerHTML = data[0]["html"][file];
-                htmlUl.append(htmlFile);
-                htmlList.push(data[0]["html"][file]);
+
+            const fileTypes = ["html", "css", "img"];
+            for (let type of fileTypes){
+                const ul    = document.createElement("ul");
+                ul.id       = type + "List";
+                let list = [];
+                for (let file = 0; file < data[0][type].length; file++){
+                    const fileObject  = document.createElement("li");
+                    
+                    const name      = document.createElement("span");
+                    name.className  = "fileName";
+                    name.innerHTML  = data[0][type][file];
+                    fileObject.append(name);
+
+                    const erase     = document.createElement("button");
+                    erase.innerHTML = "X";
+                    erase.className = "btn";
+                    erase.addEventListener("click", () => {
+
+                    });
+                    fileObject.append(erase);
+                    
+                    ul.append(fileObject);
+                    list.push(data[0][type][file]);
+                }
+                filesContainer.append(ul);
             }
-
-            for (let file = 0; file < data[0]["css"].length; file++){
-                const cssFile = document.createElement("li");
-                cssFile.innerHTML = data[0]["css"][file];
-                cssUl.append(cssFile);
-                cssList.push(data[0]["css"][file]);
-            }
-
-            for (let file = 0; file < data[0]["img"].length; file++){
-                const imgFile = document.createElement("li");
-                imgFile.innerHTML = data[0]["img"][file];
-                imgUl.append(imgFile);
-                imgList.push(data[0]["img"][file]);
-            }
-
-            filesContainer.innerHTML = "";
-
-            filesContainer.append(htmlUl);
-            filesContainer.append(cssUl);
-            filesContainer.append(imgUl);
-
-            sessionStorage.setItem("htmlList", htmlList);
-            sessionStorage.setItem("cssList", cssList);
-            sessionStorage.setItem("imgList", imgList);
 
         } catch (error) {
             console.error(error);

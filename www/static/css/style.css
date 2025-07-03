@@ -142,37 +142,42 @@ main {
 }
 
 #filesContainer li {
+    display: flex;
+    
     margin: 5px 0;
-    padding: 5px;
-    border-radius: 3px;
 }
 
 #filesContainer li:hover {
     cursor: pointer;
 }
 
-#htmlList li {
+#filesContainer li span {
+    padding: 5px;
+    border-radius: 3px;
+}
+
+#htmlList li span {
     background-color: red;
     color: white;
 }
 
-#htmlList li:hover {
+#htmlList li span:hover {
     background-color: darkred;
 }
 
-#cssList li {
+#cssList li span {
     background-color: yellow;
 }
 
-#cssList li:hover {
+#cssList li span:hover {
     background-color: rgb(208, 208, 0);
 }
 
-#imgList li {
+#imgList li span {
     background-color: skyblue;
 }
 
-#imgList li:hover {
+#imgList li span:hover {
     background-color: blue;
 }
 
