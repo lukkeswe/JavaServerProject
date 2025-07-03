@@ -106,6 +106,8 @@ main tr {
 
 main {
     flex: 4;
+    display: flex;
+    gap: 20px;
     background-color: lightgrey;
     height: 700px;
     padding: 10px;
@@ -134,8 +136,34 @@ main {
 #upload-container {
     background-color: white;
     width: fit-content;
+    height: 100px;
     padding: 10px;
     border: solid black 1px;
+}
+
+#htmlList li {
+    background-color: red;
+    color: white;
+    margin: 5px 0;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+#htmlList li:hover {
+    background-color: darkred;
+    cursor: pointer;
+}
+
+#cssList li {
+    background-color: yellow;
+    margin: 5px 0;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+#cssList li:hover {
+    background-color: rgb(208, 208, 0);
+    cursor: pointer;
 }
 
 #signUpForm {
