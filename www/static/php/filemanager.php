@@ -29,7 +29,7 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
             <div id="upload-container">
                 <input type="file" id="fileInput" style="border: solid black 1px;">
                 <br>
-                <button id="upload">Upload</button>
+                <button id="upload" class="btn">Upload</button>
             </div>
             <div id="filesContainer"></div>
         </main>
