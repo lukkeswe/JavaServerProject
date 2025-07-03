@@ -632,6 +632,20 @@ public class Main {
                     }
                     json.append("], ");
                 } catch (RuntimeException e){response = "[{\"status\": \"fail\"}]"; success = false;}
+                String[] imgFiles;
+                try {
+                    imgFiles = filesList(userPath + "img");
+                    json.append("\"img\": [");
+                    boolean first = true;
+                    for (String file : imgFiles){
+                        if (!first){
+                            json.append(", ");
+                        }
+                        json.append("\"").append(file).append("\"");
+                        first = false;
+                    }
+                    json.append("], ");
+                } catch (RuntimeException e){response = "[{\"status\": \"fail\"}]"; success = false;}
 
                 if (success) {
                     json.append("\"status\": \"ok\"").append("}]");

@@ -1,4 +1,4 @@
-function uploadFile() {
+async function uploadFile() {
     const files = document.getElementById('fileInput').files;
     const formData = new FormData();
     for (let file of files) {
@@ -10,7 +10,7 @@ function uploadFile() {
 
     console.log("Uploading file...");
     
-    fetch('/upload', {
+    await fetch('/upload', {
         method  : 'POST',
         body    : formData
     }).then(res => res.text())

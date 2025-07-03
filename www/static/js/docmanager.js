@@ -529,8 +529,10 @@ class DocumentManager {
             const filesContainer    = document.getElementById("filesContainer");
             const htmlUl            = document.createElement("ul");
             const cssUl             = document.createElement("ul");
+            const imgUl             = document.createElement("ul");
             htmlUl.id               = "htmlList";
             cssUl.id                = "cssList";
+            imgUl.id                = "imgList";
             for (let file = 0; file < data[0]["html"].length; file++){
                 const htmlFile = document.createElement("li");
                 htmlFile.innerHTML = data[0]["html"][file];
@@ -543,8 +545,17 @@ class DocumentManager {
                 cssUl.append(cssFile);
             }
 
+            for (let file = 0; file < data[0]["img"].length; file++){
+                const imgFile = document.createElement("li");
+                imgFile.innerHTML = data[0]["img"][file];
+                imgUl.append(imgFile);
+            }
+
+            filesContainer.innerHTML = "";
+
             filesContainer.append(htmlUl);
             filesContainer.append(cssUl);
+            filesContainer.append(imgUl);
 
         } catch (error) {
             console.error(error);

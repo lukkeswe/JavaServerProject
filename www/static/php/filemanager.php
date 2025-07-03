@@ -29,7 +29,7 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
             <div id="upload-container">
                 <input type="file" id="fileInput" style="border: solid black 1px;">
                 <br>
-                <button onclick="uploadFile()">Upload</button>
+                <button id="upload">Upload</button>
             </div>
             <div id="filesContainer"></div>
         </main>
@@ -40,6 +40,10 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
         const dm = new DocumentManager();
         dm.flexContainer();
         dm.getFiles(sessionStorage.getItem("username"));
+        document.getElementById("upload").addEventListener("click", async () => {
+            await uploadFile();
+            dm.getFiles(sessionStorage.getItem("username"));
+        });
     </script>
 </body>
 </html>
