@@ -533,22 +533,28 @@ class DocumentManager {
             htmlUl.id               = "htmlList";
             cssUl.id                = "cssList";
             imgUl.id                = "imgList";
+            let htmlList = [];
+            let cssList = [];
+            let imgList = [];
             for (let file = 0; file < data[0]["html"].length; file++){
                 const htmlFile = document.createElement("li");
                 htmlFile.innerHTML = data[0]["html"][file];
                 htmlUl.append(htmlFile);
+                htmlList.push(data[0]["html"][file]);
             }
 
             for (let file = 0; file < data[0]["css"].length; file++){
                 const cssFile = document.createElement("li");
                 cssFile.innerHTML = data[0]["css"][file];
                 cssUl.append(cssFile);
+                cssList.push(data[0]["css"][file]);
             }
 
             for (let file = 0; file < data[0]["img"].length; file++){
                 const imgFile = document.createElement("li");
                 imgFile.innerHTML = data[0]["img"][file];
                 imgUl.append(imgFile);
+                imgList.push(data[0]["img"][file]);
             }
 
             filesContainer.innerHTML = "";
@@ -556,6 +562,10 @@ class DocumentManager {
             filesContainer.append(htmlUl);
             filesContainer.append(cssUl);
             filesContainer.append(imgUl);
+
+            sessionStorage.setItem("htmlList", htmlList);
+            sessionStorage.setItem("cssList", cssList);
+            sessionStorage.setItem("imgList", imgList);
 
         } catch (error) {
             console.error(error);
