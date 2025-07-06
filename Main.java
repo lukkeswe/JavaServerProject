@@ -1118,6 +1118,7 @@ public class Main {
                 } else if (
                     fileName.endsWith(".jpg")   ||
                     fileName.endsWith(".jpeg")  ||
+                    fileName.endsWith(".JPG")   ||
                     fileName.endsWith(".gif")   ||
                     fileName.endsWith(".png")   ||
                     fileName.endsWith(".webp")
