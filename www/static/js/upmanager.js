@@ -2,8 +2,11 @@ async function uploadFile() {
     const files = document.getElementById('fileInput').files;
     const formData = new FormData();
     let htmlFiles = sessionStorage.getItem("htmlList");
+    console.log("html: ", htmlFiles);
     let cssFiles = sessionStorage.getItem("cssList");
+    console.log("css: ", cssFiles);
     let imgFiles = sessionStorage.getItem("imgList");
+    console.log("img: ", imgFiles);
     for (let file of files) {
         if (
             htmlFiles.includes(file.name) ||

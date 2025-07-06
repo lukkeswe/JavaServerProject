@@ -527,6 +527,7 @@ class DocumentManager {
             console.log("Response from server:", data);
             
             const filesContainer    = document.getElementById("filesContainer");
+            filesContainer.innerHTML = "";
 
             const fileTypes = ["html", "css", "img"];
             for (let type of fileTypes){
@@ -552,6 +553,7 @@ class DocumentManager {
                     ul.append(fileObject);
                     list.push(data[0][type][file]);
                 }
+                sessionStorage.setItem(ul.id, list);
                 filesContainer.append(ul);
             }
 
