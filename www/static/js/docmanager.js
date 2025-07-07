@@ -545,8 +545,27 @@ class DocumentManager {
                     const erase     = document.createElement("button");
                     erase.innerHTML = "X";
                     erase.className = "btn";
-                    erase.addEventListener("click", () => {
+                    erase.addEventListener("click", async () => {
+                        let requsetObject = {
+                            "filename"  : data[0][type][file],
+                            "user"      : sessionStorage.getItem("username"),
+                            "email"     : sessionStorage.getItem("email"),
+                            "password"  : sessionStorage.getItem("password"),
+                            "type"      : type
+                        }
+                        console.log(`Deleting ${data[0][type][file]}`);
+                        let response = await fetch("/deleteFile", {
+                            method  : "POST",
+                            headers : {"Content-Type": "application/json"},
+                            body    : JSON.stringify(requsetObject)
+                        });
 
+                        if (!response.ok){
+                            throw new Error(`Server responded with status ${response.status}`);
+                        }
+                        const msg = await response.text();
+                        alert(msg);
+                        fileObject.remove();
                     });
                     fileObject.append(erase);
                     

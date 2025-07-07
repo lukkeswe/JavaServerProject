@@ -32,6 +32,7 @@ public class Main {
         server.createContext("/createTable", new CreateNewTable());
         server.createContext("/game", new GameAssetsHandler());
         server.createContext("/listAllFiles", new ListAllFiles());
+        server.createContext("/deleteFile", new DeleteFileHandler());
         server.setExecutor(null);
         server.start();
         System.out.println("Server started on port " + port);
@@ -260,7 +261,7 @@ public class Main {
                     System.out.println("Recieved string: " + recievedString);
                     // Parse JSON into a map
                     Map<String, String> data = parseJsonToMap(recievedString);
-                    Map<String, String> result = getUser(data.get("email"), data.get("password"));
+                    Map<String, String> result = getUser(data.get("email"));
                     String json;
                     // Check if the result is ok
                     if (result.get("exist").equals("yes")) {
@@ -662,7 +663,74 @@ public class Main {
             }
         }
     }
+    static class DeleteFileHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException{
+            if ("POST".equals(exchange.getRequestMethod())) {
+                // Get the request body
+                InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), "UTF-8");
+                BufferedReader reader = new BufferedReader(isr);
+                String body = reader.lines().collect(Collectors.joining());
+                // Parse the request body to Map
+                System.out.println("Parsing body...");
+                Map<String, String> map = parseJsonToMap(body);
+                // Set the response message
+                String response = "An error occured deleting the file";
+                // Verify the user
+                if (phpPassVerify(map.get("password"), map.get("email"))){
+                    // Define the path to the file
+                    Path path = Paths.get(
+                        "/home/lukas/users/" + 
+                        map.get("user") + 
+                        "/static/" + 
+                        map.get("type") +
+                        "/" +
+                        map.get("filename"));
+                    // Make sure the file exist
+                    if (Files.exists(path)) {
+                        // Delete the file
+                        try {
+                            Files.delete(path);
+                            response = "The file was deleted successfully";
+                        } catch (IOException e){
+                            System.out.println("Error deleting file: " + e.getMessage());
+                        }
+                    } else response = "The file does not exist";
+                } else response = "User error";
+                //Create exchange
+                exchange.sendResponseHeaders(200, response.length());
+                OutputStream os = exchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            } else {
+                exchange.sendResponseHeaders(405, -1);
+            }
+        }
+    }
+    private static boolean phpPassVerify(String password, String email){
+        System.out.println("Inside phpPassVerify...");
+        try {
+            Map<String, String> user = getUser(email);
+            String hash = user.get("password");
 
+            // Escape backslashes and single quotes
+            password = password.replace("\\", "\\\\").replace("'", "\\'");
+            hash = hash.replace("\\", "\\\\").replace("'", "\\'");
+
+            String phpCode = String.format("echo password_verify('%s', '%s') ? 'true' : 'false';", password, hash);
+
+            ProcessBuilder pb = new ProcessBuilder("php", "-r", phpCode);
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))){
+                String result = reader.readLine();
+                System.out.println("Result: " + result);
+                return "true".equals(result);
+            }
+        } catch (IOException e){
+            throw new RuntimeException("Could not check the password", e);
+        }
+    }
     private static String[] filesList(String path){
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(path))){
             List<String> files = new ArrayList<>();
@@ -784,19 +852,16 @@ public class Main {
         System.out.println("JSON: " + jsonBuilder.toString());
         return jsonBuilder.toString();
     }
-    private static Map<String, String> getUser(String email, String password){
+    private static Map<String, String> getUser(String email){
         String url = "jdbc:mysql://localhost:3306/webserver";
         try(Connection conn = DriverManager.getConnection(url, "lukas", "Tvt!77@ren")){
             String sql = "SELECT * FROM users WHERE email = ?";
-            System.out.println("SELECT * FROM users WHERE email = '" + email + "'");
             PreparedStatement pstmt = conn.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             pstmt.setString(1, email);
             ResultSet resultSet = pstmt.executeQuery();
             Map<String, String> user = new HashMap<>();
             while (resultSet.next()){
-                System.out.println(resultSet.getString("email") + " : " + email);
-                if (resultSet.getString("email").equals(email) && 
-                    resultSet.getString("password").equals(password)) {
+                if (resultSet.getString("email").equals(email)) {
                     user.put("exist", "yes");
                     user.put("id", resultSet.getString("id"));
                     user.put("name", resultSet.getString("name"));

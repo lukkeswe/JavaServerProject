@@ -27,3 +27,23 @@ async function uploadFile() {
     }).then(res => res.text())
       .then(msg => alert(msg));
 }
+
+async function deleteFile(filename, user){
+    let requsetObject = {
+        "filename"  : filename,
+        "user"      : user,
+        "email"     : sessionStorage.getItem("email"),
+        "password"  : sessionStorage.getItem("password")
+    }
+    let response = await fetch("/deleteFile", {
+        method  : "POST",
+        headers : {"Content-Type": "application/json"},
+        body    : JSON.stringify(requsetObject)
+    });
+
+    if (!response.ok){
+        throw new Error(`Server responded with status ${response.status}`);
+    }
+
+    alert(response);
+}
