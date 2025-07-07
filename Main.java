@@ -371,8 +371,7 @@ public class Main {
                         System.out.println("bodyContentType: " + bodyContentType);
                         String response = "";
                         
-                        handleMultipartFormData(body, requestContentType);
-                        response = "File uploaded successfully";
+                        response = handleMultipartFormData(body, requestContentType);
                     
                         exchange.sendResponseHeaders(200, response.length());
                         OutputStream os = exchange.getResponseBody();
@@ -1053,11 +1052,13 @@ public class Main {
         }
         return buffer.toByteArray();
     }
-    private static void handleMultipartFormData(byte[] body, String contentType) throws IOException {
+    private static String handleMultipartFormData(byte[] body, String contentType) throws IOException {
         String boundary = contentType.split("boundary=")[1];
         byte[] boundaryBytes = ("--" + boundary).getBytes(StandardCharsets.UTF_8);
         byte[] closingBoundaryBytes = ("--" + boundary + "--").getBytes(StandardCharsets.UTF_8);
 
+        String msg = "Unknown upload error";
+        
         int pos = 0;
         byte[] data = null;
         String user = "temp";
@@ -1108,6 +1109,8 @@ public class Main {
                 fileName = extractFileName(headers);
                 System.out.println("File name: " + fileName);
                 data = fileContent;
+
+                msg = "File uploaded successfully";
                 
                 if (fileName.endsWith(".html")) {
                     fileType = "html";
@@ -1126,6 +1129,7 @@ public class Main {
                     fileType = "img";
                 } else {
                     fileType = "prohibited";
+                    msg = "File format not supported.";
                 }
                 continue;
             }
@@ -1140,6 +1144,7 @@ public class Main {
         if (data != null) {
             saveFile(fileName, data, fileType, user);
         }
+        return msg;
     }
     private static void saveFile(String fileName, byte[] data, String fileType, String user) throws IOException {
         // Path uploadDir = Paths.get("uploads");

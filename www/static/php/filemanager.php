@@ -41,6 +41,11 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
         dm.flexContainer();
         dm.getFiles(sessionStorage.getItem("username"));
         document.getElementById("upload").addEventListener("click", async () => {
+            const files = document.getElementById("filesContainer");
+            files.innerHTML = "";
+            const loadImage = document.createElement("img");
+            loadImage.src = "img/muppet-load.gif";
+            files.append(loadImage);
             await uploadFile();
             dm.getFiles(sessionStorage.getItem("username"));
         });
