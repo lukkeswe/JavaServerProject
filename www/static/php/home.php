@@ -8,6 +8,10 @@ if (!isset($_POST["email"]) || !isset($_POST["password"])){
     if(!$db->login()){
         header("Location:server.php");
         exit();
+    } else {
+        session_start();
+        $_SESSION["email"]      = $_POST["email"];
+        $_SESSION["password"]   = $_POST["password"];
     }
 }
 ?>

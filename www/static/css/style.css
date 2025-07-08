@@ -181,6 +181,22 @@ main {
     background-color: blue;
 }
 
+#jsList li span {
+    background-color: aqua;
+}
+
+#jsList li span:hover {
+    background-color: blue;
+}
+
+#phpList li span {
+    background-color: blueviolet;
+}
+
+#phpList li span:hover {
+    background-color: purple;
+}
+
 #signUpForm {
     display: block;
     width: fit-content;

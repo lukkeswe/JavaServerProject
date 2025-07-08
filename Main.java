@@ -118,7 +118,7 @@ public class Main {
                     // Get the output from the proccess
                     BufferedReader output = new BufferedReader(new InputStreamReader(p.getInputStream()));
                     // Collect the headers from the php output
-                    Map<String, String> phpHeaders = new LinkedHashMap<>();
+                    Map<String, List<String>> phpHeaders = new LinkedHashMap<>();
                     // Build the HTML body
                     StringBuilder bodyBuilder = new StringBuilder();
 
@@ -141,7 +141,7 @@ public class Main {
                                     // Extract the value
                                     String value = line.substring(colonIndex + 1).trim();
                                     // Append the key and value to the map
-                                    phpHeaders.put(name, value);
+                                    phpHeaders.computeIfAbsent(name, k -> new ArrayList<>()).add(value);
                                 }
                             }
                         } else {
@@ -150,9 +150,15 @@ public class Main {
                         }
                     }
                     output.close();
+                    // Send all headers from PHP to the browser
+                    for (Map.Entry<String, List<String>> header : phpHeaders.entrySet()) {
+                        for (String value : header.getValue()) {
+                            exchange.getResponseHeaders().add(header.getKey(), value);
+                        }
+                    }
                     // Check for redirecting headers
                     if (phpHeaders.containsKey("Location")){
-                        exchange.getResponseHeaders().add("Location", phpHeaders.get("Location"));
+                        //exchange.getResponseHeaders().add("Location", phpHeaders.get("Location"));
                         exchange.sendResponseHeaders(302, -1); // -1 = no body
                         return; // Break the process after the headers are being sent
                     } else {
@@ -602,50 +608,29 @@ public class Main {
                 StringBuilder json = new StringBuilder();
                 String response = "";
 
-                json.append("[{");
-                String[] htmlFiles;
+                String[] types = {"html", "php", "css", "img", "js"};
                 boolean success = true;
-                try {
-                    htmlFiles = filesList(userPath + "html");
-                    json.append("\"html\": [");
-                    boolean first = true;
-                    for (String file : htmlFiles) {
-                        if (!first) {
-                            json.append(", ");
+                json.append("[{");
+                for(String type : types){
+                    String[] files;
+                    try {
+                        files = filesList(userPath + type);
+                        json.append("\""). append(type).append("\": [");
+                        boolean first = true;
+                        for(String file : files){
+                            if (!first) {
+                                json.append(", ");
+                            }
+                            json.append("\"").append(file).append("\"");
+                            first = false;
                         }
-                        json.append("\"").append(file).append("\"");
-                        first = false;
+                        json.append("], ");
+                    } catch (RuntimeException e){
+                        response = "[{\\\"status\\\": \\\"fail\\\"}]"; 
+                        success = false;
+                        break;
                     }
-                    json.append("], ");
-                } catch (RuntimeException e){response = "[{\"status\": \"fail\"}]"; success = false;}
-                String[] cssFiles;
-                try {
-                    cssFiles = filesList(userPath + "css");
-                    json.append("\"css\": [");
-                    boolean first = true;
-                    for (String file : cssFiles){
-                        if (!first){
-                            json.append(", ");
-                        }
-                        json.append("\"").append(file).append("\"");
-                        first = false;
-                    }
-                    json.append("], ");
-                } catch (RuntimeException e){response = "[{\"status\": \"fail\"}]"; success = false;}
-                String[] imgFiles;
-                try {
-                    imgFiles = filesList(userPath + "img");
-                    json.append("\"img\": [");
-                    boolean first = true;
-                    for (String file : imgFiles){
-                        if (!first){
-                            json.append(", ");
-                        }
-                        json.append("\"").append(file).append("\"");
-                        first = false;
-                    }
-                    json.append("], ");
-                } catch (RuntimeException e){response = "[{\"status\": \"fail\"}]"; success = false;}
+                }
 
                 if (success) {
                     json.append("\"status\": \"ok\"").append("}]");
@@ -707,6 +692,7 @@ public class Main {
             }
         }
     }
+    
     private static boolean phpPassVerify(String password, String email){
         System.out.println("Inside phpPassVerify...");
         try {
@@ -1179,6 +1165,8 @@ public class Main {
                 
                 if (fileName.endsWith(".html")) {
                     fileType = "html";
+                } else if(fileName.endsWith(".php")){
+                    fileType = "php";
                 } else if (fileName.endsWith(".css")) {
                     fileType = "css";
                 } else if(fileName.endsWith(".js")){

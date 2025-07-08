@@ -1,10 +1,11 @@
 <?php
+session_start();
 require_once(__DIR__ . "/dbmanager.php");
-if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
+if(!isset($_SESSION["email"]) || !isset($_SESSION["password"])){
     header("Location:server.php");
     exit();
 } else {
-    $db = new DBmanager($_COOKIE["email"], $_COOKIE["password"]);
+    $db = new DBmanager($_SESSION["email"], $_SESSION["password"]);
     if (!$db->login()){
         header("Location:server.php");
         exit();

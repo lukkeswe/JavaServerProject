@@ -529,7 +529,7 @@ class DocumentManager {
             const filesContainer    = document.getElementById("filesContainer");
             filesContainer.innerHTML = "";
 
-            const fileTypes = ["html", "css", "img"];
+            const fileTypes = ["html", "php", "css", "img", "js"];
             for (let type of fileTypes){
                 const ul    = document.createElement("ul");
                 ul.id       = type + "List";
