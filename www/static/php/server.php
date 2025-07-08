@@ -9,25 +9,15 @@
 </head>
 <body>
     <h1 class="welcome">ようこそ！</h1>
-    <div id="loginContainer">
+    <form id="loginContainer" method="post" action="home.php">
         <label for="username">ユーザー名：</label><br>
-        <input type="text" id="email" class="textInput"><br>
+        <input type="text" name="email" id="email" class="textInput"><br>
         <label for="password">パスワード：</label><br>
-        <input type="password" id="password" class="textInput"><br>
-        <button class="btn" id="loginBtn">ログイン</button><br>
-    </div>
+        <input type="password" name="password" id="password" class="textInput"><br>
+        <button type="submit" class="btn" id="loginBtn">ログイン</button><br>
+    </form>
     <div id="container">
         <a class="btn" href="contact.html">contact</a>
     </div>
-    
-<script type="text/javascript">
-    document.getElementById("loginBtn").addEventListener("click", () => {
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
-        document.cookie = `email=${email}; path=/; max-age=86400`;
-        document.cookie = `password=${password}; path=/; max-age=86400`;
-        setTimeout(() => {window.location.href = "home.php";}, 100);
-    });
-</script>
 </body>
 </html>
