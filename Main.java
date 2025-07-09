@@ -202,6 +202,10 @@ public class Main {
         }
     }
 
+    private static final Set<String> IMAGE_EXTENSIONS = Set.of(
+    ".gif", ".jpg", ".jpeg", ".JPG", ".png", ".webp", ".svg", ".bmp", ".ico", ".avif", ".heic", ".tiff"
+    );
+    
     static class StaticFileHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
@@ -229,15 +233,20 @@ public class Main {
             } else if (requestPath.endsWith(".css")) {
                 filePath = user + "/static/css/" + fileName;
                 contentType = "text/css";
-            } else if (
-                requestPath.endsWith(".gif")    || 
-                requestPath.endsWith(".jpg")    ||
-                requestPath.endsWith(".jpeg")   ||
-                requestPath.endsWith(".png")    ||
-                requestPath.endsWith(".webp")
-                ){
-                filePath = user + "/static/img/" + fileName;
             } 
+            // If the file requested is an image file
+            String pathLower = requestPath.toLowerCase();
+            for (String extention : IMAGE_EXTENSIONS){
+                if (pathLower.endsWith(extention.toLowerCase())) {
+                    filePath = user + "/static/img/" + fileName;
+                    contentType = Files.probeContentType(Path.of(filePath));
+                    if (contentType == null){
+                        contentType = "application/octet-stream";
+                    }
+                    break;
+                }
+            }
+
             if(!Files.exists(Paths.get(filePath))) {
                 System.out.println("File not found: " + filePath); // Debug print
                 exchange.sendResponseHeaders(404, -1);
@@ -1112,6 +1121,7 @@ public class Main {
         
         int pos = 0;
         byte[] data = null;
+        boolean allowed = true;
         String user = "temp";
         String fileName = "placeholder.jpg";
         String fileType = "img";
@@ -1171,18 +1181,20 @@ public class Main {
                     fileType = "css";
                 } else if(fileName.endsWith(".js")){
                     fileType = "js";
-                } else if (
-                    fileName.endsWith(".jpg")   ||
-                    fileName.endsWith(".jpeg")  ||
-                    fileName.endsWith(".JPG")   ||
-                    fileName.endsWith(".gif")   ||
-                    fileName.endsWith(".png")   ||
-                    fileName.endsWith(".webp")
-                ) {
-                    fileType = "img";
                 } else {
-                    fileType = "prohibited";
-                    msg = "File format not supported.";
+                    boolean isImgFile = false;
+                    String fileNameLower = fileName.toLowerCase();
+                    for (String extention : IMAGE_EXTENSIONS){
+                        if (fileNameLower.endsWith(extention.toLowerCase())) {
+                            fileType = "img";
+                            isImgFile = true;
+                            break;
+                        } 
+                    }
+                    if (!isImgFile) {
+                        allowed = false;
+                        msg = "File format not supported.";
+                    }
                 }
                 continue;
             }
@@ -1194,7 +1206,7 @@ public class Main {
             }
             pos = nextBoundary;
         }
-        if (data != null) {
+        if (data != null && allowed) {
             saveFile(fileName, data, fileType, user);
         }
         return msg;
