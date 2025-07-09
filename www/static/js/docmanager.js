@@ -417,19 +417,18 @@ class DocumentManager {
         const burgerContainer   = document.createElement("aside");
         const burgerBtn         = document.createElement("button");
         const burger            = document.createElement("ul");
-        const table             = document.createElement("li");
         const home              = document.createElement("li");
         // Add ids
         burgerContainer.id  = "burgerContainer";
         burgerBtn.id        = "burgerBtn";
         burger.id           = "burger";
-        table.id            = "userBurger";
         home.id             = "homeBtn";
         // Add hyper link
-        const a = document.createElement("a");
+        const a     = document.createElement("a");
+        a.href      = "home.php";
         // Add text content
         burgerBtn.innerHTML = "🈪";
-        table.innerHTML      = "Create table";
+        a.innerHTML = "戻る";
         // Add class name
         burger.classList.add("inactive");
         // Add event listeners
@@ -438,14 +437,12 @@ class DocumentManager {
             burger.classList.toggle("active");
             burger.classList.toggle("inactive");
         });
-        table.addEventListener("click", () => {
-            this.showNewTableOptions();
-        });
         // Append elements
-        burger.append(table);
+        home.append(a);
+        burger.append(home);
         burgerContainer.append(burgerBtn);
         burgerContainer.append(burger);
-        this.container.append(burgerContainer);
+        this.container.insertBefore(burgerContainer, this.main);
     }
     showNewTableOptions(){
         // Remove the table

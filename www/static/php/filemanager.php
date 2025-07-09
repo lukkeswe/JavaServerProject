@@ -41,6 +41,7 @@ if(!isset($_SESSION["email"]) || !isset($_SESSION["password"])){
     <script type="text/javascript">
         const dm = new DocumentManager();
         dm.flexContainer();
+        dm.fileBurgerMenu();
         dm.getFiles(sessionStorage.getItem("username"));
         document.getElementById("uploadBtn").addEventListener("click", async () => {
             const files = document.getElementById("filesContainer");
