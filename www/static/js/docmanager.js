@@ -540,8 +540,19 @@ class DocumentManager {
                     const name      = document.createElement("span");
                     name.className  = "fileName";
                     name.innerHTML  = data[0][type][file];
-                    fileObject.append(name);
-
+                    
+                    // If the file is a HTML or PHP file, add a link to that file
+                    if (type == "html" || type == "php"){
+                        const a = document.createElement("a");
+                        a.href = "https://" + sessionStorage["domain"] + "/" + data[0][type][file];
+                        a.target = "_blank";
+                        a.append(name);
+                        fileObject.append(a);
+                    } else {
+                        // Else if the file is something else
+                        fileObject.append(name);
+                    }
+                    // Add a delete button
                     const erase     = document.createElement("button");
                     erase.innerHTML = "X";
                     erase.className = "btn";

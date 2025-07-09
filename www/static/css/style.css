@@ -156,6 +156,14 @@ main {
     border-radius: 3px;
 }
 
+#filesContainer li a {
+    flex: 5;
+}
+
+#filesContainer li a span {
+    display: block;
+}
+
 #htmlList li span {
     background-color: red;
     color: white;
