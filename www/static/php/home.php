@@ -1,18 +1,24 @@
 <?php
 require_once(__DIR__ . "/dbmanager.php");
-if (!isset($_POST["email"]) || !isset($_POST["password"])){
+session_start();
+if (isset($_SESSION["email"]) && isset($_SESSION["password"])){
+    $db = new DBmanager($_SESSION["email"], $_SESSION["password"]);
+    if (!$db->login()){
     header("Location:server.php");
     exit();
-} else {
+    }
+} else if(isset($_POST["email"]) && isset($_POST["password"])) {
     $db = new DBmanager($_POST["email"], $_POST["password"]);
     if(!$db->login()){
         header("Location:server.php");
         exit();
     } else {
-        session_start();
         $_SESSION["email"]      = $_POST["email"];
         $_SESSION["password"]   = $_POST["password"];
     }
+} else {
+    header("Location:server.php");
+    exit();
 }
 ?>
 <!DOCTYPE html>
