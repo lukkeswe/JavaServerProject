@@ -135,10 +135,12 @@ main {
 
 #upload-container {
     background-color: white;
-    width: fit-content;
-    height: 100px;
     padding: 10px;
     border: solid black 1px;
+}
+
+#filesContainer {
+    
 }
 
 #filesContainer li {
@@ -203,6 +205,10 @@ main {
 
 #phpList li span:hover {
     background-color: purple;
+}
+
+#displayContainer img {
+    width: 300px;
 }
 
 #signUpForm {

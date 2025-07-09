@@ -535,53 +535,42 @@ class DocumentManager {
                 ul.id       = type + "List";
                 let list = [];
                 for (let file = 0; file < data[0][type].length; file++){
+                    const fileName = data[0][type][file];
+                    
                     const fileObject  = document.createElement("li");
                     
                     const name      = document.createElement("span");
                     name.className  = "fileName";
-                    name.innerHTML  = data[0][type][file];
+                    name.innerHTML  = fileName;
                     
                     // If the file is a HTML or PHP file, add a link to that file
                     if (type == "html" || type == "php"){
                         const a = document.createElement("a");
-                        a.href = "https://" + sessionStorage["domain"] + "/" + data[0][type][file];
+                        a.href = "https://" + sessionStorage["domain"] + "/" + fileName;
                         a.target = "_blank";
                         a.append(name);
                         fileObject.append(a);
                     } else {
                         // Else if the file is something else
                         fileObject.append(name);
+                        if (type == "img") {
+                            name.addEventListener("click", () => {
+                                this.showImage(fileName, "https://" + sessionStorage["domain"] + "/");
+                            });
+                        }
                     }
                     // Add a delete button
                     const erase     = document.createElement("button");
                     erase.innerHTML = "X";
                     erase.className = "btn";
                     erase.addEventListener("click", async () => {
-                        let requsetObject = {
-                            "filename"  : data[0][type][file],
-                            "user"      : sessionStorage.getItem("username"),
-                            "email"     : sessionStorage.getItem("email"),
-                            "password"  : sessionStorage.getItem("password"),
-                            "type"      : type
-                        }
-                        console.log(`Deleting ${data[0][type][file]}`);
-                        let response = await fetch("/deleteFile", {
-                            method  : "POST",
-                            headers : {"Content-Type": "application/json"},
-                            body    : JSON.stringify(requsetObject)
-                        });
-
-                        if (!response.ok){
-                            throw new Error(`Server responded with status ${response.status}`);
-                        }
-                        const msg = await response.text();
-                        alert(msg);
+                        await this.deleteFile(fileName, type);
                         fileObject.remove();
                     });
                     fileObject.append(erase);
                     
                     ul.append(fileObject);
-                    list.push(data[0][type][file]);
+                    list.push(fileName);
                 }
                 sessionStorage.setItem(ul.id, list);
                 filesContainer.append(ul);
@@ -590,5 +579,35 @@ class DocumentManager {
         } catch (error) {
             console.error(error);
         }
+    }
+
+    async deleteFile(file, type){
+        let requsetObject = {
+            "filename"  : file,
+            "user"      : sessionStorage.getItem("username"),
+            "email"     : sessionStorage.getItem("email"),
+            "password"  : sessionStorage.getItem("password"),
+            "type"      : type
+        }
+        console.log(`Deleting ${file}`);
+        let response = await fetch("/deleteFile", {
+            method  : "POST",
+            headers : {"Content-Type": "application/json"},
+            body    : JSON.stringify(requsetObject)
+        });
+
+        if (!response.ok){
+            throw new Error(`Server responded with status ${response.status}`);
+        }
+        const msg = await response.text();
+        alert(msg);
+    }
+
+    showImage(filename, domain){
+        const display = document.getElementById("displayContainer");
+        const img = document.createElement("img");
+        img.src = domain + "img/" + filename;
+        display.innerHTML = "";
+        display.append(img);
     }
 }
