@@ -572,7 +572,7 @@ class DocumentManager {
                     ul.append(fileObject);
                     list.push(fileName);
                 }
-                sessionStorage.setItem(ul.id, list);
+                sessionStorage.setItem(ul.id, JSON.stringify(list));
                 filesContainer.append(ul);
             }
 
@@ -601,6 +601,12 @@ class DocumentManager {
         }
         const msg = await response.text();
         alert(msg);
+    
+        let list = JSON.parse(sessionStorage.getItem(type + "List") || "[]");
+        console.log("List before: ", list);
+        list = list.filter(item => item !== file);
+        sessionStorage.setItem(type + "List", JSON.stringify(list));
+        console.log("List after: ", list);
     }
 
     showImage(filename, domain){
