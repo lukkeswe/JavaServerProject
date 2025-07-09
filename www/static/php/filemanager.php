@@ -30,7 +30,7 @@ if(!isset($_SESSION["email"]) || !isset($_SESSION["password"])){
             <div id="upload-container">
                 <input type="file" id="fileInput" style="border: solid black 1px;">
                 <br>
-                <button id="upload" class="btn">Upload</button>
+                <button id="uploadBtn" class="btn">Upload</button>
                 <div id="displayContainer"></div>
             </div>
             <div id="filesContainer"></div>
@@ -42,7 +42,7 @@ if(!isset($_SESSION["email"]) || !isset($_SESSION["password"])){
         const dm = new DocumentManager();
         dm.flexContainer();
         dm.getFiles(sessionStorage.getItem("username"));
-        document.getElementById("upload").addEventListener("click", async () => {
+        document.getElementById("uploadBtn").addEventListener("click", async () => {
             const files = document.getElementById("filesContainer");
             files.innerHTML = "";
             const loadImage = document.createElement("img");

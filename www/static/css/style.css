@@ -139,6 +139,10 @@ main {
     border: solid black 1px;
 }
 
+#uploadBtn {
+    margin-top: 20px;
+}
+
 #filesContainer {
     
 }
@@ -205,6 +209,10 @@ main {
 
 #phpList li span:hover {
     background-color: purple;
+}
+
+#displayContainer {
+    margin-top: 20px;
 }
 
 #displayContainer img {
