@@ -48,8 +48,18 @@ if(!isset($_SESSION["email"]) || !isset($_SESSION["password"])){
             const loadImage = document.createElement("img");
             loadImage.src = "img/muppet-load.gif";
             files.append(loadImage);
-            await uploadFile();
+            const file = await uploadFile();
             dm.getFiles(sessionStorage.getItem("username"));
+            if (
+                file.endsWith(".jpg")   ||
+                file.endsWith(".jpeg")  ||
+                file.endsWith(".png")   || 
+                file.endsWith(".JPG")   ||
+                file.endsWith(".gif")   ||
+                file.endsWith(".webp")
+            ){
+                dm.showImage(file, "https://" + sessionStorage["domain"] + "/");
+            }
         });
     </script>
 </body>

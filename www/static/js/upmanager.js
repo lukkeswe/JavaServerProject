@@ -4,6 +4,7 @@ async function uploadFile() {
     let htmlFiles = sessionStorage.getItem("htmlList");
     let cssFiles = sessionStorage.getItem("cssList");
     let imgFiles = sessionStorage.getItem("imgList");
+    let fileName;
     for (let file of files) {
         if (
             htmlFiles.includes(file.name) ||
@@ -14,6 +15,7 @@ async function uploadFile() {
             if (!replace) {continue;}
         }
         formData.append("files", file);
+        fileName = file.name;
     }
 
     const user = sessionStorage.getItem("username");
@@ -26,24 +28,6 @@ async function uploadFile() {
         body    : formData
     }).then(res => res.text())
       .then(msg => alert(msg));
-}
 
-async function deleteFile(filename, user){
-    let requsetObject = {
-        "filename"  : filename,
-        "user"      : user,
-        "email"     : sessionStorage.getItem("email"),
-        "password"  : sessionStorage.getItem("password")
-    }
-    let response = await fetch("/deleteFile", {
-        method  : "POST",
-        headers : {"Content-Type": "application/json"},
-        body    : JSON.stringify(requsetObject)
-    });
-
-    if (!response.ok){
-        throw new Error(`Server responded with status ${response.status}`);
-    }
-
-    alert(response);
+    return fileName;
 }
