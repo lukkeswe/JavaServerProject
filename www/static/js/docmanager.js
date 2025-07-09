@@ -129,18 +129,24 @@ class DocumentManager {
         // Create elements
         const dashBoard = document.createElement("table");
         const domain    = document.createElement("td");
-        const row      = document.createElement("tr");
+        const row       = document.createElement("tr");
+        const a         = document.createElement("a");
         // Asign ids
         dashBoard.id    = "dashBoard";
         domain.id       = "domain";
         // Add content text
-        domain.innerHTML    = sessionStorage.getItem("domain");
+        a.innerHTML     = sessionStorage.getItem("domain");
+        // Add href
+        a.href          = "https://" + sessionStorage.getItem("domain")
+        // Add link setting
+        a.target        = "_blank";
         // Add eventlistener
         domain.addEventListener("click", () => {
             dashBoard.remove();
             this.showDomainInfo();
         });
         // Append elements
+        domain.append(a);
         row.append(domain);
         dashBoard.append(row);
         this.main.append(dashBoard);
