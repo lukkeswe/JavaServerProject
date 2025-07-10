@@ -267,3 +267,17 @@ footer p {
     text-align: center;
     padding: 20px;
 }
+
+@media screen and (max-width: 768px){
+    #container {
+        flex-direction: column;
+    }
+
+    main {
+        flex-direction: column;
+    }
+
+    #displayContainer {
+        text-align: center;
+    }
+}
