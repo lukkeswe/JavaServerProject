@@ -30,7 +30,7 @@ if(!isset($_SESSION["email"]) || !isset($_SESSION["password"])){
             <div id="upload-container">
                 <input type="file" id="fileInput" style="border: solid black 1px;">
                 <br>
-                <button id="uploadBtn" class="btn">Upload</button>
+                <button id="uploadBtn" class="btn">アップロード</button>
                 <div id="displayContainer"></div>
             </div>
             <div id="filesContainer"></div>

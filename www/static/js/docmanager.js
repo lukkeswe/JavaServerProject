@@ -233,25 +233,21 @@ class DocumentManager {
         file.id             = "fileBurger";
         // Add text content
         burgerBtn.innerHTML = "🈪";
-        user.innerHTML      = "View/edit user";
-        domain.innerHTML    = "Domain";
-        database.innerHTML  = "Database tool";
-        file.innerHTML      = "File manager";
+        user.innerHTML      = "ユーザー情報";
+        domain.innerHTML    = "ドメイン";
+        database.innerHTML  = "データベース管理";
+        file.innerHTML      = "ファイル管理";
         // Add class name
         burger.classList.add("inactive");
         // Add event listeners
         burgerBtn.addEventListener("click", () => {
-            // burger.style.display = "block";
             burger.classList.toggle("active");
             burger.classList.toggle("inactive");
         });
         user.addEventListener("click", ()=> {
             const dash = document.getElementById("dashBoard");
             if (dash) {
-                console.log("dash found");
-                
-                dash.remove();}
-            else {console.log("dash not found");
+                dash.remove();
             }
             this.showUserInfo();
         });
@@ -269,7 +265,7 @@ class DocumentManager {
         // Append elements
         burger.append(user);
         burger.append(domain);
-        burger.append(database);
+        //burger.append(database); // <- Add this back when the database manager is ready
         burger.append(file);
         burgerContainer.append(burgerBtn);
         burgerContainer.append(burger);
@@ -350,10 +346,7 @@ class DocumentManager {
                             if (data[0]["status"] == "failed"){
                                 alert("Failed to log in :(");
                             } else if(data[0]["id"]){
-                                document.cookie = `email=${email.value}; path=/; max-age=86400`;
-                                document.cookie= `password=${password.value}; path=/; max-age=86400`;
-                                console.log(email.value + " logged in.");
-                                setTimeout(() => {window.location.href = "/home.php";}, 100);
+                                window.location.href = "server.php";
                             }
                         } catch (error){
                             console.error("Error", error);
@@ -364,7 +357,7 @@ class DocumentManager {
                     alert("Error: ", error);
                 }
             } else {
-                alert("Passwords don't match");
+                alert("パスワード（確認用）エラー");
             }
         });
         this.container.innerHTML = "";
