@@ -566,7 +566,7 @@ class DocumentManager {
             
             const filesContainer    = document.getElementById("filesContainer");
             filesContainer.innerHTML = "";
-
+            // List of supported file types
             const fileTypes = ["html", "php", "css", "img", "js"];
             for (let type of fileTypes){
                 const ul    = document.createElement("ul");
@@ -581,36 +581,56 @@ class DocumentManager {
                     name.className  = "fileName";
                     name.innerHTML  = fileName;
                     
-                    // If the file is a HTML or PHP file, add a link to that file
+                    // If the file is a HTML or PHP file, add a hyper-link to that file
                     if (type == "html" || type == "php"){
+                        // Create hyper-link
                         const a = document.createElement("a");
+                        // Add a url
                         a.href = "https://" + sessionStorage["domain"] + "/" + fileName;
+                        // Add setting
                         a.target = "_blank";
+                        // Add event listener
+                        a.addEventListener("click", () => {this.emptyDisplayContainer();});
+                        // Append the span
                         a.append(name);
+                        // Append the hyper-link
                         fileObject.append(a);
                     } else {
-                        // Else if the file is something else
+                        // Append the name object with the span element
                         fileObject.append(name);
+                        // If the file type is of "img" type
                         if (type == "img") {
                             name.addEventListener("click", () => {
                                 this.showImage(fileName, "https://" + sessionStorage["domain"] + "/");
                             });
+                        } else if(type == "css" || type == "js"){
+                            // If the file is a css or JavaScript file
+                            // Add event listener
+                            name.addEventListener("click", () => {this.emptyDisplayContainer();});
                         }
                     }
-                    // Add a delete button
+                    // Create a delete button
                     const erase     = document.createElement("button");
                     erase.innerHTML = "X";
                     erase.className = "btn";
+                    // Add an event listener
                     erase.addEventListener("click", async () => {
+                        // Call the delete function
                         await this.deleteFile(fileName, type);
+                        // Empty the display container
+                        this.emptyDisplayContainer();
+                        // Remove the element
                         fileObject.remove();
                     });
+                    // Append the delete button
                     fileObject.append(erase);
                     
                     ul.append(fileObject);
                     list.push(fileName);
                 }
+                // Save the list of files in session storage
                 sessionStorage.setItem(ul.id, JSON.stringify(list));
+                // Append the ul
                 filesContainer.append(ul);
             }
 
@@ -651,5 +671,9 @@ class DocumentManager {
         img.src = domain + "img/" + filename;
         display.innerHTML = "";
         display.append(img);
+    }
+    emptyDisplayContainer(){
+        const displayContainer = document.getElementById("displayContainer");
+        displayContainer.innerHTML = "";
     }
 }
