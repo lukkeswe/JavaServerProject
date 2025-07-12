@@ -1175,9 +1175,11 @@ public class Main {
                 
                 if (fileName.endsWith(".html")) {
                     fileType = "html";
-                } else if(fileName.endsWith(".php")){
-                    fileType = "php";
-                } else if (fileName.endsWith(".css")) {
+                } 
+                // else if(fileName.endsWith(".php")){
+                //     fileType = "php";
+                // } 
+                else if (fileName.endsWith(".css")) {
                     fileType = "css";
                 } else if(fileName.endsWith(".js")){
                     fileType = "js";
