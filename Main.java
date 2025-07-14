@@ -45,23 +45,21 @@ public class Main {
             Headers headers = exchange.getRequestHeaders();
             // Get the host
             String host = headers.getFirst("Host");
-            System.out.println("Host: " + host);
             // If there is no host
             if (host == null) host = "unknown";
             
             String requestPath = exchange.getRequestURI().getPath();
             String[] requestSplit = requestPath.split("/");
             // Define the path to the index file
-            String htmlFilePath = "www/static/html/index.html";
+            String htmlFilePath = "/home/lukas/JavaServerProject/www/static/html/index.html";
             // If no html file is specified target the index file
             String targetFile = "index.html";
             // Initial path
             String userPath = DomainsConfig.domainMap.getOrDefault(host, null);
             if (userPath == null) {
-                userPath = "www";
+                userPath = "/home/lukas/JavaServerProject/www";
                 targetFile = "notfound.html";
             }
-            System.out.println("User path: " + userPath);
             // Initial response
             byte[] response = null;
             // If the requested file is a html file
@@ -76,7 +74,19 @@ public class Main {
                 } else {
                     String phpFilePath = userPath + "/static/php/" + requestSplit[requestSplit.length - 1];
                     // Process the file with PHP if it is a PHP file
-                    ProcessBuilder pb = new ProcessBuilder("php-cgi");
+                    String username = PhpConfig.phpMap.getOrDefault(host, null);
+                    String phpIniPath;
+                    boolean norlundJohanLukas = false;
+                    if (host.equals("norlund-johan-lukas.com") || host.equals("norlund-johan-lukas.com")){
+                        phpIniPath = "www/static/php/lukas.ini"; 
+                        norlundJohanLukas = true;
+                    } else phpIniPath = "/etc/php/users/" + username + ".ini";
+                    // Create the ProcessBuilder with a "-c" flag
+                    ProcessBuilder pb = new ProcessBuilder("php-cgi", "-c", phpIniPath);
+                    // Set working directory
+                    if (norlundJohanLukas) {
+                        pb.directory(new File("www/static/php/"));
+                    } else pb.directory(new File(userPath + "/static/php/"));
                     //Copy headers from the request
                     Map<String, String> env = pb.environment();
                     // Set common CGI variables
@@ -173,13 +183,10 @@ public class Main {
                 host.equalsIgnoreCase("ludwig.norlund-johan-lukas.com")
                 ){
                 htmlFilePath = userPath;
-                System.out.println("File path: " + htmlFilePath);
             } else {
                 // Every other case other than the develpment url
                 htmlFilePath = userPath + "/static/html/" + targetFile;
             }
-            System.out.println("Host: " + host);
-            System.out.println("Serving file: " + htmlFilePath);
             // If the requested file isn't a PHP file
             if (!requestPath.endsWith(".php")){
                 Path path = Paths.get(htmlFilePath);
@@ -213,7 +220,6 @@ public class Main {
             Headers headers = exchange.getRequestHeaders();
             // Get the host
             String host = headers.getFirst("Host");
-            System.out.println("Static host: " + host);
             // Get the requested path
             String requestPath = exchange.getRequestURI().getPath();
             // Block access to .php files
@@ -1176,9 +1182,9 @@ public class Main {
                 if (fileName.endsWith(".html")) {
                     fileType = "html";
                 } 
-                // else if(fileName.endsWith(".php")){
-                //     fileType = "php";
-                // } 
+                else if(fileName.endsWith(".php")){
+                    fileType = "php";
+                } 
                 else if (fileName.endsWith(".css")) {
                     fileType = "css";
                 } else if(fileName.endsWith(".js")){
