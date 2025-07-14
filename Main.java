@@ -469,12 +469,10 @@ public class Main {
                         map.remove("invite");
                         // Insert new user 
                         insertRow("webserver", "lukas", "Tvt!77@ren", "users", map);
-                        // Create the user's database
-                        boolean newuser = createNewUser("lukas", "Tvt!77@ren", domainToName(map.get("domain")), map.get("password"));
-
+                        // Create the user's database // Not for now
+                        // boolean newuser = createNewUser("lukas", "Tvt!77@ren", domainToName(map.get("domain")), map.get("password")); 
+                        boolean newuser = true;
                         if (newuser){
-                            // Delete the invite so it can't be used again
-                            boolean deleted = deleteRow("webserver", "lukas", "Tvt!77@ren", "invites", "invite", invite);
                             // Create a new directory with folders for the user
                             String userPath = "/home/lukas/users/" + domainToName(map.get("domain"));
                             createPath(userPath);
@@ -484,8 +482,18 @@ public class Main {
                             createPath(userPath + "/static/js");
                             createPath(userPath + "/static/img");
                             createPath(userPath + "/static/php");
-                            System.out.println("New user: " + domainToName(map.get("domain")));
-                            response = "[{\"status\": \"ok\"}]";
+                            
+                            // Create a php.ini file for the user
+                            boolean ini = phpIniSetup(domainToName(map.get("domain")));
+                            if (!ini) {
+                                System.out.println("Error creating new user!");
+                                response = "[{\"status\": \"fail\"}]";
+                            } else {
+                                // Delete the invite so it can't be used again
+                                boolean deleted = deleteRow("webserver", "lukas", "Tvt!77@ren", "invites", "invite", invite);
+                                System.out.println("New user: " + domainToName(map.get("domain")));
+                                response = "[{\"status\": \"ok\"}]";
+                            }
                         }   
                     }
                 }
@@ -708,6 +716,54 @@ public class Main {
         }
     }
     
+    private static boolean phpIniSetup(String user){
+        String iniPath = "/home/lukas/php_ini/";
+        try {
+            // Ensure directory exist
+            File iniDir = new File(iniPath);
+            if (!iniDir.exists()) {
+                iniDir.mkdirs();
+            }
+            // Target ini file
+            File iniFile = new File(iniPath + user + ".ini");
+            if (iniFile.exists()) {
+                System.out.println("\".ini\" file already exists for user: " + user);
+                return false;
+            }
+
+            // User's web root path for open_basedir
+            String userPath = "/home/lukas/users/" + user + "/static/php/";
+
+            // Build contents
+            StringBuilder iniContent = new StringBuilder();
+            iniContent.append("open_basedir=").append(userPath).append("\n");
+            iniContent.append("disable_functions=exec,passthru,shell_exec,system,proc_open,popen,pcntl_exec\n");
+            iniContent.append("allow_url_fopen=Off\n");
+            iniContent.append("allow_url_include=Off\n");
+            iniContent.append("max_execution_time=5\n");
+            iniContent.append("memory_limit=32M\n");
+            iniContent.append("upload_max_filesize=2M\n");
+            iniContent.append("post_max_size=4M\n");
+            iniContent.append("display_errors=Off\n");
+
+            // Copy default config first
+            Path defaultPhpIni = Paths.get("/etc/php/8.1/cgi/php.ini");
+            Files.copy(defaultPhpIni, iniFile.toPath());
+
+            // Write the ini content
+            Files.writeString(
+                iniFile.toPath(), 
+                "\n; --Per user restrictions--\n" + iniContent.toString(), 
+                StandardCharsets.UTF_8,
+                StandardOpenOption.APPEND
+                );
+            System.out.println("php.ini created for user: " + user);
+            return true;
+        } catch (IOException e) {
+            System.out.println("Error creating php.ini for user: " + user + " - " + e.getMessage());
+            return false;
+        }
+    }
     private static boolean phpPassVerify(String password, String email){
         System.out.println("Inside phpPassVerify...");
         try {
