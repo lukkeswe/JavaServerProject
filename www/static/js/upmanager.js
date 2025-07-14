@@ -6,6 +6,8 @@ async function uploadFile() {
     let cssFiles = sessionStorage.getItem("cssList");
     let imgFiles = sessionStorage.getItem("imgList");
     let fileName;
+    let isValidFile = false;
+
     for (let file of files) {
         if (
             htmlFiles.includes(file.name) ||
@@ -15,21 +17,32 @@ async function uploadFile() {
         ){
             const replace = confirm(`The file "${file.name}" already existing. Do you want to replace it?`);
             if (!replace) {continue;}
+        } else if (!isValidFileName(file.name)){
+            alert(`\"${file.name}\" is not a valid file name.`);
+            continue;
         }
         formData.append("files", file);
         fileName = file.name;
+        isValidFile = true;
     }
+    if (isValidFile) {
+        const user = sessionStorage.getItem("username");
+        formData.append("user", user);
 
-    const user = sessionStorage.getItem("username");
-    formData.append("user", user);
+        console.log("Uploading file...");
+        
+        await fetch('/upload', {
+            method  : 'POST',
+            body    : formData
+        }).then(res => res.text())
+        .then(msg => alert(msg));
 
-    console.log("Uploading file...");
-    
-    await fetch('/upload', {
-        method  : 'POST',
-        body    : formData
-    }).then(res => res.text())
-      .then(msg => alert(msg));
+        return fileName;
+    }
+}
 
-    return fileName;
+function isValidFileName(fileName){
+    if (!fileName || fileName.trim() === "") return false;
+    const validPattern = /^[a-zA-Z0-9._-]+$/;
+    return validPattern.test(fileName);
 }
