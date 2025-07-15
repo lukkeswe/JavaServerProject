@@ -15,10 +15,10 @@ async function uploadFile() {
             cssFiles.includes(file.name) ||
             imgFiles.includes(file.name)
         ){
-            const replace = confirm(`The file "${file.name}" already existing. Do you want to replace it?`);
+            const replace = confirm(`「${file.name}」 のファイルが存在しています。上書きますか？`);
             if (!replace) {continue;}
         } else if (!isValidFileName(file.name)){
-            alert(`\"${file.name}\" is not a valid file name.`);
+            alert(`「${file.name}」をファイル名として出来ません。`);
             continue;
         }
         formData.append("files", file);
