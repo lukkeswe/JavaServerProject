@@ -451,9 +451,10 @@ public class Main {
                 String recievedString = reader.lines().collect(Collectors.joining());
                 // Parse JSON into map
                 Map<String, String> map = parseJsonToMap(recievedString);
-                map.put("name", domainToName(map.get("domain")));
+                String name = domainToName(map.get("domain"));
+                map.put("name", name);
                 String response = "[{\"status\": \"fail\"}]";
-                boolean exists = existInTable("webserver", "users", "name", domainToName(map.get("domain")));
+                boolean exists = existInTable("webserver", "users", "name", name);
                 if (!exists){
                     String hash = "";
                     boolean hashOk = false;
@@ -470,11 +471,11 @@ public class Main {
                         // Insert new user 
                         insertRow("webserver", "lukas", "Tvt!77@ren", "users", map);
                         // Create the user's database // Not for now
-                        // boolean newuser = createNewUser("lukas", "Tvt!77@ren", domainToName(map.get("domain")), map.get("password")); 
+                        // boolean newuser = createNewUser("lukas", "Tvt!77@ren", name), map.get("password")); 
                         boolean newuser = true;
                         if (newuser){
                             // Create a new directory with folders for the user
-                            String userPath = "/home/lukas/users/" + domainToName(map.get("domain"));
+                            String userPath = "/home/lukas/users/" + name;
                             createPath(userPath);
                             createPath(userPath + "/static");
                             createPath(userPath + "/static/html");
@@ -484,14 +485,18 @@ public class Main {
                             createPath(userPath + "/static/php");
                             
                             // Create a php.ini file for the user
-                            boolean ini = phpIniSetup(domainToName(map.get("domain")));
-                            if (!ini) {
+                            boolean ini = phpIniSetup(name);
+                            // Add the domain to the domains config
+                            boolean domain = DomainConfigUtil.addDomainMapping(map.get("domain"), userPath);
+                            // Add the user to the php.ini config
+                            boolean php = PhpConfigUtil.addPhpMapping(map.get("domain"), name);
+                            if (!ini || !domain || !php) {
                                 System.out.println("Error creating new user!");
                                 response = "[{\"status\": \"fail\"}]";
                             } else {
                                 // Delete the invite so it can't be used again
                                 boolean deleted = deleteRow("webserver", "lukas", "Tvt!77@ren", "invites", "invite", invite);
-                                System.out.println("New user: " + domainToName(map.get("domain")));
+                                System.out.println("New user: " + name);
                                 response = "[{\"status\": \"ok\"}]";
                             }
                         }   

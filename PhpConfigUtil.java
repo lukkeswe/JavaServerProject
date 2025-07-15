@@ -6,7 +6,7 @@ import java.util.Properties;
 public class PhpConfigUtil {
     private static final String CONFIG_FILE = "php.properties";
 
-    public static synchronized boolean addDomainMapping(String domain, String path) {
+    public static synchronized boolean addPhpMapping(String domain, String name) {
         Properties props = loadProperties();
 
         if (props == null) return false;
@@ -16,7 +16,7 @@ public class PhpConfigUtil {
             return false;
         }
 
-        props.setProperty(domain.toLowerCase(), path);
+        props.setProperty(domain.toLowerCase(), name);
 
         try (FileOutputStream output = new FileOutputStream(CONFIG_FILE)){
             props.store(output, "Updated PHP mappings");
@@ -30,7 +30,7 @@ public class PhpConfigUtil {
         return true;
     }
 
-    public static synchronized boolean updateDomainMapping(String domain, String newPath){
+    public static synchronized boolean updatePhpMapping(String domain, String newName){
         Properties props = loadProperties();
 
         if (props == null) return false;
@@ -40,11 +40,11 @@ public class PhpConfigUtil {
             return false;
         }
 
-        props.setProperty(domain.toLowerCase(), newPath);
+        props.setProperty(domain.toLowerCase(), newName);
         return saveProperties(props, "Updated PHP user");
     }
 
-    public static synchronized boolean removeDomainMapping(String domain) {
+    public static synchronized boolean removePhpMapping(String domain) {
         Properties props = loadProperties();
         
         if (props == null) return false;
