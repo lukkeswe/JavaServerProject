@@ -394,8 +394,9 @@ public class Main {
                         String response = "";
                         
                         response = handleMultipartFormData(body, requestContentType);
-                    
-                        exchange.sendResponseHeaders(200, response.length());
+                        byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
+
+                        exchange.sendResponseHeaders(200, responseBytes.length);
                         OutputStream os = exchange.getResponseBody();
                         os.write(response.getBytes());
                         os.close();
@@ -1184,7 +1185,7 @@ public class Main {
         byte[] boundaryBytes = ("--" + boundary).getBytes(StandardCharsets.UTF_8);
         byte[] closingBoundaryBytes = ("--" + boundary + "--").getBytes(StandardCharsets.UTF_8);
 
-        String msg = "Unknown upload error";
+        String msg = "アップロードのエラー！";
         
         int pos = 0;
         byte[] data = null;
@@ -1238,7 +1239,7 @@ public class Main {
                 System.out.println("File name: " + fileName);
                 data = fileContent;
 
-                msg = "File uploaded successfully";
+                msg = "アップロードが成功しました。";
                 
                 if (fileName.endsWith(".html")) {
                     fileType = "html";
@@ -1262,7 +1263,7 @@ public class Main {
                     }
                     if (!isImgFile) {
                         allowed = false;
-                        msg = "File format not supported.";
+                        msg = "ファイル型エラー";
                     }
                 }
                 continue;
