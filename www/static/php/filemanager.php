@@ -51,6 +51,8 @@ if(!isset($_SESSION["email"]) || !isset($_SESSION["password"])){
             files.append(loadImage);
             const file = await uploadFile();
             dm.getFiles(sessionStorage.getItem("username"));
+            dm.emptyDisplayContainer();
+            dm.showInfo(file);
             if (
                 file.endsWith(".jpg")   ||
                 file.endsWith(".jpeg")  ||

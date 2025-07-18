@@ -588,18 +588,28 @@ class DocumentManager {
                         a.append(name);
                         // Append the hyper-link
                         fileObject.append(a);
+                        // Add eventlistener
+                        a.addEventListener("click", () => {
+                            this.emptyDisplayContainer();
+                            this.showInfo(fileName);
+                        });
                     } else {
                         // Append the name object with the span element
                         fileObject.append(name);
                         // If the file type is of "img" type
                         if (type == "img") {
                             name.addEventListener("click", () => {
+                                this.emptyDisplayContainer();
+                                this.showInfo(fileName);
                                 this.showImage(fileName, "https://" + sessionStorage["domain"] + "/");
                             });
                         } else if(type == "css" || type == "js"){
                             // If the file is a css or JavaScript file
                             // Add event listener
-                            name.addEventListener("click", () => {this.emptyDisplayContainer();});
+                            name.addEventListener("click", () => {
+                                this.emptyDisplayContainer();
+                                this.showInfo(fileName);
+                            });
                         }
                     }
                     // Create a delete button
@@ -662,8 +672,16 @@ class DocumentManager {
         const display = document.getElementById("displayContainer");
         const img = document.createElement("img");
         img.src = domain + "img/" + filename;
-        display.innerHTML = "";
         display.append(img);
+    }
+    showInfo(filename){
+        // Get the display element
+        const display = document.getElementById("displayContainer");
+        // Create the information elements
+        const h2 = document.createElement("h2");
+        h2.innerHTML = filename;
+
+        display.append(h2);
     }
     emptyDisplayContainer(){
         const displayContainer = document.getElementById("displayContainer");
