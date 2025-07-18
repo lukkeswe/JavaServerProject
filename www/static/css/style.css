@@ -109,7 +109,7 @@ main {
     display: flex;
     gap: 20px;
     background-color: lightgrey;
-    height: 700px;
+    min-height: 700px;
     padding: 10px;
 }
 
@@ -137,6 +137,7 @@ main {
     background-color: white;
     padding: 10px;
     border: solid black 1px;
+    height: fit-content;
 }
 
 #uploadBtn {
@@ -275,6 +276,7 @@ footer p {
 
     main {
         flex-direction: column;
+        min-height: 10px;
     }
 
     #displayContainer {
