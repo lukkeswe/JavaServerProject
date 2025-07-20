@@ -223,6 +223,7 @@ class DocumentManager {
         const domain            = document.createElement("li");
         const database          = document.createElement("li");
         const file              = document.createElement("li");
+        const logout            = document.createElement("li");
         // Add ids
         burgerContainer.id  = "burgerContainer";
         burgerBtn.id        = "burgerBtn";
@@ -231,12 +232,14 @@ class DocumentManager {
         domain.id           = "domainBurger";
         database.id         = "databaseBurger";
         file.id             = "fileBurger";
+        logout.id           = "logout";
         // Add text content
         burgerBtn.innerHTML = "🈪";
         user.innerHTML      = "ユーザー情報";
         domain.innerHTML    = "ドメイン";
         database.innerHTML  = "データベース管理";
         file.innerHTML      = "ファイル管理";
+        logout.innerHTML    = "ログアウト";
         // Add class name
         burger.classList.add("inactive");
         // Add event listeners
@@ -262,11 +265,15 @@ class DocumentManager {
         file.addEventListener("click", () => {
             window.location.href = "filemanager.php";
         });
+        logout.addEventListener("click", () => {
+            window.location.href = "logout.php";
+        });
         // Append elements
         burger.append(user);
         burger.append(domain);
         //burger.append(database); // <- Add this back when the database manager is ready
         burger.append(file);
+        burger.append(logout);
         burgerContainer.append(burgerBtn);
         burgerContainer.append(burger);
         this.container.append(burgerContainer);
@@ -411,17 +418,20 @@ class DocumentManager {
         const burgerBtn         = document.createElement("button");
         const burger            = document.createElement("ul");
         const home              = document.createElement("li");
+        const logout            = document.createElement("li");
         // Add ids
         burgerContainer.id  = "burgerContainer";
         burgerBtn.id        = "burgerBtn";
         burger.id           = "burger";
         home.id             = "homeBtn";
+        logout.id           = "logout";
         // Add hyper link
         const a     = document.createElement("a");
         a.href      = "home.php";
         // Add text content
-        burgerBtn.innerHTML = "🈪";
-        a.innerHTML = "戻る";
+        burgerBtn.innerHTML     = "🈪";
+        a.innerHTML             = "戻る";
+        logout.innerHTML        = "ログアウト"; 
         // Add class name
         burger.classList.add("inactive");
         // Add event listeners
@@ -430,9 +440,15 @@ class DocumentManager {
             burger.classList.toggle("active");
             burger.classList.toggle("inactive");
         });
+        logout.addEventListener("click", () => {
+            sessionStorage.removeItem("email");
+            sessionStorage.removeItem("password");
+            window.location.href = "logout.php";
+        });
         // Append elements
         home.append(a);
         burger.append(home);
+        burger.append(logout);
         burgerContainer.append(burgerBtn);
         burgerContainer.append(burger);
         this.container.insertBefore(burgerContainer, this.main);
@@ -686,5 +702,13 @@ class DocumentManager {
     emptyDisplayContainer(){
         const displayContainer = document.getElementById("displayContainer");
         displayContainer.innerHTML = "";
+    }
+    logout(){
+        sessionStorage.removeItem("email");
+        sessionStorage.removeItem("password");
+        sessionStorage.removeItem("domain");
+        sessionStorage.removeItem("phone");
+        sessionStorage.removeItem("username");
+        window.location.href = "logout.php";
     }
 }
