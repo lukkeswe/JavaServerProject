@@ -7,6 +7,27 @@ td {
     border-right: solid black 1px;
     font-size: 16px;
 }
+header {
+    border: solid black 1px;
+    width: 782px;
+}
+
+#language {
+    width: fit-content;
+    display: flex;
+    flex-direction: row;
+    padding: 5px;
+    padding-bottom: 0;
+}
+#language a {
+    border: solid black 1px;
+    border-bottom: none;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+}
+#language a:hover {
+    background-color: lightgray;
+}
 /* #basicInfo {
 
 } */
