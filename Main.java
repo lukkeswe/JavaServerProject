@@ -4,7 +4,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.util.*;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.nio.*;
 import com.sun.net.httpserver.HttpServer;
@@ -33,7 +35,8 @@ public class Main {
         server.createContext("/game", new GameAssetsHandler());
         server.createContext("/listAllFiles", new ListAllFiles());
         server.createContext("/deleteFile", new DeleteFileHandler());
-        server.setExecutor(null);
+        server.createContext("/create-session", new SessionHandler());
+        server.setExecutor(Executors.newFixedThreadPool(10));
         server.start();
         System.out.println("Server started on port " + port);
     }
@@ -691,8 +694,13 @@ public class Main {
                 // Set the response message
                 String response = "An error occured deleting the file";
                 // Verify the user
-                if (phpPassVerify(map.get("password"), map.get("email"))){
-                    // Define the path to the file
+                String sessionId = getJavaSessionId(exchange);
+                String email = SessionManager.getUsername(sessionId);
+                if (email == null) {
+                    exchange.sendResponseHeaders(403, -1);
+                    exchange.getResponseBody().close();
+                    return;
+                } else {
                     Path path = Paths.get(
                         "/home/lukas/users/" + 
                         map.get("user") + 
@@ -710,7 +718,7 @@ public class Main {
                             System.out.println("Error deleting file: " + e.getMessage());
                         }
                     } else response = "The file does not exist";
-                } else response = "User error";
+                }
                 //Create exchange
                 exchange.sendResponseHeaders(200, response.length());
                 OutputStream os = exchange.getResponseBody();
@@ -721,7 +729,76 @@ public class Main {
             }
         }
     }
-    
+    static class SessionHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException{
+            try {
+                if ("POST".equals(exchange.getRequestMethod())) {
+                    InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
+                    BufferedReader reader = new BufferedReader(isr);
+                    String body = reader.lines().collect(Collectors.joining());
+
+                    System.out.println("Recieved body: " + body);
+
+                    // Map<String, String> params = parseFormData(body);
+                    // String email = params.get("email");
+
+                    Map<String, String> map = parseJsonToMap(body);
+                    String email = map.get("email");
+
+                    if (email != null && !email.isEmpty()) {
+                        String sessionId = SessionManager.createSession(email);
+                        System.out.println("SessionId: " + sessionId);
+
+                        String response = sessionId;
+                        byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+                        System.out.println("Sending response...");
+                        exchange.getResponseHeaders().add("Content-Type", "text/plain");
+                        exchange.sendResponseHeaders(200, bytes.length);
+                        OutputStream os = exchange.getResponseBody();
+                        os.write(bytes);
+                        os.flush();
+                        os.close();
+                        System.out.println("Response sent");
+                    } else {
+                        exchange.sendResponseHeaders(400, -1);
+                    }
+                } else {
+                    exchange.sendResponseHeaders(405, -1);
+                }
+            } finally {
+                exchange.close();
+            }
+        }
+    }
+
+    public static String getJavaSessionId(HttpExchange exchange) {
+        List<String> cookieHeaders = exchange.getRequestHeaders().get("Cookie");
+        if (cookieHeaders != null) {
+            for (String header : cookieHeaders) {
+                System.out.println(header);
+                for (String cookie : header.split(";")) {
+                    String[] parts = cookie.trim().split("=");
+                    if (parts.length == 2 && parts[0].equals("javasession")) {
+                        return parts[1];
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    private static Map<String, String> parseFormData(String body){
+        Map<String, String> result = new HashMap<>();
+        for(String pair: body.split("&")){
+            String[] parts = pair.split("=");
+            if (parts.length == 2) {
+                String key      = URLDecoder.decode(parts[0], StandardCharsets.UTF_8);
+                String value    = URLDecoder.decode(parts[1], StandardCharsets.UTF_8);
+                result.put(key, value); 
+            }
+        }
+        return result;
+    }
     private static boolean phpIniSetup(String user){
         String iniPath = "/home/lukas/php_ini/";
         try {

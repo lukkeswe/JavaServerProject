@@ -1,12 +1,15 @@
 <?php
 require_once(__DIR__ . "/dbmanager.php");
+require_once(__DIR__. "/config.php");
 session_start();
+$endpoint = "";
 if (isset($_SESSION["email"]) && isset($_SESSION["password"])){
     $db = new DBmanager($_SESSION["email"], $_SESSION["password"]);
     if (!$db->login()){
     header("Location:server.php");
     exit();
     }
+    $endpoint = API_SERVER . "/create-session";
 } else if(isset($_POST["email"]) && isset($_POST["password"])) {
     $db = new DBmanager($_POST["email"], $_POST["password"]);
     if(!$db->login()){
@@ -15,6 +18,42 @@ if (isset($_SESSION["email"]) && isset($_SESSION["password"])){
     } else {
         $_SESSION["email"]      = $_POST["email"];
         $_SESSION["password"]   = $_POST["password"];
+        // Initialize cURL
+        $ch = curl_init();
+        // Target server
+        $url = API_SERVER . "/create-session";
+        curl_setopt($ch, CURLOPT_URL, $url);
+        // Set timeout
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        // Enable POST  method
+        curl_setopt($ch, CURLOPT_POST, true);
+        // Request data
+        $data = [
+            "email" => $_POST["email"]
+        ];
+        // Convert to JSON
+        $jsonData = json_encode($data);
+        // -- Set the request options --
+        // Return response as a string
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        // Prepare POST
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
+        // Set the header with apropriate content type and leangth
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Content-Length: ' . strlen($jsonData)
+        ]);
+        // Execute POST request
+        $response = curl_exec($ch);
+        // Error check
+        if ($response === false) {
+            echo "cURL Error: " . curl_error($ch);
+        } else {
+            setcookie("javasession", $response, 0);
+            echo "Server responded with: " . $response;
+        }
+        curl_close($ch);
     }
 } else {
     header("Location:server.php");
@@ -39,7 +78,7 @@ if (isset($_SESSION["email"]) && isset($_SESSION["password"])){
     </script>
 </head>
 <body>
-    <header><h1>サーバーチーム</h1></header>
+    <header><h1>サーバーチーム</h1><p><?php echo $endpoint; ?></p></header>
     <div id="container"></div>
     <footer><p>&copy;Norlund J. Lukas</p></footer>
     <script type="text/javascript">
