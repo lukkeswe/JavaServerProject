@@ -71,20 +71,16 @@ if (isset($_COOKIE["email"]) && isset($_COOKIE["password"])){
     <link rel="stylesheet" href="css/style.css">
     <script src="static/js/docmanager.js"></script>
     <title>Home</title>
-    <script type="text/javascript">
-        sessionStorage.setItem("username", "<?php echo $db->username;?>");
-        sessionStorage.setItem("email", "<?php echo $db->email; ?>");
-        sessionStorage.setItem("domain", "<?php echo $db->domain;?>");
-        sessionStorage.setItem("phone", <?php echo $db->phone;?>);
-        sessionStorage.setItem("password", "<?php echo $db->password;?>");
-    </script>
 </head>
 <body>
     <header><h1>サーバーチーム</h1><p><?php echo $endpoint; ?></p></header>
     <div id="container"></div>
     <footer><p>&copy;Norlund J. Lukas</p></footer>
     <script type="text/javascript">
-        if (sessionStorage.getItem("username")){
+        if (getCookie("javasession") != null){
+            sessionStorage.setItem("email", "<?php echo $db->email; ?>");
+            sessionStorage.setItem("domain", "<?php echo $db->domain;?>");
+            sessionStorage.setItem("phone", <?php echo $db->phone;?>);
             const dm = new DocumentManager();
             dm.flexContainer();
             dm.burgerMenu();
@@ -92,8 +88,17 @@ if (isset($_COOKIE["email"]) && isset($_COOKIE["password"])){
             dm.main = document.getElementById("main-content");
             dm.showUserDash();
         } else {
-            console.log("No username!");
+            console.log("No session!");
             
+        }
+
+        function getCookie(key){
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${key}=`);
+            if (parts.length === 2){
+                return parts.pop().split(";").shift();
+            }
+            return null;
         }
     </script>
 </body>

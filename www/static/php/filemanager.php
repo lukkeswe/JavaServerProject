@@ -41,7 +41,7 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
         const dm = new DocumentManager();
         dm.flexContainer();
         dm.fileBurgerMenu();
-        dm.getFiles(sessionStorage.getItem("username"));
+        dm.getFiles("<?php echo $db->username; ?>");
         document.getElementById("uploadBtn").addEventListener("click", async () => {
             const files = document.getElementById("filesContainer");
             files.innerHTML = "";

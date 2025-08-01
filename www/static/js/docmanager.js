@@ -441,8 +441,6 @@ class DocumentManager {
             burger.classList.toggle("inactive");
         });
         logout.addEventListener("click", () => {
-            sessionStorage.removeItem("email");
-            sessionStorage.removeItem("password");
             window.location.href = "logout.php";
         });
         // Append elements
