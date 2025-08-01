@@ -381,36 +381,45 @@ public class Main {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-                try {
-                        System.out.println("Reciving upload...");
-                        // Get the request headers
-                        Headers requestHeaders = exchange.getRequestHeaders();
-                        // Get the request content type
-                        String requestContentType = requestHeaders.getFirst("Content-Type");
-                        // Get the body in bytes
-                        byte[] body = inputStreamToBytes(exchange.getRequestBody());
-                        // Extract the headers from the body
-                        String bodyHeaders = extractHeaders(body, requestContentType);
-                        // Extract the body's content type
-                        String bodyContentType = extractContentType(bodyHeaders);
-                        System.out.println("bodyContentType: " + bodyContentType);
-                        String response = "";
-                        
-                        response = handleMultipartFormData(body, requestContentType);
-                        byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
+                // Verify the user
+                String sessionId = getJavaSessionId(exchange);
+                String email = SessionManager.getUsername(sessionId);
+                if (email == null) {
+                    exchange.sendResponseHeaders(403, -1);
+                    exchange.getResponseBody().close();
+                    return;
+                } else {
+                    try {
+                            System.out.println("Reciving upload...");
+                            // Get the request headers
+                            Headers requestHeaders = exchange.getRequestHeaders();
+                            // Get the request content type
+                            String requestContentType = requestHeaders.getFirst("Content-Type");
+                            // Get the body in bytes
+                            byte[] body = inputStreamToBytes(exchange.getRequestBody());
+                            // Extract the headers from the body
+                            String bodyHeaders = extractHeaders(body, requestContentType);
+                            // Extract the body's content type
+                            String bodyContentType = extractContentType(bodyHeaders);
+                            System.out.println("bodyContentType: " + bodyContentType);
+                            String response = "";
+                            
+                            response = handleMultipartFormData(body, requestContentType);
+                            byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
 
-                        exchange.sendResponseHeaders(200, responseBytes.length);
-                        OutputStream os = exchange.getResponseBody();
-                        os.write(response.getBytes());
-                        os.close();
-                    } catch (Exception e){
-                        e.printStackTrace();
-                        String response = "Upload failed: " + e.getMessage();
-                        exchange.sendResponseHeaders(500, response.length());
-                        OutputStream os = exchange.getResponseBody();
-                        os.write(response.getBytes());
-                        os.close();
-                    }
+                            exchange.sendResponseHeaders(200, responseBytes.length);
+                            OutputStream os = exchange.getResponseBody();
+                            os.write(response.getBytes());
+                            os.close();
+                        } catch (Exception e){
+                            e.printStackTrace();
+                            String response = "Upload failed: " + e.getMessage();
+                            exchange.sendResponseHeaders(500, response.length());
+                            OutputStream os = exchange.getResponseBody();
+                            os.write(response.getBytes());
+                            os.close();
+                        }
+                }
             } else {
                 exchange.sendResponseHeaders(405, -1);
             }
@@ -633,48 +642,57 @@ public class Main {
                 System.out.println("Recieved string: " + recivedString);
                 // Parse JSON into map
                 Map<String, String> map = parseJsonToMap(recivedString);
-                // Get lists of the files depending on the user
-                String userPath = "/home/lukas/users/" + map.get("user") + "/static/";
-                System.out.println("Listing files in: " + userPath);
+                // Verify the user
+                String sessionId = getJavaSessionId(exchange);
+                String email = SessionManager.getUsername(sessionId);
+                if (email == null) {
+                    exchange.sendResponseHeaders(403, -1);
+                    exchange.getResponseBody().close();
+                    return;
+                } else {
+                    // Get lists of the files depending on the user
+                    String userPath = "/home/lukas/users/" + map.get("user") + "/static/";
+                    System.out.println("Listing files in: " + userPath);
 
-                StringBuilder json = new StringBuilder();
-                String response = "";
+                    StringBuilder json = new StringBuilder();
+                    String response = "";
 
-                String[] types = {"html", "php", "css", "img", "js"};
-                boolean success = true;
-                json.append("[{");
-                for(String type : types){
-                    String[] files;
-                    try {
-                        files = filesList(userPath + type);
-                        json.append("\""). append(type).append("\": [");
-                        boolean first = true;
-                        for(String file : files){
-                            if (!first) {
-                                json.append(", ");
+                    String[] types = {"html", "php", "css", "img", "js"};
+                    boolean success = true;
+                    json.append("[{");
+                    for(String type : types){
+                        String[] files;
+                        try {
+                            files = filesList(userPath + type);
+                            json.append("\""). append(type).append("\": [");
+                            boolean first = true;
+                            for(String file : files){
+                                if (!first) {
+                                    json.append(", ");
+                                }
+                                json.append("\"").append(file).append("\"");
+                                first = false;
                             }
-                            json.append("\"").append(file).append("\"");
-                            first = false;
+                            json.append("], ");
+                        } catch (RuntimeException e){
+                            response = "[{\\\"status\\\": \\\"fail\\\"}]"; 
+                            success = false;
+                            break;
                         }
-                        json.append("], ");
-                    } catch (RuntimeException e){
-                        response = "[{\\\"status\\\": \\\"fail\\\"}]"; 
-                        success = false;
-                        break;
                     }
-                }
 
-                if (success) {
-                    json.append("\"status\": \"ok\"").append("}]");
-                    response = json.toString();
-                }
+                    if (success) {
+                        json.append("\"status\": \"ok\"").append("}]");
+                        response = json.toString();
+                    }
 
-                // Create exchange
-                exchange.getResponseHeaders().add("Content-Type", "application/json");
-                exchange.sendResponseHeaders(200, response.length());
-                OutputStream os = exchange.getResponseBody();
-                os.write(response.getBytes());
-                os.close();
+                    // Create exchange
+                    exchange.getResponseHeaders().add("Content-Type", "application/json");
+                    exchange.sendResponseHeaders(200, response.length());
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(response.getBytes());
+                    os.close();
+                }
             } else {
                 exchange.sendResponseHeaders(405, -1);
             }
