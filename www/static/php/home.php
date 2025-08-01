@@ -1,10 +1,10 @@
 <?php
 require_once(__DIR__ . "/dbmanager.php");
 require_once(__DIR__. "/config.php");
-session_start();
+
 $endpoint = "";
-if (isset($_SESSION["email"]) && isset($_SESSION["password"])){
-    $db = new DBmanager($_SESSION["email"], $_SESSION["password"]);
+if (isset($_COOKIE["email"]) && isset($_COOKIE["password"])){
+    $db = new DBmanager($_COOKIE["email"], $_COOKIE["password"]);
     if (!$db->login()){
     header("Location:server.php");
     exit();
@@ -16,8 +16,6 @@ if (isset($_SESSION["email"]) && isset($_SESSION["password"])){
         header("Location:server.php");
         exit();
     } else {
-        $_SESSION["email"]      = $_POST["email"];
-        $_SESSION["password"]   = $_POST["password"];
         // Initialize cURL
         $ch = curl_init();
         // Target server
@@ -48,9 +46,13 @@ if (isset($_SESSION["email"]) && isset($_SESSION["password"])){
         $response = curl_exec($ch);
         // Error check
         if ($response === false) {
-            echo "cURL Error: " . curl_error($ch);
+            header("Location:server.php");
+            exit();
         } else {
+            // Set the cookies
             setcookie("javasession", $response, 0);
+            setcookie("email", $_POST["email"], 0, "/", "", true, true);
+            setcookie("password", $_POST["password"], 0, "/", "", true, true);
             echo "Server responded with: " . $response;
         }
         curl_close($ch);
