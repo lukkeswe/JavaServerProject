@@ -240,12 +240,9 @@ class DocumentManager {
         database.innerHTML  = "データベース管理";
         file.innerHTML      = "ファイル管理";
         logout.innerHTML    = "ログアウト";
-        // Add class name
-        burger.classList.add("inactive");
         // Add event listeners
         burgerBtn.addEventListener("click", () => {
-            burger.classList.toggle("active");
-            burger.classList.toggle("inactive");
+            burger.classList.toggle("open");
         });
         user.addEventListener("click", ()=> {
             const dash = document.getElementById("dashBoard");

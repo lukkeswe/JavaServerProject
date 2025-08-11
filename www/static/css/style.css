@@ -86,6 +86,13 @@ main tr {
 }
 
 #burger {
+    width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: width 1s ease;
+}
+
+#burger.open {
     width: 150px;
 }
 
@@ -256,6 +263,10 @@ main {
 
 .inactive {
     display: none;
+}
+
+.text-hidden li {
+    opacity: 0;
 }
 
 footer {
