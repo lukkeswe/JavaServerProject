@@ -53,7 +53,6 @@ if (isset($_COOKIE["email"]) && isset($_COOKIE["password"])){
             setcookie("javasession", $response, 0);
             setcookie("email", $_POST["email"], 0, "/", "", true, true);
             setcookie("password", $_POST["password"], 0, "/", "", true, true);
-            echo "Server responded with: " . $response;
         }
         curl_close($ch);
     }
@@ -73,7 +72,7 @@ if (isset($_COOKIE["email"]) && isset($_COOKIE["password"])){
     <title>Home</title>
 </head>
 <body>
-    <header><h1>サーバーチーム</h1><p><?php echo $endpoint; ?></p></header>
+    <header><h1>サーバーチーム</h1></header>
     <div id="container"></div>
     <footer><p>&copy;Norlund J. Lukas</p></footer>
     <script type="text/javascript">

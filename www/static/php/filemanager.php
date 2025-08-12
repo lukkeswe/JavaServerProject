@@ -48,8 +48,8 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
             const loadImage = document.createElement("img");
             loadImage.src = "img/muppet-load.gif";
             files.append(loadImage);
-            const file = await uploadFile();
-            dm.getFiles(sessionStorage.getItem("username"));
+            const file = await uploadFile("<?php echo $db->username; ?>");
+            dm.getFiles("<?php echo $db->username; ?>");
             dm.emptyDisplayContainer();
             dm.showInfo(file);
             if (

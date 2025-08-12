@@ -1,4 +1,4 @@
-async function uploadFile() {
+async function uploadFile(user) {
     const files = document.getElementById('fileInput').files;
     const formData = new FormData();
     let htmlFiles = sessionStorage.getItem("htmlList");
@@ -26,7 +26,6 @@ async function uploadFile() {
         isValidFile = true;
     }
     if (isValidFile) {
-        const user = sessionStorage.getItem("username");
         formData.append("user", user);
 
         console.log("Uploading file...");
