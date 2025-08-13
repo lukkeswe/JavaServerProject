@@ -50,9 +50,10 @@ public class Main {
             String host = headers.getFirst("Host");
             // If there is no host
             if (host == null) host = "unknown";
-            
+            // Extract the request path
             String requestPath = exchange.getRequestURI().getPath();
             String[] requestSplit = requestPath.split("/");
+            
             // Define the path to the index file
             String htmlFilePath = "/home/lukas/JavaServerProject/www/static/html/index.html";
             // If no html file is specified target the index file
@@ -68,6 +69,18 @@ public class Main {
             // If the requested file is a html file
             if (requestPath.endsWith(".html")) {
                 targetFile = requestSplit[requestSplit.length - 1];
+            } else if (!requestPath.equals("/") && !requestPath.endsWith(".php")) {
+                // Check if the path points to real directory
+                Path fullPath = Paths.get(userPath + "/static/html" + requestPath);
+                if (!Files.exists(fullPath)){
+                    // Serve 404 if path does not exist
+                    response = Files.readAllBytes(Paths.get("www/static/html/notfound.html"));
+                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+                    exchange.sendResponseHeaders(404, response.length);
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(response);
+                    return;
+                }
             } else if (requestPath.endsWith(".php")){
                 // If the requested file is a php file
                 // Check if the file exist
