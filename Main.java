@@ -60,6 +60,8 @@ public class Main {
             String targetFile = "index.html";
             // Initial path
             String userPath = DomainsConfig.domainMap.getOrDefault(host, null);
+            // Set subfolder
+            String subfolder = "";
             if (userPath == null) {
                 userPath = "/home/lukas/JavaServerProject/www";
                 targetFile = "notfound.html";
@@ -69,18 +71,6 @@ public class Main {
             // If the requested file is a html file
             if (requestPath.endsWith(".html")) {
                 targetFile = requestSplit[requestSplit.length - 1];
-            } else if (!requestPath.equals("/") && !requestPath.endsWith(".php")) {
-                // Check if the path points to real directory
-                Path fullPath = Paths.get(userPath + "/static/html" + requestPath);
-                if (!Files.exists(fullPath)){
-                    // Serve 404 if path does not exist
-                    response = Files.readAllBytes(Paths.get("www/static/html/notfound.html"));
-                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
-                    exchange.sendResponseHeaders(404, response.length);
-                    OutputStream os = exchange.getResponseBody();
-                    os.write(response);
-                    return;
-                }
             } else if (requestPath.endsWith(".php")){
                 // If the requested file is a php file
                 // Check if the file exist
@@ -193,6 +183,30 @@ public class Main {
                     }
                 }
             }
+            
+            if (!requestPath.equals("/") && !requestPath.endsWith(".php")) {
+                // Check if the path points to real directory
+                Path fullPath = Paths.get(userPath, "static", "html" , requestPath);
+                if (!requestPath.endsWith(".html")) {
+                    fullPath = Paths.get(fullPath.toString(), targetFile);
+                }
+                
+                if (!Files.exists(fullPath)){
+                    // Serve 404 if path does not exist
+                    System.out.println("invalid path: " + fullPath.toString());
+                    response = Files.readAllBytes(Paths.get("www/static/html/notfound.html"));
+                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+                    exchange.sendResponseHeaders(404, response.length);
+                } else {
+                    response = Files.readAllBytes(fullPath);
+                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+                    exchange.sendResponseHeaders(200, response.length);
+                }
+                OutputStream os = exchange.getResponseBody();
+                os.write(response);
+                os.close();
+                return;
+            }
             // If the host is the development url
             if (
                 host.equalsIgnoreCase("dev.norlund-johan-lukas.com") || 
@@ -201,7 +215,7 @@ public class Main {
                 htmlFilePath = userPath;
             } else {
                 // Every other case other than the develpment url
-                htmlFilePath = userPath + "/static/html/" + targetFile;
+                htmlFilePath = userPath + "/static/html/" + subfolder + targetFile;
             }
             // If the requested file isn't a PHP file
             if (!requestPath.endsWith(".php")){
