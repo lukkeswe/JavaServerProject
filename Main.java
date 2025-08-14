@@ -184,7 +184,13 @@ public class Main {
                 }
             }
             
-            if (!requestPath.equals("/") && !requestPath.endsWith(".php")) {
+            // If the host is the development url
+            if (
+                host.equalsIgnoreCase("dev.norlund-johan-lukas.com") || 
+                host.equalsIgnoreCase("ludwig.norlund-johan-lukas.com")
+                ){
+                htmlFilePath = userPath;
+            } else if (!requestPath.equals("/") && !requestPath.endsWith(".php")) {
                 // Check if the path points to real directory
                 Path fullPath = Paths.get(userPath, "static", "html" , requestPath);
                 if (!requestPath.endsWith(".html")) {
@@ -206,13 +212,6 @@ public class Main {
                 os.write(response);
                 os.close();
                 return;
-            }
-            // If the host is the development url
-            if (
-                host.equalsIgnoreCase("dev.norlund-johan-lukas.com") || 
-                host.equalsIgnoreCase("ludwig.norlund-johan-lukas.com")
-                ){
-                htmlFilePath = userPath;
             } else {
                 // Every other case other than the develpment url
                 htmlFilePath = userPath + "/static/html/" + subfolder + targetFile;
