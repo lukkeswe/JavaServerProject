@@ -241,6 +241,10 @@ public class Main {
     private static final Set<String> IMAGE_EXTENSIONS = Set.of(
     ".gif", ".jpg", ".jpeg", ".JPG", ".png", ".webp", ".svg", ".bmp", ".ico", ".avif", ".heic", ".tiff"
     );
+
+    private static final Set<String> STATIC_EXTENSIONS = Set.of(
+        "/static/css", "/css", "/static/img", "/img", "/static/js", "/js"
+    );
     
     static class StaticFileHandler implements HttpHandler {
         @Override
@@ -255,12 +259,29 @@ public class Main {
             if (requestPath.endsWith(".php")) {
                 System.out.println("Blocked access to: " + requestPath);
                 exchange.sendResponseHeaders(403, -1);
+                return;
             }
             String[] requestPathSplits = requestPath.split("/");
             String fileName = requestPathSplits[requestPathSplits.length - 1];
             String contentType = "application/octet-stream";
-            String user = DomainsConfig.domainMap.getOrDefault(host, null);
-            String filePath = "www" + requestPath;
+            String user = DomainsConfig.domainMap.getOrDefault(host, "www");
+            String filePath = requestPath;
+            // Double check if the path is valid
+            Path resolvePath = Paths.get(user, filePath).normalize();
+            boolean validExtension = false;
+            // Compare with all the valid extensions
+            for (String extension : STATIC_EXTENSIONS) {
+                if (resolvePath.startsWith(Paths.get(user + extension))) {
+                    validExtension = true;
+                    break;
+                }
+            }
+            // Send "403" response if the path/extension is not valid
+            if (!validExtension) {
+                exchange.sendResponseHeaders(403, -1);
+                return;
+            }
+
             // Determine the MIME type and file path
             if (requestPath.endsWith(".js")) {
                 filePath = user + "/static/js/" + fileName;

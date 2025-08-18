@@ -21,3 +21,4 @@ Services:
 
 See logs: journalctl -u jlnserver.service -e
 
+Set capability: sudo setcap 'cap_net_bind_service=+ep' /usr/lib/jvm/java-17-openjdk-amd64/bin/java
