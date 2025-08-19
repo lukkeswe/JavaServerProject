@@ -211,15 +211,15 @@ public class Main {
                         // Set the full target path to the resolvePath
                         fullPath = resolvePath;
                         // Set the content type
-                        if (resolvePath.endsWith(".css")) contentType = "text/css";
-                        else if (resolvePath.endsWith(".js")) contentType = "application/javascript";
+                        if (resolvePath.toString().endsWith(".css")) contentType = "text/css";
+                        else if (resolvePath.toString().endsWith(".js")) contentType = "application/javascript";
                     } else {
                         // Check if the file is an image file
                         boolean isImage = false;
                         // Cycle through the supported file formats
                         for (String extension : IMAGE_EXTENSIONS){
                             // If the extention match a suppported format set the content type to "octet-stream"
-                            if (resolvePath.endsWith(extension)) {
+                            if (resolvePath.toString().endsWith(extension)) {
                                 isImage = true;
                                 contentType = "application/octet-stream";
                             }
