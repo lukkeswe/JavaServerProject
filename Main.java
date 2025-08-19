@@ -204,6 +204,18 @@ public class Main {
                 if (!requestPath.endsWith(".html")) {
                     // If the file isn't an HTML file, check if it is a valid static file format
                     Path resolvePath = Paths.get(userPath, "static", "html", requestPath).normalize();
+                    if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
+                        resolvePath = Paths.get(userPath, "static", "html", requestPath, "index.html").normalize();
+                        if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
+                            resolvePath = Paths.get(userPath, "static", "php", requestPath).normalize();
+                            System.out.println("resolvePath: " + resolvePath.toString());
+                            if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
+                                exchange.sendResponseHeaders(403, -1);
+                                return;
+                            }
+                    
+                        }
+                    }
                     // Check if it is a CSS or JavaScript file
                     if (resolvePath.toString().endsWith(".css") || resolvePath.toString().endsWith(".js")){
                         // Set the full target path to the resolvePath
