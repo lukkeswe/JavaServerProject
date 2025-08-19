@@ -41,6 +41,14 @@ public class Main {
         System.out.println("Server started on port " + port);
     }
 
+    private static final Set<String> IMAGE_EXTENSIONS = Set.of(
+    ".gif", ".jpg", ".jpeg", ".JPG", ".png", ".webp", ".svg", ".bmp", ".ico", ".avif", ".heic", ".tiff"
+    );
+
+    private static final Set<String> STATIC_EXTENSIONS = Set.of(
+        "/static", "/static/css", "/css", "/static/img", "/img", "/static/js", "/js"
+    );
+
     static class RootHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
@@ -191,10 +199,36 @@ public class Main {
                 ){
                 htmlFilePath = userPath;
             } else if (!requestPath.equals("/") && !requestPath.endsWith(".php")) {
+                System.out.println("Iregular path: " + requestPath);
                 // Check if the path points to real directory
                 Path fullPath = Paths.get(userPath, "static", "html" , requestPath);
+                String contentType = "text/html";
                 if (!requestPath.endsWith(".html")) {
-                    fullPath = Paths.get(fullPath.toString(), targetFile);
+                    // If the file isn't an HTML file, check if it is a valid static file format
+                    Path resolvePath = Paths.get(userPath, "static", "html", requestPath).normalize();
+                    // Check if it is a CSS or JavaScript file
+                    if (resolvePath.toString().endsWith(".css") || resolvePath.toString().endsWith(".js")){
+                        // Set the full target path to the resolvePath
+                        fullPath = resolvePath;
+                        // Set the content type
+                        if (resolvePath.endsWith(".css")) contentType = "text/css";
+                        else if (resolvePath.endsWith(".js")) contentType = "application/javascript";
+                    } else {
+                        // Check if the file is an image file
+                        boolean isImage = false;
+                        // Cycle through the supported file formats
+                        for (String extension : IMAGE_EXTENSIONS){
+                            // If the extention match a suppported format set the content type to "octet-stream"
+                            if (resolvePath.endsWith(extension)) {
+                                isImage = true;
+                                contentType = "application/octet-stream";
+                            }
+                        }
+                        // Set the full target path to the resolve path if the file is an image
+                        if (isImage) fullPath = resolvePath;
+                        // If the requested file isn't a supported static file, append "index.html" (fallback)
+                        else fullPath = Paths.get(fullPath.toString(), targetFile);
+                    }
                 }
                 
                 if (!Files.exists(fullPath)){
@@ -205,7 +239,7 @@ public class Main {
                     exchange.sendResponseHeaders(404, response.length);
                 } else {
                     response = Files.readAllBytes(fullPath);
-                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+                    exchange.getResponseHeaders().set("Content-Type", contentType + "; charset=UTF-8");
                     exchange.sendResponseHeaders(200, response.length);
                 }
                 OutputStream os = exchange.getResponseBody();
@@ -237,14 +271,6 @@ public class Main {
             os.close();
         }
     }
-
-    private static final Set<String> IMAGE_EXTENSIONS = Set.of(
-    ".gif", ".jpg", ".jpeg", ".JPG", ".png", ".webp", ".svg", ".bmp", ".ico", ".avif", ".heic", ".tiff"
-    );
-
-    private static final Set<String> STATIC_EXTENSIONS = Set.of(
-        "/static/css", "/css", "/static/img", "/img", "/static/js", "/js"
-    );
     
     static class StaticFileHandler implements HttpHandler {
         @Override
@@ -277,17 +303,30 @@ public class Main {
                 }
             }
             // Send "403" response if the path/extension is not valid
+            boolean unregularPath = false;
             if (!validExtension) {
-                exchange.sendResponseHeaders(403, -1);
-                return;
+                if (resolvePath.endsWith(".css") || resolvePath.endsWith(".js")) {
+                    unregularPath = true;
+                }
+                for (String extension : IMAGE_EXTENSIONS){
+                    if (resolvePath.endsWith(extension)) {
+                        unregularPath = true;
+                    }
+                }
+                if (!unregularPath) {
+                    exchange.sendResponseHeaders(403, -1);
+                    return;
+                }
             }
 
             // Determine the MIME type and file path
             if (requestPath.endsWith(".js")) {
-                filePath = user + "/static/js/" + fileName;
+                if (unregularPath) filePath = resolvePath.toString();
+                else filePath = user + "/static/js/" + fileName;
                 contentType = "application/javascript";
             } else if (requestPath.endsWith(".css")) {
-                filePath = user + "/static/css/" + fileName;
+                if (unregularPath) filePath = requestPath.toString();
+                else filePath = user + "/static/css/" + fileName;
                 contentType = "text/css";
             } 
             // If the file requested is an image file
