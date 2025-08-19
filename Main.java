@@ -78,13 +78,13 @@ public class Main {
             if (requestPath.endsWith(".html")) {
                 targetFile = requestSplit[requestSplit.length - 1];
             } else if (requestPath.endsWith(".php")){
+                Path resolvePath = Paths.get(userPath, "static", "php", requestPath);
                 // If the requested file is a php file
                 // Check if the file exist
-                Path phpPath = Paths.get(userPath + "/static/php/" + requestSplit[requestSplit.length - 1]);
-                if (!Files.exists(phpPath) || !Files.isRegularFile(phpPath)) {
+                if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
                     response = Files.readAllBytes(Paths.get("www/static/html/notfound.html"));
                 } else {
-                    String phpFilePath = userPath + "/static/php/" + requestSplit[requestSplit.length - 1];
+                    String phpFilePath = resolvePath.toString();
                     // Process the file with PHP if it is a PHP file
                     String username = PhpConfig.phpMap.getOrDefault(host, null);
                     String phpIniPath;
