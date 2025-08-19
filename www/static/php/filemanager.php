@@ -19,8 +19,8 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/style.css">
     <title>File manager</title>
-    <script src="static/upmanager.js"></script>
-    <script src="static/docmanager.js"></script>
+    <script src="static/js/upmanager.js"></script>
+    <script src="static/js/docmanager.js"></script>
 </head>
 <body>
     <header><h1>ファイル管理</h1></header>

@@ -16,6 +16,7 @@ header {
     width: fit-content;
     display: flex;
     flex-direction: row;
+    gap: 5px;
     padding: 5px;
     padding-bottom: 0;
 }
@@ -24,6 +25,7 @@ header {
     border-bottom: none;
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
+    padding: 5px;
 }
 #language a:hover {
     background-color: lightgray;
