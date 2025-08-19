@@ -68,8 +68,6 @@ public class Main {
             String targetFile = "index.html";
             // Initial path
             String userPath = DomainsConfig.domainMap.getOrDefault(host, null);
-            // Set subfolder
-            String subfolder = "";
             if (userPath == null) {
                 userPath = "/home/lukas/JavaServerProject/www";
                 targetFile = "notfound.html";
@@ -248,7 +246,7 @@ public class Main {
                 return;
             } else {
                 // Every other case other than the develpment url
-                htmlFilePath = userPath + "/static/html/" + subfolder + targetFile;
+                htmlFilePath = userPath + "/static/html/" + targetFile;
             }
             // If the requested file isn't a PHP file
             if (!requestPath.endsWith(".php")){
