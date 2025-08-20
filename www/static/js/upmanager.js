@@ -40,6 +40,31 @@ async function uploadFile(user) {
     }
 }
 
+async function uploadFolder(user){
+    const input = document.getElementById("folderInput");
+    const files = input.files;
+
+    if (files.lenght === 0){
+        alert("フォルダが選択していません！")
+        return;
+    }
+
+    const formData = new FormData();
+
+    formData.append("user", user); //<-- Here
+
+    for (const file of files){
+        formData.append("files[]", file, file.webkitRelativePath);
+    }
+
+    const response = await fetch("/uploadFolder", {
+        method: "POST",
+        body: formData
+    });
+
+    alert(await response.text());
+}
+
 function isValidFileName(fileName){
     if (!fileName || fileName.trim() === "") return false;
     const validPattern = /^[a-zA-Z0-9._-]+$/;

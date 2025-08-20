@@ -27,9 +27,19 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
     <div id="container">
         <main id="main-content">
             <div id="upload-container">
-                <input type="file" id="fileInput" style="border: solid black 1px;">
-                <br>
-                <button id="uploadBtn" class="btn">アップロード</button>
+                <button id="uploadBackBtn" style="display: none;">back</button>
+                <div id="fileUploadContainer" style="display: none;">
+                    <input type="file" id="fileInput" style="border: solid black 1px;">
+                    <button id="uploadBtn" class="btn">アップロード</button>
+                </div>
+                <div id="folderUploadContainer" style="display: none;">
+                    <input type="file" id="folderInput" webkitdirectory multiple style="border: solid black 1px;">
+                    <button id="uploadFolderBtn" class="btn">アップロード</button>
+                </div>
+                <div id="uploadBtnsContainer" style="display: inline-block;">
+                    <button id="fileBtn" class="btn">file</button>
+                    <button id="folderBtn" class="btn">folder</button>
+                </div>
                 <div id="displayContainer"></div>
             </div>
             <div id="filesContainer"></div>
@@ -42,6 +52,32 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
         dm.flexContainer();
         dm.fileBurgerMenu();
         dm.getFiles("<?php echo $db->username; ?>");
+        document.getElementById("fileBtn").addEventListener("click", () => {
+            const btnContainer = document.getElementById("uploadBtnsContainer");
+            btnContainer.style.display = "none";
+            const fileBtnCon = document.getElementById("fileUploadContainer");
+            fileBtnCon.style.display = "block";
+            const backBtn = document.getElementById("uploadBackBtn");
+            backBtn.style.display = "block";
+        });
+        document.getElementById("folderBtn").addEventListener("click", () => {
+            const btnContainer = document.getElementById("uploadBtnsContainer");
+            btnContainer.style.display = "none";
+            const fileBtnCon = document.getElementById("folderUploadContainer");
+            fileBtnCon.style.display = "block";
+            const backBtn = document.getElementById("uploadBackBtn");
+            backBtn.style.display = "block";
+        });
+        document.getElementById("uploadBackBtn").addEventListener("click", () => {
+            const backBtn = document.getElementById("uploadBackBtn");
+            backBtn.style.display = "none";
+            const fileCon = document.getElementById("fileUploadContainer");
+            fileCon.style.display = "none";
+            const folderCon = document.getElementById("folderUploadContainer");
+            folderCon.style.display = "none";
+            const btnCon = document.getElementById("uploadBtnsContainer");
+            btnCon.style.display = "block";
+        });
         document.getElementById("uploadBtn").addEventListener("click", async () => {
             const files = document.getElementById("filesContainer");
             files.innerHTML = "";
@@ -63,6 +99,18 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
                 dm.showImage(file, "https://" + sessionStorage["domain"] + "/");
             }
         });
+        document.getElementById("uploadFolderBtn").addEventListener("click", async () => {
+            const files = document.getElementById("filesContainer");
+            files.innerHTML = "";
+            const loadImage = document.createElement("img");
+            loadImage.src = "img/muppet-load.gif";
+            files.append(loadImage);
+            const folder = await uploadFolder("<?php echo $db->username; ?>");
+            dm.getFiles("<?php echo $db->username; ?>");
+            dm.emptyDisplayContainer();
+            dm.showInfo();
+        });
+
     </script>
 </body>
 </html>
