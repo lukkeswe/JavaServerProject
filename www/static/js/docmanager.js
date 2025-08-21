@@ -706,4 +706,30 @@ class DocumentManager {
         sessionStorage.removeItem("username");
         window.location.href = "logout.php";
     }
+    showFileUpload(){
+        const btnContainer = document.getElementById("uploadBtnsContainer");
+        btnContainer.style.display = "none";
+        const fileBtnCon = document.getElementById("fileUploadContainer");
+        fileBtnCon.style.display = "block";
+        const backBtn = document.getElementById("uploadBackBtn");
+        backBtn.style.display = "block";
+    }
+    showFolderUpload(){
+        const btnContainer = document.getElementById("uploadBtnsContainer");
+        btnContainer.style.display = "none";
+        const fileBtnCon = document.getElementById("folderUploadContainer");
+        fileBtnCon.style.display = "block";
+        const backBtn = document.getElementById("uploadBackBtn");
+        backBtn.style.display = "block";
+    }
+    uploadBack(){
+        const backBtn = document.getElementById("uploadBackBtn");
+        backBtn.style.display = "none";
+        const fileCon = document.getElementById("fileUploadContainer");
+        fileCon.style.display = "none";
+        const folderCon = document.getElementById("folderUploadContainer");
+        folderCon.style.display = "none";
+        const btnCon = document.getElementById("uploadBtnsContainer");
+        btnCon.style.display = "block";
+    }
 }

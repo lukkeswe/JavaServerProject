@@ -36,7 +36,7 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
                     <input type="file" id="folderInput" webkitdirectory multiple style="border: solid black 1px;">
                     <button id="uploadFolderBtn" class="btn">アップロード</button>
                 </div>
-                <div id="uploadBtnsContainer" style="display: inline-block;">
+                <div id="uploadBtnsContainer" style="display: flex;">
                     <button id="fileBtn" class="btn">file</button>
                     <button id="folderBtn" class="btn">folder</button>
                 </div>
@@ -53,30 +53,13 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
         dm.fileBurgerMenu();
         dm.getFiles("<?php echo $db->username; ?>");
         document.getElementById("fileBtn").addEventListener("click", () => {
-            const btnContainer = document.getElementById("uploadBtnsContainer");
-            btnContainer.style.display = "none";
-            const fileBtnCon = document.getElementById("fileUploadContainer");
-            fileBtnCon.style.display = "block";
-            const backBtn = document.getElementById("uploadBackBtn");
-            backBtn.style.display = "block";
+            dm.showFileUpload();
         });
         document.getElementById("folderBtn").addEventListener("click", () => {
-            const btnContainer = document.getElementById("uploadBtnsContainer");
-            btnContainer.style.display = "none";
-            const fileBtnCon = document.getElementById("folderUploadContainer");
-            fileBtnCon.style.display = "block";
-            const backBtn = document.getElementById("uploadBackBtn");
-            backBtn.style.display = "block";
+            dm.showFolderUpload();
         });
         document.getElementById("uploadBackBtn").addEventListener("click", () => {
-            const backBtn = document.getElementById("uploadBackBtn");
-            backBtn.style.display = "none";
-            const fileCon = document.getElementById("fileUploadContainer");
-            fileCon.style.display = "none";
-            const folderCon = document.getElementById("folderUploadContainer");
-            folderCon.style.display = "none";
-            const btnCon = document.getElementById("uploadBtnsContainer");
-            btnCon.style.display = "block";
+            dm.uploadBack();
         });
         document.getElementById("uploadBtn").addEventListener("click", async () => {
             const files = document.getElementById("filesContainer");
