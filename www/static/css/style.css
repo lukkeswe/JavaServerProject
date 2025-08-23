@@ -145,19 +145,25 @@ main {
     padding: 10px;
     border: solid black 1px;
     height: fit-content;
+    min-width: 320px;
 }
 
 #uploadBtn {
     margin-top: 20px;
 }
 
-#filesContainer {
-    
+#filesContainer ul {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
 }
 
 #filesContainer li {
     display: flex;
-    margin: 5px 0;
+    flex-direction: column;
+    width: 100px;
+    height: 100px;
+    margin: 5px;
 }
 
 #filesContainer li:hover {
@@ -181,6 +187,7 @@ main {
 #htmlList li span {
     background-color: red;
     color: white;
+    height: 100%;
 }
 
 #htmlList li span:hover {
@@ -213,6 +220,7 @@ main {
 
 #phpList li span {
     background-color: blueviolet;
+    height: 100%;
 }
 
 #phpList li span:hover {
