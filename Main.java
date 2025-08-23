@@ -1029,7 +1029,9 @@ public class Main {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(path))){
             List<String> files = new ArrayList<>();
             for (Path entry : stream){
-                if (!Files.isDirectory(entry)){
+                if (Files.isDirectory(entry)){
+                    files.add(entry.getFileName().toString() + "/");
+                } else {
                     files.add(entry.getFileName().toString());
                 }
             }
