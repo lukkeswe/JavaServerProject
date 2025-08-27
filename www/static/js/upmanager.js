@@ -51,22 +51,59 @@ async function uploadFolder(user){
 
     const formData = new FormData();
 
-    formData.append("user", user); //<-- Here
+    formData.append("user", user);
+
+    let htmlFiles = sessionStorage.getItem("htmlList");
+    let fileName;
+    let isValidFile = false;
+    let parentFolder;
 
     for (const file of files){
+        if (!isValidPath(file.webkitRelativePath)) {
+            alert(`「${file.webkitRelativePath}」は無効なフォルダ/ファイル名です。`);
+            isValidFile = false;
+            break;
+        }
+
+        const parts = file.webkitRelativePath.split("/");
+        parentFolder = parts[0] + "/";
+        
         formData.append("files[]", file, file.webkitRelativePath);
+        fileName = file.name;
+        isValidFile = true;
     }
-
-    const response = await fetch("/uploadFolder", {
-        method: "POST",
-        body: formData
-    });
-
-    alert(await response.text());
+    if (htmlFiles.includes(parentFolder)) {
+        const replace = confirm(`「${parentFolder}」 のフォルダが存在しています。上書きますか？`);
+        if (!replace) isValidFile = false;
+    }
+    if (isValidFile){
+        const response = await fetch("/uploadFolder", {
+            method: "POST",
+            body: formData
+        });
+        alert(await response.text());
+    }
+    
 }
 
 function isValidFileName(fileName){
     if (!fileName || fileName.trim() === "") return false;
     const validPattern = /^[a-zA-Z0-9._-]+$/;
     return validPattern.test(fileName);
+}
+
+function isValidPath(path) {
+    if (!path || path.trim() === "") return false;
+
+    const validPattern = /^[a-zA-Z0-9._-]+$/;
+
+    // Split into parts by "/"
+    const parts = path.split("/");
+
+    for (const part of parts) {
+        if (!validPattern.test(part)){
+            return false;
+        }
+    }
+    return true;
 }

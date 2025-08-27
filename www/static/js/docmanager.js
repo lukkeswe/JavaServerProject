@@ -769,6 +769,7 @@ class DocumentManager {
         display.append(img);
     }
     showInfo(filename){
+        if (!filename) return;
         // Get the display element
         const display = document.getElementById("displayContainer");
         // Create the information elements
