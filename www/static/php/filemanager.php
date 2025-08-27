@@ -48,6 +48,7 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
     
     <footer><p>&copy;Norlund J. Lukas</p></footer>
     <script type="text/javascript">
+        sessionStorage.setItem("user", "<?php echo $db->username; ?>")
         const dm = new DocumentManager();
         dm.flexContainer();
         dm.fileBurgerMenu();

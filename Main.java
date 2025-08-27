@@ -787,7 +787,12 @@ public class Main {
                     return;
                 } else {
                     // Get lists of the files depending on the user
+                    boolean iregularPath = false;
                     String userPath = "/home/lukas/users/" + map.get("user") + "/static/";
+                    if (!map.get("path").equals("") && map.get("path") != null) {
+                        userPath = userPath + "html/" + map.get("path");
+                        iregularPath = true;
+                    }
                     System.out.println("Listing files in: " + userPath);
 
                     StringBuilder json = new StringBuilder();
@@ -796,31 +801,69 @@ public class Main {
                     String[] types = {"html", "php", "css", "img", "js"};
                     boolean success = true;
                     json.append("[{");
-                    for(String type : types){
+                    if (!iregularPath){
+                        for(String type : types){
+                            String[] files;
+                            try {
+                                files = filesList(userPath + type);
+                                json.append("\""). append(type).append("\": [");
+                                boolean first = true;
+                                for(String file : files){
+                                    if (!first) {
+                                        json.append(", ");
+                                    }
+                                    json.append("\"").append(file).append("\"");
+                                    first = false;
+                                }
+                                json.append("], ");
+                            } catch (RuntimeException e){
+                                System.err.println(e);
+                                response = "[{\\\"status\\\": \\\"fail\\\"}]"; 
+                                success = false;
+                                break;
+                            }
+                        }
+                    } else {
                         String[] files;
                         try {
-                            files = filesList(userPath + type);
-                            json.append("\""). append(type).append("\": [");
-                            boolean first = true;
-                            for(String file : files){
-                                if (!first) {
-                                    json.append(", ");
+                            files = filesList(userPath);
+                            for (String type : types){
+                                json.append("\"").append(type).append("\": [");
+                                boolean first = true;
+                                for (String file : files){
+                                    if(!first){
+                                        json.append(", ");
+                                    }
+                                    if (file.endsWith("." + type) || (file.endsWith("/") && type.equals("html"))) {
+                                        json.append("\"").append(file).append("\"");
+                                        first = false;
+                                    } else if (type.equals("img")) {
+                                        for (String extension : IMAGE_EXTENSIONS) {
+                                            if (file.toLowerCase().endsWith(extension)) {
+                                                json.append("\"").append(file).append("\"");
+                                                first = false;
+                                            }
+                                        }
+                                    }
                                 }
-                                json.append("\"").append(file).append("\"");
-                                first = false;
+                                json.append("],");
                             }
-                            json.append("], ");
-                        } catch (RuntimeException e){
+                        } catch (RuntimeException e) {
+                            System.err.println(e);
                             response = "[{\\\"status\\\": \\\"fail\\\"}]"; 
                             success = false;
-                            break;
                         }
+                        
+
                     }
+                    
 
                     if (success) {
                         json.append("\"status\": \"ok\"").append("}]");
                         response = json.toString();
                     }
+
+                    System.out.println("Sending back: " + response.toString());
 
                     // Create exchange
                     exchange.getResponseHeaders().add("Content-Type", "application/json");

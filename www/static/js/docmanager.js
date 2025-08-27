@@ -552,10 +552,13 @@ class DocumentManager {
         editContainer.append(createBtn);
         this.main.append(editContainer);
     }
-    async getFiles(user){
+    async getFiles(user, path = ""){
         console.log("Fetching files...");
         
-        let requestObject = {"user" : user};
+        let requestObject = {
+            "user" : user,
+            "path" : path
+        };
         try {
             const response = await fetch("/listAllFiles", {
                 method  : 'POST',
@@ -567,7 +570,26 @@ class DocumentManager {
             }
             const data = await response.json();
             console.log("Response from server:", data);
-            
+            const currentPath = document.getElementById("path");
+            if (currentPath != null && currentPath.textContent != "") {
+                const backBtn = document.createElement("button");
+                backBtn.innerHTML = "↑";
+                backBtn.className = "btn";
+                backBtn.addEventListener("click", () => {
+                    const slice = currentPath.textContent.split("/");
+                    console.log("slice: " + slice);
+                    let previousPath = "";
+                    for (let i = 0; i < slice.length - 2; i++) {
+                        previousPath = previousPath + slice[i] + "/";
+                    }
+                    console.log("targetPath: " + previousPath);
+                    
+                    this.getFiles(sessionStorage.getItem("user"), previousPath);
+                    currentPath.innerHTML = previousPath;
+                    backBtn.remove();
+                });
+                document.getElementById("displayContainer").append(backBtn);
+            }
             const filesContainer    = document.getElementById("filesContainer");
             filesContainer.innerHTML = "";
             // List of supported file types
@@ -598,25 +620,50 @@ class DocumentManager {
                         // Remove the element
                         fileObject.remove();
                     });
-                    
                     // If the file is a HTML or PHP file, add a hyper-link to that file
                     if (type == "html" || type == "php"){
+                        
                         if (fileName.endsWith("/")){
                             const span = document.createElement("span");
                             span.innerHTML = fileName;
                             span.addEventListener("click", () => {
                                 this.emptyDisplayContainer();
+                                if (currentPath != null && currentPath.textContent.endsWith("/")) {
+                                    this.getFiles(sessionStorage.getItem("user"), currentPath.textContent + fileName);
+                                } else {
+                                    this.getFiles(sessionStorage.getItem("user"), fileName);
+                                }
                                 this.appendElementToDisplayContainer(erase);
                                 const path = document.createElement("p");
-                                path.innerHTML = fileName;
+                                path.id = "path";
+                                if (currentPath != null && currentPath.textContent.endsWith("/")) {
+                                    path.innerHTML = currentPath.textContent + fileName;
+                                } else {
+                                    path.innerHTML = fileName;
+                                }
                                 this.appendElementToDisplayContainer(path);
+                            });
+                            fileObject.append(span);
+                        } else if(fileName.endsWith(".css")) {
+                            const span = document.createElement("span");
+                            span.className = "cssIcon";
+                            span.innerHTML = fileName;
+                            span.addEventListener("click", () => {
+                                this.emptyDisplayContainer();
+                                this.appendElementToDisplayContainer(currentPath);
+                                this.appendElementToDisplayContainer(erase);
+                                this.showInfo(fileName);
                             });
                             fileObject.append(span);
                         } else {
                             // Create hyper-link
                             const a = document.createElement("a");
                             // Add a url
-                            a.href = "https://" + sessionStorage["domain"] + "/" + fileName;
+                            if (currentPath != null && currentPath.textContent.endsWith("/")) {
+                                a.href = "https://" + sessionStorage["domain"] + "/" + currentPath.textContent + fileName;
+                            } else {
+                                a.href = "https://" + sessionStorage["domain"] + "/" + fileName;
+                            }
                             // Add setting
                             a.target = "_blank";
                             // Add event listener
@@ -628,6 +675,7 @@ class DocumentManager {
                             // Add eventlistener
                             a.addEventListener("click", () => {
                                 this.emptyDisplayContainer();
+                                this.appendElementToDisplayContainer(erase);
                                 this.showInfo(fileName);
                             });
                         }
