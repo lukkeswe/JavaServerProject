@@ -570,6 +570,8 @@ class DocumentManager {
             }
             const data = await response.json();
             console.log("Response from server:", data);
+            const pathContainer = document.getElementById("pathContainer");
+            const optionsContainer = document.getElementById("optionsContainer");
             const currentPath = document.getElementById("path");
             const backBtn = document.createElement("button");
             if (currentPath != null && currentPath.textContent != "") {
@@ -588,7 +590,9 @@ class DocumentManager {
                     currentPath.innerHTML = previousPath;
                     backBtn.remove();
                 });
-                document.getElementById("displayContainer").append(backBtn);
+                document.getElementById("displayContainer").innerHTML = "";
+                optionsContainer.innerHTML = "";
+                optionsContainer.append(backBtn);
             }
             const filesContainer    = document.getElementById("filesContainer");
             filesContainer.innerHTML = "";
@@ -641,7 +645,8 @@ class DocumentManager {
                                 } else {
                                     path.innerHTML = fileName;
                                 }
-                                this.appendElementToDisplayContainer(path);
+                                pathContainer.innerHTML = "";
+                                pathContainer.append(path);
                             });
                             fileObject.append(span);
                         } else if(fileName.endsWith(".css")) {
@@ -650,9 +655,11 @@ class DocumentManager {
                             span.innerHTML = fileName;
                             span.addEventListener("click", () => {
                                 this.emptyDisplayContainer();
-                                this.appendElementToDisplayContainer(currentPath);
-                                this.appendElementToDisplayContainer(erase);
                                 this.showInfo(fileName);
+                                
+                                optionsContainer.innerHTML = "";
+                                optionsContainer.append(backBtn);
+                                optionsContainer.append(erase);
                             });
                             fileObject.append(span);
                         } else {
@@ -686,11 +693,15 @@ class DocumentManager {
                         if (type == "img") {
                             name.addEventListener("click", () => {
                                 this.emptyDisplayContainer();
-                                this.appendElementToDisplayContainer(currentPath);
-                                this.appendElementToDisplayContainer(backBtn);
-                                this.appendElementToDisplayContainer(erase);
                                 this.showInfo(fileName);
                                 this.showImage(fileName, "https://" + sessionStorage.getItem("domain") + "/");
+
+                                pathContainer.innerHTML = "";
+                                pathContainer.append(currentPath);
+                                
+                                optionsContainer.innerHTML = "";
+                                optionsContainer.append(backBtn);
+                                optionsContainer.append(erase);
                             });
                         } else if(type == "css" || type == "js"){
                             // If the file is a css or JavaScript file

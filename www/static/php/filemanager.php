@@ -27,6 +27,7 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
     <div id="container">
         <main id="main-content">
             <div id="upload-container">
+                <div id="pathContainer"></div>
                 <button id="uploadBackBtn" style="display: none;">back</button>
                 <div id="fileUploadContainer" style="display: none;">
                     <input type="file" id="fileInput" style="border: solid black 1px;">
@@ -40,6 +41,7 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
                     <button id="fileBtn" class="btn">file</button>
                     <button id="folderBtn" class="btn">folder</button>
                 </div>
+                <div id="optionsContainer"></div>
                 <div id="displayContainer"></div>
             </div>
             <div id="filesContainer"></div>
