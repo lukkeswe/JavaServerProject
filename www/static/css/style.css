@@ -148,6 +148,10 @@ main {
     min-width: 320px;
 }
 
+#optionsContainer {
+    display: flex;
+}
+
 #uploadBtn {
     margin-top: 20px;
 }
@@ -200,11 +204,6 @@ main {
 
 #cssList li span:hover {
     background-color: rgb(208, 208, 0);
-}
-
-#htmlList li span.cssIcon {
-    background-color: yellow;
-    color: black;
 }
 
 #imgList li span {
