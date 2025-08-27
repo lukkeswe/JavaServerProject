@@ -713,10 +713,6 @@ class DocumentManager {
                             });
                         }
                     }
-                    
-                    // Append the delete button
-                    //fileObject.append(erase);
-                    
                     ul.append(fileObject);
                     list.push(fileName);
                 }
@@ -765,6 +761,7 @@ class DocumentManager {
         const display = document.getElementById("displayContainer");
         const img = document.createElement("img");
         const currentPath = document.getElementById("path");
+        img.loading = "lazy";
         img.src = domain + "img/" + filename;
         if (currentPath != null && currentPath.textContent != "") {
             img.src = domain + currentPath.textContent + filename;
