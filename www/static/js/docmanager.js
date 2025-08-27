@@ -571,8 +571,8 @@ class DocumentManager {
             const data = await response.json();
             console.log("Response from server:", data);
             const currentPath = document.getElementById("path");
+            const backBtn = document.createElement("button");
             if (currentPath != null && currentPath.textContent != "") {
-                const backBtn = document.createElement("button");
                 backBtn.innerHTML = "↑";
                 backBtn.className = "btn";
                 backBtn.addEventListener("click", () => {
@@ -686,9 +686,11 @@ class DocumentManager {
                         if (type == "img") {
                             name.addEventListener("click", () => {
                                 this.emptyDisplayContainer();
+                                this.appendElementToDisplayContainer(currentPath);
+                                this.appendElementToDisplayContainer(backBtn);
                                 this.appendElementToDisplayContainer(erase);
                                 this.showInfo(fileName);
-                                this.showImage(fileName, "https://" + sessionStorage["domain"] + "/");
+                                this.showImage(fileName, "https://" + sessionStorage.getItem("domain") + "/");
                             });
                         } else if(type == "css" || type == "js"){
                             // If the file is a css or JavaScript file
@@ -751,7 +753,11 @@ class DocumentManager {
     showImage(filename, domain){
         const display = document.getElementById("displayContainer");
         const img = document.createElement("img");
+        const currentPath = document.getElementById("path");
         img.src = domain + "img/" + filename;
+        if (currentPath != null && currentPath.textContent != "") {
+            img.src = domain + currentPath.textContent + filename;
+        }
         display.append(img);
     }
     showInfo(filename){
