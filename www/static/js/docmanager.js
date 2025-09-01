@@ -1,9 +1,10 @@
 class DocumentManager {
-    constructor() {
+    constructor(user) {
         this.container  = document.getElementById("container");
         this.main       = document.getElementById("main-content");
         this.table      = document.getElementById("table");
         this.db;
+        this.user       = user;
     }
     flexContainer(){
         this.container.style.display = "flex";
@@ -574,13 +575,14 @@ class DocumentManager {
             const optionsContainer = document.getElementById("optionsContainer");
             const currentPath = document.getElementById("path");
             const backBtn = document.createElement("button");
+            let previousPath = "";
             if (currentPath != null && currentPath.textContent != "") {
                 backBtn.innerHTML = "↑";
                 backBtn.className = "btn";
                 backBtn.addEventListener("click", () => {
                     const slice = currentPath.textContent.split("/");
                     console.log("slice: " + slice);
-                    let previousPath = "";
+                    
                     for (let i = 0; i < slice.length - 2; i++) {
                         previousPath = previousPath + slice[i] + "/";
                     }
@@ -617,8 +619,16 @@ class DocumentManager {
                     erase.className = "btn";
                     // Add an event listener
                     erase.addEventListener("click", async () => {
+                        const path = document.getElementById("path");
                         // Call the delete function
-                        await this.deleteFile(fileName, type);
+                        if (path != null && path.textContent != "") {
+                            console.log("Sending path: " + path.textContent);
+                            await this.deleteFile(fileName, type, path.textContent);
+                        } else {
+                            console.log("No path: " + path.textContent);
+                            await this.deleteFile(fileName, type);
+                        }
+                        
                         // Empty the display container
                         this.emptyDisplayContainer();
                         // Remove the element
@@ -726,15 +736,14 @@ class DocumentManager {
             console.error(error);
         }
     }
-    async deleteFile(file, type){
+    async deleteFile(file, type, path = ""){
         let requsetObject = {
             "filename"  : file,
-            "user"      : sessionStorage.getItem("username"),
-            "email"     : sessionStorage.getItem("email"),
-            "password"  : sessionStorage.getItem("password"),
-            "type"      : type
+            "type"      : type,
+            "path"      : path,
+            "user"      : this.user
         }
-        console.log(`Deleting ${file}`);
+        console.log(`Deleting ${path + file}`);
         let response = await fetch("/deleteFile", {
             method  : "POST",
             headers : {"Content-Type": "application/json"},

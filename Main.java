@@ -892,18 +892,32 @@ public class Main {
                 // Verify the user
                 String sessionId = getJavaSessionId(exchange);
                 String email = SessionManager.getUsername(sessionId);
+
+                Path path;
                 if (email == null) {
                     exchange.sendResponseHeaders(403, -1);
                     exchange.getResponseBody().close();
                     return;
                 } else {
-                    Path path = Paths.get(
-                        "/home/lukas/users/" + 
-                        map.get("user") + 
-                        "/static/" + 
-                        map.get("type") +
-                        "/" +
-                        map.get("filename"));
+                    System.out.println("Recived path: " + map.get("path"));
+                    if (map.get("path") != null && !map.get("path").equals("")){
+                        path = Paths.get(
+                            "/home/lukas/users/" +
+                            map.get("user") +
+                            "/static/html/" +
+                            map.get("path") +
+                            map.get("filename")
+                        );
+                    } else {
+                        path = Paths.get(
+                            "/home/lukas/users/" + 
+                            map.get("user") + 
+                            "/static/" + 
+                            map.get("type") +
+                            "/" +
+                            map.get("filename"));
+                    }
+                    System.out.println("Delete target: " + path.toString());
                     // Make sure the file exist
                     if (Files.exists(path)) {
                         // Delete the file
@@ -914,6 +928,7 @@ public class Main {
                             System.out.println("Error deleting file: " + e.getMessage());
                         }
                     } else response = "The file does not exist";
+                    
                 }
                 //Create exchange
                 exchange.sendResponseHeaders(200, response.length());
