@@ -1,4 +1,4 @@
-async function uploadFile(user) {
+async function uploadFile(user, path = "") {
     const files = document.getElementById('fileInput').files;
     const formData = new FormData();
     let htmlFiles = sessionStorage.getItem("htmlList");
@@ -27,7 +27,7 @@ async function uploadFile(user) {
     }
     if (isValidFile) {
         formData.append("user", user);
-
+        formData.append("path", path);
         console.log("Uploading file...");
         
         await fetch('/upload', {
@@ -40,7 +40,7 @@ async function uploadFile(user) {
     }
 }
 
-async function uploadFolder(user){
+async function uploadFolder(user, path = ""){
     const input = document.getElementById("folderInput");
     const files = input.files;
 
@@ -52,6 +52,7 @@ async function uploadFolder(user){
     const formData = new FormData();
 
     formData.append("user", user);
+    formData.append("path", path);
 
     let htmlFiles = sessionStorage.getItem("htmlList");
     let fileName;

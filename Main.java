@@ -831,15 +831,14 @@ public class Main {
                                 json.append("\"").append(type).append("\": [");
                                 boolean first = true;
                                 for (String file : files){
-                                    if(!first){
-                                        json.append(", ");
-                                    }
                                     if (file.endsWith("." + type) || (file.endsWith("/") && type.equals("html"))) {
+                                        if(!first) json.append(", ");
                                         json.append("\"").append(file).append("\"");
                                         first = false;
                                     } else if (type.equals("img")) {
                                         for (String extension : IMAGE_EXTENSIONS) {
                                             if (file.toLowerCase().endsWith(extension)) {
+                                                if(!first) json.append(", ");
                                                 json.append("\"").append(file).append("\"");
                                                 first = false;
                                             }
@@ -1469,6 +1468,7 @@ public class Main {
         String user = "temp";
         String fileName = "placeholder.jpg";
         String fileType = "img";
+        String path = "";
 
         while (true) {
             // Find next boundary
@@ -1550,10 +1550,19 @@ public class Main {
                 System.out.println("Received user: " + user);
                 continue;
             }
+
+            if (headers.contains("name=\"path\"")){
+                path = new String(fileContent, StandardCharsets.UTF_8).trim();
+                System.out.println("Recived path: " + path);
+            }
             pos = nextBoundary;
         }
         if (data != null && allowed) {
-            saveFile(fileName, data, fileType, user);
+            if (path != null && !path.equals("")) {
+                saveFile(fileName, data, path, user);
+            } else {
+                saveFile(fileName, data, fileType, user);
+            }
         }
         return msg;
     }
@@ -1567,6 +1576,7 @@ public class Main {
         int pos = 0;
         byte[] data = null;
         String user = "temp";
+        String path = "";
 
         while (true) {
             // Find next boundary
@@ -1612,12 +1622,17 @@ public class Main {
 
                 //-----
                 String relativePath = extractFilePath(headers);
+                String fullPath = "";
+                if (path != null && !path.equals("")){
+                    fullPath = "/home/lukas/users/" + user + "/static/" + path + relativePath;
+                    System.out.println("Full path: " + fullPath);
+                }
                 System.out.println("File path: " + relativePath);
                 if (relativePath != null && !relativePath.isEmpty()){
                     data = fileContent;
                     // Create target file with directory structure
-                    File targetFile = new File("/home/lukas/users/" + user + "/static/html", relativePath);
-                    System.out.println("folderPath: " + "/home/lukas/users/" + user + "/static/html/" + relativePath);
+                    File targetFile = new File(fullPath);
+                    System.out.println("folderPath: " + fullPath);
                     targetFile.getParentFile().mkdirs(); // Ensure dirs exist
 
                     try (FileOutputStream fos = new FileOutputStream(targetFile)) {
@@ -1633,6 +1648,11 @@ public class Main {
                 user = new String(fileContent, StandardCharsets.UTF_8).trim();
                 System.out.println("Received user: " + user);
                 continue;
+            }
+
+            if (headers.contains("name=\"path\"")){
+                path = new String(fileContent, StandardCharsets.UTF_8).trim();
+                System.out.println("Recived path: " + path);
             }
             pos = nextBoundary;
         }

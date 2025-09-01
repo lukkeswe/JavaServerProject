@@ -67,11 +67,21 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
         document.getElementById("uploadBtn").addEventListener("click", async () => {
             const files = document.getElementById("filesContainer");
             files.innerHTML = "";
+
+            const currentPath = document.getElementById("path");
+            let path;
+            if (currentPath) path = "html/" + currentPath.textContent;
+            else path = "";
+
             const loadImage = document.createElement("img");
             loadImage.src = "img/muppet-load.gif";
             files.append(loadImage);
-            const file = await uploadFile("<?php echo $db->username; ?>");
-            dm.getFiles("<?php echo $db->username; ?>");
+            const file = await uploadFile("<?php echo $db->username; ?>", path);
+            if (currentPath) {
+                dm.getFiles("<?php echo $db->username; ?>", currentPath.textContent);
+                console.log("Sending: ", currentPath.textContent);
+            }
+            else dm.getFiles("<?php echo $db->username; ?>");
             dm.emptyDisplayContainer();
             dm.showInfo(file);
             if (
@@ -88,11 +98,21 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
         document.getElementById("uploadFolderBtn").addEventListener("click", async () => {
             const files = document.getElementById("filesContainer");
             files.innerHTML = "";
+
+            const currentPath = document.getElementById("path");
+            let path;
+            if (currentPath) path = "html/" + currentPath.textContent;
+            else path = "";
+
             const loadImage = document.createElement("img");
             loadImage.src = "img/muppet-load.gif";
             files.append(loadImage);
-            const folder = await uploadFolder("<?php echo $db->username; ?>");
-            dm.getFiles("<?php echo $db->username; ?>");
+            const folder = await uploadFolder("<?php echo $db->username; ?>", path);
+            if (currentPath) {
+                dm.getFiles("<?php echo $db->username; ?>", currentPath.textContent);
+                console.log("Sending: ", currentPath.textContent);
+            }
+            else dm.getFiles("<?php echo $db->username; ?>");
             dm.emptyDisplayContainer();
             dm.showInfo();
         });
