@@ -733,6 +733,8 @@ class DocumentManager {
                                 optionsContainer.innerHTML = "";
                                 // Add the delete button to the options container
                                 optionsContainer.append(erase);
+                                // Add the edit button
+                                optionsContainer.append(edit);
                                 this.showInfo(fileName);
                             });
                         }
