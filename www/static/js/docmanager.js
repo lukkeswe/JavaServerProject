@@ -729,6 +729,9 @@ class DocumentManager {
                             // Add eventlistener
                             a.addEventListener("click", () => {
                                 this.emptyDisplayContainer();
+                                // Empty optioins container
+                                optionsContainer.innerHTML = "";
+                                // Add the delete button to the options container
                                 optionsContainer.append(erase);
                                 this.showInfo(fileName);
                             });
