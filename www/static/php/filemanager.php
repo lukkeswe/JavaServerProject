@@ -45,10 +45,13 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
                 <div id="displayContainer"></div>
             </div>
             <div id="filesContainer"></div>
+            <div id="editor"></div>
         </main>
     </div>
     
     <footer><p>&copy;Norlund J. Lukas</p></footer>
+    <!-- Ace Editor JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.9/ace.js"></script>
     <script type="text/javascript">
         sessionStorage.setItem("user", "<?php echo $db->username; ?>")
         const dm = new DocumentManager("<?php echo $db->username; ?>");

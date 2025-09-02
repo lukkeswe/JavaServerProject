@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="static/css/reset.css">
     <link rel="stylesheet" href="static/css/style.css">
-    <title>index</title>
+    <title>Server</title>
 </head>
 <body>
     <h1 class="welcome">ようこそ！</h1>

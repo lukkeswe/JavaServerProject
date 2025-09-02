@@ -36,6 +36,7 @@ public class Main {
         server.createContext("/game", new GameAssetsHandler());
         server.createContext("/listAllFiles", new ListAllFiles());
         server.createContext("/deleteFile", new DeleteFileHandler());
+        server.createContext("/getFileContent", new FetchFileContent());
         server.createContext("/create-session", new SessionHandler());
         server.setExecutor(Executors.newFixedThreadPool(10));
         server.start();
@@ -979,6 +980,65 @@ public class Main {
                 }
             } finally {
                 exchange.close();
+            }
+        }
+    }
+    static class FetchFileContent implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if ("POST".equals(exchange.getRequestMethod())) {
+                // Get the request body
+                InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), "UTF-8");
+                BufferedReader reader = new BufferedReader(isr);
+                String body = reader.lines().collect(Collectors.joining());
+                // Verify the user
+                String sessionId = getJavaSessionId(exchange);
+                String email = SessionManager.getUsername(sessionId);
+                // Reject the request if verification fails
+                if (email == null) {
+                    exchange.sendResponseHeaders(403, -1);
+                    exchange.getResponseBody().close();
+                    return;
+                } else {
+                    // Parse the body into map
+                    Map<String, String> map = parseJsonToMap(body);
+                    // Initialize response
+                    byte[] response;
+                    // Check if file exists
+                    Path path;
+                    if (map.get("path") != null && map.get("path") != "") {
+                        path = Paths.get(
+                            "/home/lukas/users/" +
+                            map.get("user") + 
+                            "/static/html/" + 
+                            map.get("path") + 
+                            map.get("filename")
+                        );
+                    } else {
+                        path = Paths.get(
+                            "/home/lukas/users/" +
+                            map.get("user") + 
+                            "/static/" + 
+                            map.get("type") + "/" + 
+                            map.get("filename")
+                        );
+                    }
+                    if (!Files.exists(path)){
+                        System.out.println("No file found at: " + path.toString());
+                        exchange.sendResponseHeaders(403, -1);
+                        exchange.getResponseBody().close();
+                        return;
+                    } else {
+                        response = Files.readAllBytes(path);
+                    }
+                    // Create the response
+                    exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
+                    exchange.sendResponseHeaders(200, response.length);
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(response);
+                    os.close();
+                }
+                
             }
         }
     }

@@ -634,6 +634,52 @@ class DocumentManager {
                         // Remove the element
                         fileObject.remove();
                     });
+
+                    // Create am edit button
+                    const edit      = document.createElement("button");
+                    edit.className  = "btn";
+                    edit.innerHTML  = "edit";
+                    // Add eventlistener 
+                    edit.addEventListener("click", async () => {
+                        // Get the current path
+                        const path = document.getElementById("path");
+                        // If the path isn't root
+                        if (path != null && path.textContent != "") {
+                            // Fetch the file content from the server
+                            const content = await this.fetchFileContent(fileName, type, path.textContent);
+                            // Empty the files container
+                            document.getElementById("filesContainer").innerHTML = "";
+                            // Initialize the editor with the fetched content
+                            if (type == "js") this.showEditor(content, "javascript");
+                            else this.showEditor(content, type);
+                        // If the path is root
+                        } else {
+                            const content = await this.fetchFileContent(fileName, type, "");
+                            // Empty the files container
+                            document.getElementById("filesContainer").innerHTML = "";
+                            // Initialize the editor with the fetched content
+                            if (type == "js") this.showEditor(content, "javascript");
+                            else this.showEditor(content, type);
+                        }
+                        // Create a back button
+                        const backBtn = document.createElement("button");
+                        backBtn.className = "btn";
+                        backBtn.innerHTML = "↑";
+                        // Add an eventlistener
+                        backBtn.addEventListener("click", () => {
+                            // Get the path
+                            const path = document.getElementById("path");
+                            // Hide the editor
+                            document.getElementById("editor").style.display = "none";
+                            // Display the files in the current directory
+                            if (path != null && path.textContent != "") this.getFiles(this.user, path.textContent);
+                            else this.getFiles(this.user, "");
+                            // Remove the back button
+                            backBtn.remove();
+                        });
+                        optionsContainer.append(backBtn);
+                    });
+
                     // If the file is a HTML or PHP file, add a hyper-link to that file
                     if (type == "html" || type == "php"){
                         
@@ -659,19 +705,6 @@ class DocumentManager {
                                 pathContainer.append(path);
                             });
                             fileObject.append(span);
-                        } else if(fileName.endsWith(".css")) {
-                            const span = document.createElement("span");
-                            span.className = "cssIcon";
-                            span.innerHTML = fileName;
-                            span.addEventListener("click", () => {
-                                this.emptyDisplayContainer();
-                                this.showInfo(fileName);
-                                
-                                optionsContainer.innerHTML = "";
-                                optionsContainer.append(backBtn);
-                                optionsContainer.append(erase);
-                            });
-                            fileObject.append(span);
                         } else {
                             // Create hyper-link
                             const a = document.createElement("a");
@@ -684,7 +717,11 @@ class DocumentManager {
                             // Add setting
                             a.target = "_blank";
                             // Add event listener
-                            a.addEventListener("click", () => {this.emptyDisplayContainer();});
+                            a.addEventListener("click", () => {
+                                this.emptyDisplayContainer();
+                                // Add an edit button
+                                optionsContainer.append(edit);
+                            });
                             // Append the span
                             a.append(name);
                             // Append the hyper-link
@@ -692,7 +729,7 @@ class DocumentManager {
                             // Add eventlistener
                             a.addEventListener("click", () => {
                                 this.emptyDisplayContainer();
-                                this.appendElementToDisplayContainer(erase);
+                                optionsContainer.append(erase);
                                 this.showInfo(fileName);
                             });
                         }
@@ -720,6 +757,7 @@ class DocumentManager {
                                 this.emptyDisplayContainer();
 
                                 this.showInfo(fileName);
+                                optionsContainer.append(edit);
                             });
                         }
                     }
@@ -736,13 +774,44 @@ class DocumentManager {
             console.error(error);
         }
     }
+    // Initialize the editor
+    showEditor (content, mode) {
+        // Initialize Ace editor
+        const editor = ace.edit("editor");
+        editor.setTheme("ace/theme/monokai");  // choose theme
+        editor.session.setMode("ace/mode/" + mode); // syntax mode
+        editor.setValue(content, -1); // Append the content
+        document.getElementById("editor").style.display = "block"; // Display the editor
+        document.getElementById("optionsContainer").innerHTML = ""; // Empty the options container
+    }
+    async fetchFileContent (file, type, path = "") {
+        let requestObject = {
+            "filename"  : file,
+            "type"      : type,
+            "path"      : path,
+            "user"      : this.user
+        };
+        console.log(`Fetching ${path + file}'s content...`);
+        let response = await fetch("/getFileContent", {
+            method  : "POST",
+            headers : {"Content-Type": "application/json"},
+            body    : JSON.stringify(requestObject)
+        });
+
+        if (!response.ok){
+            throw new Error(`Server responded with ${response.status}`);
+        }
+
+        const content = await response.text();
+        return content;
+    }
     async deleteFile(file, type, path = ""){
         let requsetObject = {
             "filename"  : file,
             "type"      : type,
             "path"      : path,
             "user"      : this.user
-        }
+        };
         console.log(`Deleting ${path + file}`);
         let response = await fetch("/deleteFile", {
             method  : "POST",
