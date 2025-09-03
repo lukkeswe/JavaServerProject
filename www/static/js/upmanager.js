@@ -87,6 +87,26 @@ async function uploadFolder(user, path = ""){
     
 }
 
+async function saveContentToFile(user, path ="", type, file, content) {
+    let requestObject = {
+        "user"      : user,
+        "path"      : path,
+        "type"      : type,
+        "filename"  : file,
+        "content"   : content
+    };
+    console.log("Saving file...");
+    
+    const respone = await fetch("/saveFile", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(requestObject)
+    });
+
+    console.log(await respone.text());
+    
+}
+
 function isValidFileName(fileName){
     if (!fileName || fileName.trim() === "") return false;
     const validPattern = /^[a-zA-Z0-9._-]+$/;

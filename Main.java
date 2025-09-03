@@ -37,6 +37,7 @@ public class Main {
         server.createContext("/listAllFiles", new ListAllFiles());
         server.createContext("/deleteFile", new DeleteFileHandler());
         server.createContext("/getFileContent", new FetchFileContent());
+        server.createContext("/saveFile", new SaveFileHandler());
         server.createContext("/create-session", new SessionHandler());
         server.setExecutor(Executors.newFixedThreadPool(10));
         server.start();
@@ -1042,8 +1043,63 @@ public class Main {
             }
         }
     }
+    static class SaveFileHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if ("POST". equals(exchange.getRequestMethod())) {
+                // Get the request body
+                String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+                // Verify the user
+                String sessionId = getJavaSessionId(exchange);
+                String email = SessionManager.getUsername(sessionId);
+                // Reject the request if verification fails
+                if (email == null) {
+                    System.out.println("Rejected: session not valid");
+                    exchange.sendResponseHeaders(403, -1);
+                    exchange.getResponseBody().close();
+                    return;
+                } else {
+                    // Parse the body into map
+                    Map<String, String> map = parseJsonToMap(body);
+                    String content = map.get("content").replace("\r\n", "\n");
+                    // Create the file's path
+                    String path;
+                    if (map.get("path") != null && map.get("path") != ""){
+                        path = "/home/lukas/users/" + map.get("user") + "/static/html/" + map.get("path") + map.get("filename");
+                    } else {
+                        path = "/home/lukas/users/" + map.get("user") + "/static/" + map.get("type") + "/" + map.get("filename");
+                    }
+                    // Save the file
+                    if (writeFile(path, content)){
+                        String msg = "Success";
+                        byte[] response = msg.getBytes();
+                        exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
+                        exchange.sendResponseHeaders(200, response.length);
+                        OutputStream os = exchange.getResponseBody();
+                        os.write(response);
+                        os.close();
+                    } else {
+                        exchange.sendResponseHeaders(403, -1);
+                        exchange.getResponseBody().close();
+                        return;
+                    }
+                }
+            }
+        }
+    }
 
-    public static String getJavaSessionId(HttpExchange exchange) {
+    private static boolean writeFile(String filePath, String content) {
+        Path path = Paths.get(filePath);
+        try {
+            Files.write(path, content.getBytes(StandardCharsets.UTF_8));
+            System.out.println("Saved: " + path.toString());
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    private static String getJavaSessionId(HttpExchange exchange) {
         List<String> cookieHeaders = exchange.getRequestHeaders().get("Cookie");
         if (cookieHeaders != null) {
             for (String header : cookieHeaders) {
@@ -1227,24 +1283,83 @@ public class Main {
             return "fail";
         }
     }
-    private static Map<String, String> parseJsonToMap(String json){
+    private static Map<String, String> parseJsonToMap(String json) {
         Map<String, String> map = new HashMap<>();
         json = json.trim();
 
         if (json.startsWith("{") && json.endsWith("}")) {
-            json = json.substring(1, json.length() - 1); // Remove the outer curly braces
+            json = json.substring(1, json.length() - 1); // remove { }
         }
-        String[] pairs = json.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)"); // Split key-value pairs
-        for (String pair : pairs) {
-            String[] keyValue = pair.split(":(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", 2); // Split key and value
-            if (keyValue.length == 2) {
-                String key = keyValue[0].trim().replaceAll("^\"|\"$", ""); // Remove quotes from key
-                String value = keyValue[1].trim().replaceAll("^\"|\"$", ""); // Remove quotes from value
-                map.put(key, value);
+
+        int i = 0;
+        while (i < json.length()) {
+            // Skip whitespace
+            while (i < json.length() && Character.isWhitespace(json.charAt(i))) i++;
+
+            // --- Parse key ---
+            if (json.charAt(i) != '"') throw new IllegalArgumentException("Expected '\"' at key start");
+            int keyStart = ++i;
+            while (i < json.length() && json.charAt(i) != '"') {
+                if (json.charAt(i) == '\\') i++; // skip escaped char
+                i++;
             }
+            String key = unescapeJson(json.substring(keyStart, i));
+            i++; // skip closing quote
+
+            // Skip whitespace and colon
+            while (i < json.length() && (Character.isWhitespace(json.charAt(i)) || json.charAt(i) == ':')) i++;
+
+            // --- Parse value ---
+            if (json.charAt(i) != '"') throw new IllegalArgumentException("Expected '\"' at value start");
+            int valStart = ++i;
+            while (i < json.length() && json.charAt(i) != '"') {
+                if (json.charAt(i) == '\\') i++; // skip escaped char
+                i++;
+            }
+            String value = unescapeJson(json.substring(valStart, i));
+            i++; // skip closing quote
+
+            map.put(key, value);
+
+            // Skip whitespace and optional comma
+            while (i < json.length() && (Character.isWhitespace(json.charAt(i)) || json.charAt(i) == ',')) i++;
         }
+
         return map;
     }
+
+    // --- Helper: decode JSON escape sequences ---
+    private static String unescapeJson(String s) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == '\\' && i + 1 < s.length()) {
+                char next = s.charAt(++i);
+                switch (next) {
+                    case 'n': sb.append('\n'); break;
+                    case 'r': sb.append('\r'); break;
+                    case 't': sb.append('\t'); break;
+                    case 'b': sb.append('\b'); break;
+                    case 'f': sb.append('\f'); break;
+                    case '"': sb.append('"'); break;
+                    case '\\': sb.append('\\'); break;
+                    case '/': sb.append('/'); break;
+                    case 'u':
+                        if (i + 4 < s.length()) {
+                            String hex = s.substring(i + 1, i + 5);
+                            sb.append((char) Integer.parseInt(hex, 16));
+                            i += 4;
+                        }
+                        break;
+                    default: sb.append(next); break;
+                }
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+
     private static String parseMapToJson(Map<String, String> map){
         StringBuilder jsonBuilder = new StringBuilder();
         jsonBuilder.append("[{");

@@ -647,8 +647,8 @@ class DocumentManager {
                             // Empty the files container
                             document.getElementById("filesContainer").innerHTML = "";
                             // Initialize the editor with the fetched content
-                            if (type == "js") this.showEditor(content, "javascript");
-                            else this.showEditor(content, type);
+                            if (type == "js") this.showEditor(content, "javascript", type, fileName);
+                            else this.showEditor(content, type, type, fileName);
                         // If the path is root
                         } else {
                             const content = await this.fetchFileContent(fileName, type, "");
@@ -775,7 +775,7 @@ class DocumentManager {
         }
     }
     // Initialize the editor
-    showEditor (content, mode) {
+    showEditor (content, mode, type, filename) {
         // Initialize Ace editor
         const editor = ace.edit("editor");
         editor.setTheme("ace/theme/monokai");  // choose theme
@@ -783,6 +783,23 @@ class DocumentManager {
         editor.setValue(content, -1); // Append the content
         document.getElementById("editor").style.display = "block"; // Display the editor
         document.getElementById("optionsContainer").innerHTML = ""; // Empty the options container
+
+        // Create a save button
+        const save = document.createElement("button");
+        save.innerHTML = "save";
+        save.className = "btn";
+        // Add an eventlistener
+        save.addEventListener("click", async () => {
+            const path = document.getElementById("path");
+            // Call the function in Upmanager.jp to save the file
+            if (path != null && path.textContent != ""){
+                await saveContentToFile(sessionStorage.getItem("user"), path.textContent, type, filename, editor.getValue());
+            } else {
+                await saveContentToFile(sessionStorage.getItem("user"), "", type, filename, editor.getValue());
+            }
+        });
+        // Append the save button to the options container
+        document.getElementById("optionsContainer").append(save);
     }
     async fetchFileContent (file, type, path = "") {
         let requestObject = {
