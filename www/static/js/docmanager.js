@@ -1,10 +1,11 @@
 class DocumentManager {
     constructor(user) {
-        this.container  = document.getElementById("container");
-        this.main       = document.getElementById("main-content");
-        this.table      = document.getElementById("table");
+        this.container      = document.getElementById("container");
+        this.main           = document.getElementById("main-content");
+        this.table          = document.getElementById("table");
         this.db;
-        this.user       = user;
+        this.user           = user;
+        this.pathContainer  = document.getElementById("pathContainer");
     }
     flexContainer(){
         this.container.style.display = "flex";
@@ -571,7 +572,6 @@ class DocumentManager {
             }
             const data = await response.json();
             console.log("Response from server:", data);
-            const pathContainer = document.getElementById("pathContainer");
             const optionsContainer = document.getElementById("optionsContainer");
             const currentPath = document.getElementById("path");
             const backBtn = document.createElement("button");
@@ -701,8 +701,7 @@ class DocumentManager {
                                 } else {
                                     path.innerHTML = fileName;
                                 }
-                                pathContainer.innerHTML = "";
-                                pathContainer.append(path);
+                                this.updateCurrentPath(path);
                             });
                             fileObject.append(span);
                         } else {
@@ -747,10 +746,9 @@ class DocumentManager {
                                 this.emptyDisplayContainer();
                                 this.showInfo(fileName);
                                 this.showImage(fileName, "https://" + sessionStorage.getItem("domain") + "/");
-
-                                pathContainer.innerHTML = "";
-                                pathContainer.append(currentPath);
-                                
+                                // Update the current path
+                                this.updateCurrentPath(currentPath);
+                                // Update the options container
                                 optionsContainer.innerHTML = "";
                                 optionsContainer.append(backBtn);
                                 optionsContainer.append(erase);
@@ -835,6 +833,17 @@ class DocumentManager {
         list = list.filter(item => item !== file);
         sessionStorage.setItem(type + "List", JSON.stringify(list));
         console.log("List after: ", list);
+    }
+    // Update the current path
+    updateCurrentPath(path){
+        // Empty the path container
+        this.pathContainer.innerHTML = "";
+        // Create a span element, containing the user's domain
+        const span = document.createElement("span");
+        span.innerHTML = sessionStorage.getItem("domain") + "/";
+        // Append the elements to the path container
+        this.pathContainer.append(span);
+        this.pathContainer.append(path);
     }
     appendElementToDisplayContainer(element){
         const displayContainer = document.getElementById("displayContainer");

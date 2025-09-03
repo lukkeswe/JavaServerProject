@@ -156,6 +156,18 @@ main {
     margin-top: 20px;
 }
 
+#explorer {
+    display: block;
+    width: 100%;
+}
+
+#pathContainer {
+    display: flex;
+    width: 100%;
+    background-color: white;
+    border: solid black 1px;
+}
+
 #filesContainer ul {
     display: flex;
     flex-direction: row;
