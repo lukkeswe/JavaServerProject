@@ -431,13 +431,10 @@ class DocumentManager {
         burgerBtn.innerHTML     = "🈪";
         a.innerHTML             = "戻る";
         logout.innerHTML        = "ログアウト"; 
-        // Add class name
-        burger.classList.add("inactive");
         // Add event listeners
         burgerBtn.addEventListener("click", () => {
             // burger.style.display = "block";
-            burger.classList.toggle("active");
-            burger.classList.toggle("inactive");
+            burger.classList.toggle("open");;
         });
         logout.addEventListener("click", () => {
             window.location.href = "logout.php";
