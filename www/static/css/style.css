@@ -259,10 +259,11 @@ main {
 #editor {
     display: none;
     width: 100%;
-    height: 100%;
+    height: calc(100% - 25px);
     max-height: 800px;
     border: 1px solid #ccc;
     font-size: 14px;
+    margin-left: 5px;
 }
 
 #signUpForm {
@@ -335,6 +336,7 @@ footer p {
 
     #editor {
         height: 500px;
+        margin-left: 0;
     }
 
     #burger {
