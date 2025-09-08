@@ -13,7 +13,7 @@ class DBmanager {
     } 
     public function login(){
         try {
-            $config = require(__DIR__ . "/db.php");
+            $config = require("/home/lukas/db.php");
             $conn = new PDO("mysql:host=localhost;dbname=webserver", $config["user"], $config["password"]);
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $sql = "SELECT * FROM users WHERE email = :email";
@@ -37,7 +37,7 @@ class DBmanager {
 
     public function checkInvite($invite){
         try {
-            $config = require(__DIR__ . "/db.php");
+            $config = require("/home/lukas/db.php");
             $conn = new PDO("mysql:host=localhost;dbname=webserver", $config["user"], $config["password"]);
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $sql = "SELECT * FROM invites WHERE invite = :invite";
