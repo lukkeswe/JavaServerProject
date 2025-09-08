@@ -658,8 +658,8 @@ class DocumentManager {
                             // Empty the files container
                             document.getElementById("filesContainer").innerHTML = "";
                             // Initialize the editor with the fetched content
-                            if (type == "js") this.showEditor(content, "javascript");
-                            else this.showEditor(content, type);
+                            if (type == "js") this.showEditor(content, "javascript", type, fileName);
+                            else this.showEditor(content, type, type, fileName);
                         }
                         // Create a back button
                         const backBtn = document.createElement("button");

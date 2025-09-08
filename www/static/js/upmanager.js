@@ -97,13 +97,13 @@ async function saveContentToFile(user, path ="", type, file, content) {
     };
     console.log("Saving file...");
     
-    const respone = await fetch("/saveFile", {
+    const response = await fetch("/saveFile", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(requestObject)
     });
 
-    console.log(await respone.text());
+    console.log(await response.text());
     
 }
 

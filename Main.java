@@ -1064,7 +1064,7 @@ public class Main {
                     String content = map.get("content").replace("\r\n", "\n");
                     // Create the file's path
                     String path;
-                    if (map.get("path") != null && map.get("path") != ""){
+                    if (map.get("path") != null && !map.get("path").equals("")){
                         path = "/home/lukas/users/" + map.get("user") + "/static/html/" + map.get("path") + map.get("filename");
                     } else {
                         path = "/home/lukas/users/" + map.get("user") + "/static/" + map.get("type") + "/" + map.get("filename");
