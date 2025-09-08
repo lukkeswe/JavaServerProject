@@ -52,6 +52,15 @@ public class Main {
         "/static", "/static/css", "/css", "/static/img", "/img", "/static/js", "/js"
     );
 
+    private static final Properties DB_PROPERTIES;
+    static {
+        try {
+            DB_PROPERTIES = DBConfig.loadConfig();
+        } catch (IOException e){
+            throw new RuntimeException("Failed to load DB config", e);
+        }
+    }
+
     static class RootHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
@@ -620,9 +629,9 @@ public class Main {
                         String invite = map.get("invite");
                         map.remove("invite");
                         // Insert new user 
-                        insertRow("webserver", "lukas", "Tvt!77@ren", "users", map);
+                        insertRow(DB_PROPERTIES.getProperty("db.database"), DB_PROPERTIES.getProperty("db.user"), DB_PROPERTIES.getProperty("db.password"), "users", map);
                         // Create the user's database // Not for now
-                        // boolean newuser = createNewUser("lukas", "Tvt!77@ren", name), map.get("password")); 
+                        // boolean newuser = createNewUser(DB_PROPERTIES.getProperty("db.user"), DB_PROPERTIES.getProperty("db.password"), name), map.get("password")); 
                         boolean newuser = true;
                         if (newuser){
                             // Create a new directory with folders for the user
@@ -646,7 +655,7 @@ public class Main {
                                 response = "[{\"status\": \"fail\"}]";
                             } else {
                                 // Delete the invite so it can't be used again
-                                boolean deleted = deleteRow("webserver", "lukas", "Tvt!77@ren", "invites", "invite", invite);
+                                boolean deleted = deleteRow(DB_PROPERTIES.getProperty("db.database"), DB_PROPERTIES.getProperty("db.user"), DB_PROPERTIES.getProperty("db.password"), "invites", "invite", invite);
                                 System.out.println("New user: " + name);
                                 response = "[{\"status\": \"ok\"}]";
                             }
@@ -1269,8 +1278,7 @@ public class Main {
         return sanitizeUserName(parts[0]);
     }
     private static String insertMessage(String name, String email, String message){
-        String url = "jdbc:mysql://localhost:3306/webserver";
-        try (Connection conn = DriverManager.getConnection(url, "lukas", "Tvt!77@ren")){
+        try (Connection conn = DriverManager.getConnection(DB_PROPERTIES.getProperty("db.url"), DB_PROPERTIES.getProperty("db.user"), DB_PROPERTIES.getProperty("db.password"))){
             String sql = "INSERT INTO messages (name, email, message) VALUES (?, ?, ?)";
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, name);
@@ -1381,8 +1389,7 @@ public class Main {
         return jsonBuilder.toString();
     }
     private static Map<String, String> getUser(String email){
-        String url = "jdbc:mysql://localhost:3306/webserver";
-        try(Connection conn = DriverManager.getConnection(url, "lukas", "Tvt!77@ren")){
+        try(Connection conn = DriverManager.getConnection(DB_PROPERTIES.getProperty("db.url"), DB_PROPERTIES.getProperty("db.user"), DB_PROPERTIES.getProperty("db.password"))){
             String sql = "SELECT * FROM users WHERE email = ?";
             PreparedStatement pstmt = conn.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             pstmt.setString(1, email);
@@ -1411,8 +1418,7 @@ public class Main {
         return user;
     }
     private static String getInvite(String invite){
-        String url = "jdbc:mysql://localhost:3306/webserver";
-        try (Connection conn = DriverManager.getConnection(url, "lukas", "Tvt!77@ren")){
+        try (Connection conn = DriverManager.getConnection(DB_PROPERTIES.getProperty("db.url"), DB_PROPERTIES.getProperty("db.user"), DB_PROPERTIES.getProperty("db.password"))){
             String sql = "SELECT * FROM invites WHERE invite = ?";
             PreparedStatement pstmt = conn.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             pstmt.setString(1, invite);
@@ -1581,7 +1587,7 @@ public class Main {
     private static boolean existInTable(String database, String table, String column, String value){
         String url = "jdbc:mysql://localhost:3306/" + database;
         String sql = "SELECT * FROM " + table + " WHERE " + column + " = ?";        
-        try (Connection conn = DriverManager.getConnection(url, "lukas", "Tvt!77@ren")){
+        try (Connection conn = DriverManager.getConnection(url, DB_PROPERTIES.getProperty("db.user"), DB_PROPERTIES.getProperty("db.password"))){
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, value);
             System.out.println("sql: " + pstmt.toString());
