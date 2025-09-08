@@ -27,7 +27,7 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
     <div id="container">
         <main id="main-content">
             <div id="upload-container">
-                <button id="uploadBackBtn" style="display: none;">back</button>
+                <button id="uploadBackBtn" class="btn" style="display: none;">戻る↩</button>
                 <div id="fileUploadContainer" style="display: none;">
                     <input type="file" id="fileInput" style="border: solid black 1px;">
                     <button id="uploadBtn" class="btn">アップロード</button>
@@ -36,10 +36,12 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
                     <input type="file" id="folderInput" webkitdirectory multiple style="border: solid black 1px;">
                     <button id="uploadFolderBtn" class="btn">アップロード</button>
                 </div>
-                <div id="uploadBtnsContainer" style="display: flex;">
-                    <button id="fileBtn" class="btn">file</button>
-                    <button id="folderBtn" class="btn">folder</button>
+                <div id="uploadBtnsContainer" style="display: none;">
+                    <button id="fileBtn" class="btn">ファイル</button>
+                    <button id="folderBtn" class="btn">フォルダ</button>
+                    <button id="cancelUpload" class="btn">キャンセル</button>
                 </div>
+                <button class="btn" id="showUploadBtn">アップロード</button>
                 <div id="optionsContainer"></div>
                 <div id="displayContainer"></div>
             </div>
@@ -62,6 +64,14 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
         dm.flexContainer();
         dm.fileBurgerMenu();
         dm.getFiles("<?php echo $db->username; ?>");
+        document.getElementById("showUploadBtn").addEventListener("click", () => {
+            dm.toggleShowUploadBtn();
+        });
+        document.getElementById("cancelUpload").addEventListener("click", () => {
+            console.log("Cancel");
+            
+            dm.toggleShowUploadBtn();
+        });
         document.getElementById("fileBtn").addEventListener("click", () => {
             dm.showFileUpload();
         });

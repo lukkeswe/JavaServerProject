@@ -1815,8 +1815,10 @@ public class Main {
                 String fullPath = "";
                 if (path != null && !path.equals("")){
                     fullPath = "/home/lukas/users/" + user + "/static/" + path + relativePath;
-                    System.out.println("Full path: " + fullPath);
+                } else {
+                    fullPath = "/home/lukas/users/" + user + "/static/html/" + relativePath;
                 }
+                System.out.println("Full path: " + fullPath);
                 System.out.println("File path: " + relativePath);
                 if (relativePath != null && !relativePath.isEmpty()){
                     data = fileContent;

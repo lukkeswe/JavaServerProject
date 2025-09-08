@@ -570,8 +570,10 @@ class DocumentManager {
             const data = await response.json();
             console.log("Response from server:", data);
             const optionsContainer = document.getElementById("optionsContainer");
+            optionsContainer.innerHTML = "";
             const currentPath = document.getElementById("path");
             const backBtn = document.createElement("button");
+            document.getElementById("displayContainer").innerHTML = "";
             let previousPath = "";
             if (currentPath != null && currentPath.textContent != "") {
                 backBtn.innerHTML = "↑";
@@ -590,7 +592,6 @@ class DocumentManager {
                     backBtn.remove();
                 });
                 document.getElementById("displayContainer").innerHTML = "";
-                optionsContainer.innerHTML = "";
                 optionsContainer.append(backBtn);
             }
             const filesContainer    = document.getElementById("filesContainer");
@@ -635,9 +636,11 @@ class DocumentManager {
                     // Create am edit button
                     const edit      = document.createElement("button");
                     edit.className  = "btn";
-                    edit.innerHTML  = "edit";
+                    edit.innerHTML  = "編集";
                     // Add eventlistener 
                     edit.addEventListener("click", async () => {
+                        // Hide the upload button
+                        document.getElementById("showUploadBtn").style.display = "none";
                         // Get the current path
                         const path = document.getElementById("path");
                         // If the path isn't root
@@ -673,6 +676,9 @@ class DocumentManager {
                             else this.getFiles(this.user, "");
                             // Remove the back button
                             backBtn.remove();
+                            optionsContainer.innerHTML = "";
+                            // Display the upload button
+                            document.getElementById("showUploadBtn").style.display = "block";
                         });
                         optionsContainer.append(backBtn);
                     });
@@ -712,12 +718,6 @@ class DocumentManager {
                             }
                             // Add setting
                             a.target = "_blank";
-                            // Add event listener
-                            a.addEventListener("click", () => {
-                                this.emptyDisplayContainer();
-                                // Add an edit button
-                                optionsContainer.append(edit);
-                            });
                             // Append the span
                             a.append(name);
                             // Append the hyper-link
@@ -727,6 +727,8 @@ class DocumentManager {
                                 this.emptyDisplayContainer();
                                 // Empty optioins container
                                 optionsContainer.innerHTML = "";
+                                // Add back the back button
+                                optionsContainer.append(backBtn);
                                 // Add the delete button to the options container
                                 optionsContainer.append(erase);
                                 // Add the edit button
@@ -786,7 +788,7 @@ class DocumentManager {
 
         // Create a save button
         const save = document.createElement("button");
-        save.innerHTML = "save";
+        save.innerHTML = "保存";
         save.className = "btn";
         // Add an eventlistener
         save.addEventListener("click", async () => {
@@ -896,6 +898,21 @@ class DocumentManager {
         sessionStorage.removeItem("username");
         window.location.href = "logout.php";
     }
+    toggleShowUploadBtn(){
+        const btnContainer = document.getElementById("uploadBtnsContainer");
+        const displayBtn = document.getElementById("showUploadBtn");
+        const options = document.getElementById("optionsContainer");
+        if (btnContainer.style.display == "none") {
+            btnContainer.style.display = "flex";
+            displayBtn.style.display = "none";
+            options.style.display = "none";
+        }
+        else {
+            btnContainer.style.display = "none";
+            displayBtn.style.display = "block";
+            options.style.display = "flex";
+        } 
+    }
     showFileUpload(){
         const btnContainer = document.getElementById("uploadBtnsContainer");
         btnContainer.style.display = "none";
@@ -913,13 +930,9 @@ class DocumentManager {
         backBtn.style.display = "block";
     }
     uploadBack(){
-        const backBtn = document.getElementById("uploadBackBtn");
-        backBtn.style.display = "none";
-        const fileCon = document.getElementById("fileUploadContainer");
-        fileCon.style.display = "none";
-        const folderCon = document.getElementById("folderUploadContainer");
-        folderCon.style.display = "none";
-        const btnCon = document.getElementById("uploadBtnsContainer");
-        btnCon.style.display = "block";
+        document.getElementById("uploadBackBtn").style.display = "none";
+        document.getElementById("fileUploadContainer").style.display = "none";
+        document.getElementById("folderUploadContainer").style.display = "none";
+        document.getElementById("uploadBtnsContainer").style.display = "flex";;
     }
 }
