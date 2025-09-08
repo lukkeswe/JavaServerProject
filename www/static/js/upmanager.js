@@ -103,7 +103,15 @@ async function saveContentToFile(user, path ="", type, file, content) {
         body: JSON.stringify(requestObject)
     });
 
-    console.log(await response.text());
+    let msg = await response.text()
+
+    console.log(msg);
+
+    if (msg == "Success") {
+        alert("ファイルを保存しました");
+    } else {
+        alert("保存エラー")
+    }
     
 }
 
