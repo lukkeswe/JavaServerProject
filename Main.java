@@ -90,116 +90,16 @@ public class Main {
             if (requestPath.endsWith(".html")) {
                 targetFile = requestSplit[requestSplit.length - 1];
             } else if (requestPath.endsWith(".php")){
-                Path resolvePath = Paths.get(userPath, "static", "php", requestPath);
-                // If the requested file is a php file
-                // Check if the file exist
-                if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
-                    response = Files.readAllBytes(Paths.get("www/static/html/notfound.html"));
+                // Proccess the requested PHP file
+                byte[] requestedPhp = runPhp(exchange);
+                // If the result isn't null
+                if (requestedPhp != null) {
+                    response = requestedPhp;
+                // Else break the exchange
                 } else {
-                    String phpFilePath = resolvePath.toString();
-                    // Process the file with PHP if it is a PHP file
-                    String username = PhpConfig.phpMap.getOrDefault(host, null);
-                    String phpIniPath;
-                    boolean norlundJohanLukas = false;
-                    if (host.equals("norlund-johan-lukas.com") || host.equals("norlund-johan-lukas.com")){
-                        phpIniPath = "www/static/php/lukas.ini"; 
-                        norlundJohanLukas = true;
-                    } else phpIniPath = "/etc/php/users/" + username + ".ini";
-                    // Create the ProcessBuilder with a "-c" flag
-                    ProcessBuilder pb = new ProcessBuilder("php-cgi", "-c", phpIniPath);
-                    // Set working directory
-                    if (norlundJohanLukas) {
-                        pb.directory(new File("www/static/php/"));
-                    } else pb.directory(new File(userPath + "/static/php/"));
-                    //Copy headers from the request
-                    Map<String, String> env = pb.environment();
-                    // Set common CGI variables
-                    env.put("SCRIPT_FILENAME", phpFilePath);
-                    env.put("REQUEST_METHOD", exchange.getRequestMethod());
-                    env.put("REDIRECT_STATUS", "200");
-                    // Handle GET
-                    if ("GET".equalsIgnoreCase(exchange.getRequestMethod())) {
-                        URI uri = exchange.getRequestURI();
-                        String query = uri.getRawQuery(); // Encoded query string
-                        if (query != null) {
-                            env.put("QUERY_STRING", query);
-                        }
-                    }
-                    //Handle POST
-                    byte[] postData = null;
-                    if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-                        Headers reqHeaders = exchange.getRequestHeaders();
-                        String contentType = reqHeaders.getFirst("Content-Type");
-                        int contentLength = Integer.parseInt(reqHeaders.getFirst("Content-Length"));
-                        env.put("CONTENT_LENGTH", Integer.toString(contentLength));
-                        env.put("CONTENT_TYPE", contentType != null ? contentType : "application/x-www-form-urlencoded");
-                        postData = exchange.getRequestBody().readNBytes(contentLength);
-                    }
-                    // Get cookies
-                    String cookieHeader = exchange.getRequestHeaders().getFirst("Cookie");
-                    if (cookieHeader != null){
-                        env.put("HTTP_COOKIE", cookieHeader);
-                    }
-                    // Start the PHP process
-                    Process p = pb.start();
-                    // Write POST data into php-cgi's stdin
-                    if (postData != null){
-                        try (OutputStream stdin = p.getOutputStream()){
-                            stdin.write(postData);
-                            stdin.flush();
-                        }
-                    }
-                    // Get the output from the proccess
-                    BufferedReader output = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                    // Collect the headers from the php output
-                    Map<String, List<String>> phpHeaders = new LinkedHashMap<>();
-                    // Build the HTML body
-                    StringBuilder bodyBuilder = new StringBuilder();
-
-                    boolean inHeaders = true;
-                    String line;
-                    // Read every line in the output
-                    while ((line = output.readLine()) != null){
-                        // Collect the headers
-                        if (inHeaders) {
-                            // Look for the end of the headers
-                            if (line.trim().isEmpty()){
-                                inHeaders = false;
-                            } else {
-                                // Find the index of the colon dividing key and value of the headers
-                                int colonIndex = line.indexOf(":");
-                                // If there is a colon
-                                if (colonIndex > 0) {
-                                    // Extract the key (name)
-                                    String name = line.substring(0, colonIndex).trim();
-                                    // Extract the value
-                                    String value = line.substring(colonIndex + 1).trim();
-                                    // Append the key and value to the map
-                                    phpHeaders.computeIfAbsent(name, k -> new ArrayList<>()).add(value);
-                                }
-                            }
-                        } else {
-                            // After the end of the headers append all of the lines of the body
-                            bodyBuilder.append(line).append("\n");
-                        }
-                    }
-                    output.close();
-                    // Send all headers from PHP to the browser
-                    for (Map.Entry<String, List<String>> header : phpHeaders.entrySet()) {
-                        for (String value : header.getValue()) {
-                            exchange.getResponseHeaders().add(header.getKey(), value);
-                        }
-                    }
-                    // Check for redirecting headers
-                    if (phpHeaders.containsKey("Location")){
-                        //exchange.getResponseHeaders().add("Location", phpHeaders.get("Location"));
-                        exchange.sendResponseHeaders(302, -1); // -1 = no body
-                        return; // Break the process after the headers are being sent
-                    } else {
-                        // If there is no redirecting header then collect the body into the response
-                        response = bodyBuilder.toString().getBytes(StandardCharsets.UTF_8);
-                    }
+                    return;
                 }
+
             }
             
             // If the host is the development url
@@ -1097,6 +997,139 @@ public class Main {
         }
     }
 
+    private static byte[] runPhp(HttpExchange exchange){
+        byte[] body;
+
+        // Get the headers
+        Headers headers = exchange.getRequestHeaders();
+        // Get the host
+        String host = headers.getFirst("Host");
+        // If there is no host
+        if (host == null) host = "unknown";
+        // Extract the request path
+        String requestPath = exchange.getRequestURI().getPath();
+        // Initial path
+        String userPath = DomainsConfig.domainMap.getOrDefault(host, null);
+
+        Path resolvePath = Paths.get(userPath, "static", "php", requestPath);
+        try {
+            // Check if the file exist
+            if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
+                body = Files.readAllBytes(Paths.get("www/static/html/notfound.html"));
+            } else {
+                String phpFilePath = resolvePath.toString();
+                // Process the file with PHP if it is a PHP file
+                String username = PhpConfig.phpMap.getOrDefault(host, null);
+                String phpIniPath;
+                boolean norlundJohanLukas = false;
+                if (host.equals("norlund-johan-lukas.com") || host.equals("norlund-johan-lukas.com")){
+                    phpIniPath = "www/static/php/lukas.ini"; 
+                    norlundJohanLukas = true;
+                } else phpIniPath = "/etc/php/users/" + username + ".ini";
+                // Create the ProcessBuilder with a "-c" flag
+                ProcessBuilder pb = new ProcessBuilder("php-cgi", "-c", phpIniPath);
+                // Set working directory
+                if (norlundJohanLukas) {
+                    pb.directory(new File("www/static/php/"));
+                } else pb.directory(new File(userPath + "/static/php/"));
+                //Copy headers from the request
+                Map<String, String> env = pb.environment();
+                // Set common CGI variables
+                env.put("SCRIPT_FILENAME", phpFilePath);
+                env.put("REQUEST_METHOD", exchange.getRequestMethod());
+                env.put("REDIRECT_STATUS", "200");
+                // Handle GET
+                if ("GET".equalsIgnoreCase(exchange.getRequestMethod())) {
+                    URI uri = exchange.getRequestURI();
+                    String query = uri.getRawQuery(); // Encoded query string
+                    if (query != null) {
+                        env.put("QUERY_STRING", query);
+                    }
+                }
+                //Handle POST
+                byte[] postData = null;
+                if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                    Headers reqHeaders = exchange.getRequestHeaders();
+                    String contentType = reqHeaders.getFirst("Content-Type");
+                    int contentLength = Integer.parseInt(reqHeaders.getFirst("Content-Length"));
+                    env.put("CONTENT_LENGTH", Integer.toString(contentLength));
+                    env.put("CONTENT_TYPE", contentType != null ? contentType : "application/x-www-form-urlencoded");
+                    postData = exchange.getRequestBody().readNBytes(contentLength);
+                }
+                // Get cookies
+                String cookieHeader = exchange.getRequestHeaders().getFirst("Cookie");
+                if (cookieHeader != null){
+                    env.put("HTTP_COOKIE", cookieHeader);
+                }
+                // Start the PHP process
+                Process p = pb.start();
+                // Write POST data into php-cgi's stdin
+                if (postData != null){
+                    try (OutputStream stdin = p.getOutputStream()){
+                        stdin.write(postData);
+                        stdin.flush();
+                    }
+                }
+                // Get the output from the proccess
+                BufferedReader output = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                // Collect the headers from the php output
+                Map<String, List<String>> phpHeaders = new LinkedHashMap<>();
+                // Build the HTML body
+                StringBuilder bodyBuilder = new StringBuilder();
+
+                boolean inHeaders = true;
+                String line;
+                // Read every line in the output
+                while ((line = output.readLine()) != null){
+                    // Collect the headers
+                    if (inHeaders) {
+                        // Look for the end of the headers
+                        if (line.trim().isEmpty()){
+                            inHeaders = false;
+                        } else {
+                            // Find the index of the colon dividing key and value of the headers
+                            int colonIndex = line.indexOf(":");
+                            // If there is a colon
+                            if (colonIndex > 0) {
+                                // Extract the key (name)
+                                String name = line.substring(0, colonIndex).trim();
+                                // Extract the value
+                                String value = line.substring(colonIndex + 1).trim();
+                                // Append the key and value to the map
+                                phpHeaders.computeIfAbsent(name, k -> new ArrayList<>()).add(value);
+                            }
+                        }
+                    } else {
+                        // After the end of the headers append all of the lines of the body
+                        bodyBuilder.append(line).append("\n");
+                    }
+                }
+                output.close();
+                // Send all headers from PHP to the browser
+                for (Map.Entry<String, List<String>> header : phpHeaders.entrySet()) {
+                    for (String value : header.getValue()) {
+                        exchange.getResponseHeaders().add(header.getKey(), value);
+                    }
+                }
+                // Check for redirecting headers
+                if (phpHeaders.containsKey("Location")){
+                    //exchange.getResponseHeaders().add("Location", phpHeaders.get("Location"));
+                    exchange.sendResponseHeaders(302, -1); // -1 = no body
+                    return null; // Break the proccess
+                } else {
+                    // If there is no redirecting header then collect the body into the response
+                    body = bodyBuilder.toString().getBytes(StandardCharsets.UTF_8);
+                }
+            }
+
+            return body;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+        
+    }
     private static boolean writeFile(String filePath, String content) {
         Path path = Paths.get(filePath);
         try {
