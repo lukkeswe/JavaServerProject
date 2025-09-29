@@ -20,12 +20,12 @@ public class Main {
         int port = 80;
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext("/", new RootHandler());
-        server.createContext("/static", new StaticFileHandler());
+        //server.createContext("/static", new StaticFileHandler());
         server.createContext("/upload", new UploadHandler());
         server.createContext("/uploadFolder", new UploadFolderHandler());
-        server.createContext("/css", new StaticFileHandler());
-        server.createContext("/img", new StaticFileHandler());
-        server.createContext("/js", new StaticFileHandler());
+        //server.createContext("/css", new StaticFileHandler());
+        //server.createContext("/img", new StaticFileHandler());
+        //server.createContext("/js", new StaticFileHandler());
         server.createContext("/query", new QueryHandler());
         server.createContext("/deleteRows", new DeleteHandler());
         server.createContext("/login", new LoginHandler());
@@ -75,7 +75,7 @@ public class Main {
             String[] requestSplit = requestPath.split("/");
             
             // Define the path to the index file
-            String htmlFilePath = "/home/lukas/JavaServerProject/www/static/html/index.html";
+            String htmlFilePath = "/home/lukas/JavaServerProject/www/static/index.html";
             // If no html file is specified target the index file
             String targetFile = "index.html";
             // Initial path
@@ -111,19 +111,30 @@ public class Main {
             } else if (!requestPath.equals("/") && !requestPath.endsWith(".php")) {
                 System.out.println("Iregular path: " + requestPath);
                 // Check if the path points to real directory
-                Path fullPath = Paths.get(userPath, "static", "html" , requestPath);
+                Path fullPath = Paths.get(userPath, "static", requestPath);
                 String contentType = "text/html";
                 if (!requestPath.endsWith(".html")) {
                     // If the file isn't an HTML file, check if it is a valid static file format
-                    Path resolvePath = Paths.get(userPath, "static", "html", requestPath).normalize();
+                    Path resolvePath = Paths.get(userPath, "static", requestPath).normalize();
                     if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
-                        resolvePath = Paths.get(userPath, "static", "html", requestPath, "index.html").normalize();
+                        resolvePath = Paths.get(userPath, "static", requestPath, "index.html").normalize();
                         if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
-                            resolvePath = Paths.get(userPath, "static", "php", requestPath).normalize();
+                            resolvePath = Paths.get(userPath, "static", requestPath, "index.php").normalize();
                             System.out.println("resolvePath: " + resolvePath.toString());
                             if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
                                 exchange.sendResponseHeaders(403, -1);
                                 return;
+                            } else {
+                                // Proccess the requested PHP file
+                                byte[] requestedPhp = runPhp(exchange);
+                                // If the result isn't null
+                                if (requestedPhp != null) {
+                                    response = requestedPhp;
+                                // Else break the exchange
+                                } else {
+                                    exchange.sendResponseHeaders(403, -1);
+                                    return;
+                                }
                             }
                     
                         }
@@ -170,7 +181,7 @@ public class Main {
                 return;
             } else {
                 // Every other case other than the develpment url
-                htmlFilePath = userPath + "/static/html/" + targetFile;
+                htmlFilePath = userPath + "/static/" + targetFile;
             }
             // If the requested file isn't a PHP file
             if (!requestPath.endsWith(".php")){
@@ -178,7 +189,7 @@ public class Main {
                 // Check if the  file exists
                 if (!Files.exists(path) || !Files.isRegularFile(path)){
                     // Fallback if the file does not exist (404: not found :( )
-                    response = Files.readAllBytes(Paths.get("www/static/html/notfound.html"));
+                    response = Files.readAllBytes(Paths.get("www/static/notfound.html"));
                 } else {
                     // If the file exist, load it into the response
                     response = Files.readAllBytes(Paths.get(htmlFilePath));
@@ -701,40 +712,39 @@ public class Main {
                     boolean iregularPath = false;
                     String userPath = "/home/lukas/users/" + map.get("user") + "/static/";
                     if (!map.get("path").equals("") && map.get("path") != null) {
-                        userPath = userPath + "html/" + map.get("path");
-                        iregularPath = true;
+                        userPath = userPath + map.get("path");
                     }
                     System.out.println("Listing files in: " + userPath);
 
                     StringBuilder json = new StringBuilder();
                     String response = "";
 
-                    String[] types = {"html", "php", "css", "img", "js"};
+                    String[] types = {"folder", "html", "php", "css", "img", "js"};
                     boolean success = true;
                     json.append("[{");
-                    if (!iregularPath){
-                        for(String type : types){
-                            String[] files;
-                            try {
-                                files = filesList(userPath + type);
-                                json.append("\""). append(type).append("\": [");
-                                boolean first = true;
-                                for(String file : files){
-                                    if (!first) {
-                                        json.append(", ");
-                                    }
-                                    json.append("\"").append(file).append("\"");
-                                    first = false;
-                                }
-                                json.append("], ");
-                            } catch (RuntimeException e){
-                                System.err.println(e);
-                                response = "[{\\\"status\\\": \\\"fail\\\"}]"; 
-                                success = false;
-                                break;
-                            }
-                        }
-                    } else {
+                    // if (!iregularPath){
+                    //     for(String type : types){
+                    //         String[] files;
+                    //         try {
+                    //             files = filesList(userPath + type);
+                    //             json.append("\""). append(type).append("\": [");
+                    //             boolean first = true;
+                    //             for(String file : files){
+                    //                 if (!first) {
+                    //                     json.append(", ");
+                    //                 }
+                    //                 json.append("\"").append(file).append("\"");
+                    //                 first = false;
+                    //             }
+                    //             json.append("], ");
+                    //         } catch (RuntimeException e){
+                    //             System.err.println(e);
+                    //             response = "[{\\\"status\\\": \\\"fail\\\"}]"; 
+                    //             success = false;
+                    //             break;
+                    //         }
+                    //     }
+                    // } else {
                         String[] files;
                         try {
                             files = filesList(userPath);
@@ -742,7 +752,7 @@ public class Main {
                                 json.append("\"").append(type).append("\": [");
                                 boolean first = true;
                                 for (String file : files){
-                                    if (file.endsWith("." + type) || (file.endsWith("/") && type.equals("html"))) {
+                                    if (file.endsWith("." + type) || (file.endsWith("/") && type.equals("folder"))) {
                                         if(!first) json.append(", ");
                                         json.append("\"").append(file).append("\"");
                                         first = false;
@@ -765,7 +775,7 @@ public class Main {
                         }
                         
 
-                    }
+                    //}
                     
 
                     if (success) {
@@ -915,24 +925,14 @@ public class Main {
                     // Initialize response
                     byte[] response;
                     // Check if file exists
-                    Path path;
-                    if (map.get("path") != null && map.get("path") != "") {
-                        path = Paths.get(
-                            "/home/lukas/users/" +
-                            map.get("user") + 
-                            "/static/html/" + 
-                            map.get("path") + 
-                            map.get("filename")
-                        );
-                    } else {
-                        path = Paths.get(
+                    Path path = Paths.get(
                             "/home/lukas/users/" +
                             map.get("user") + 
                             "/static/" + 
-                            map.get("type") + "/" + 
+                            map.get("path") + 
                             map.get("filename")
                         );
-                    }
+                    
                     if (!Files.exists(path)){
                         System.out.println("No file found at: " + path.toString());
                         exchange.sendResponseHeaders(403, -1);
@@ -1011,11 +1011,11 @@ public class Main {
         // Initial path
         String userPath = DomainsConfig.domainMap.getOrDefault(host, null);
 
-        Path resolvePath = Paths.get(userPath, "static", "php", requestPath);
+        Path resolvePath = Paths.get(userPath, "static", requestPath);
         try {
             // Check if the file exist
             if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
-                body = Files.readAllBytes(Paths.get("www/static/html/notfound.html"));
+                body = Files.readAllBytes(Paths.get("www/static/notfound.html"));
             } else {
                 String phpFilePath = resolvePath.toString();
                 // Process the file with PHP if it is a PHP file
@@ -1023,15 +1023,15 @@ public class Main {
                 String phpIniPath;
                 boolean norlundJohanLukas = false;
                 if (host.equals("norlund-johan-lukas.com") || host.equals("norlund-johan-lukas.com")){
-                    phpIniPath = "www/static/php/lukas.ini"; 
+                    phpIniPath = "www/static/lukas.ini"; 
                     norlundJohanLukas = true;
                 } else phpIniPath = "/etc/php/users/" + username + ".ini";
                 // Create the ProcessBuilder with a "-c" flag
                 ProcessBuilder pb = new ProcessBuilder("php-cgi", "-c", phpIniPath);
                 // Set working directory
                 if (norlundJohanLukas) {
-                    pb.directory(new File("www/static/php/"));
-                } else pb.directory(new File(userPath + "/static/php/"));
+                    pb.directory(new File("www/static/"));
+                } else pb.directory(new File(userPath + "/static/"));
                 //Copy headers from the request
                 Map<String, String> env = pb.environment();
                 // Set common CGI variables
@@ -1787,11 +1787,7 @@ public class Main {
             pos = nextBoundary;
         }
         if (data != null && allowed) {
-            if (path != null && !path.equals("")) {
-                saveFile(fileName, data, path, user);
-            } else {
-                saveFile(fileName, data, fileType, user);
-            }
+            saveFile(fileName, data, path, user);
         }
         return msg;
     }
@@ -1851,12 +1847,8 @@ public class Main {
 
                 //-----
                 String relativePath = extractFilePath(headers);
-                String fullPath = "";
-                if (path != null && !path.equals("")){
-                    fullPath = "/home/lukas/users/" + user + "/static/" + path + relativePath;
-                } else {
-                    fullPath = "/home/lukas/users/" + user + "/static/html/" + relativePath;
-                }
+                String fullPath = "/home/lukas/users/" + user + "/static/" + path + relativePath;
+                
                 System.out.println("Full path: " + fullPath);
                 System.out.println("File path: " + relativePath);
                 if (relativePath != null && !relativePath.isEmpty()){

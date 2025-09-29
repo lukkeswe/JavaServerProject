@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>ノーランド ヨハン ルーカス</title>
+        <link rel="stylesheet" href="css/reset.css">
+        <link rel="stylesheet" href="css/contact-style.css">
+        <link rel="icon" type="image/x-icon" href="img/lukas.ico">
+        <script src="static/js/dbmanager.js"></script>
+    </head>
+    <header>
+        <p>Norlund J. Lukas</p>
+        <nav>
+            <ul>
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="#">お問い合わせ</a></li>
+            </ul>
+        </nav>
+    </header>
+    <body>
+        <div class="mainvisual">
+            <h1>お問い合わせ</h1>
+        </div>
+        <div class="content">
+            <main>
+                <div class="form">
+                    <div class="form-txt">
+                        <label for="name">お名前<span>必須</span></label>
+                        <input id="name" type="text" name="name" placeholder="例）山田太郎" required>
+                    </div>
+                    <div class="form-txt">
+                        <label for="mail">メールアドレス<span>必須</span></label>
+                        <input id="email" type="text" name="email" placeholder="例）guest@example.com" required>
+                    </div>
+                    <div class="form-txt">
+                        <label for="content">お問い合わせ内容<span>必須</span></label>
+                        <textarea name="content" id="content-area" rows="5" placeholder="お問い合わせ内容を入力"></textarea>
+                    </div>
+                    <button type="submit" id="submit">送信</button>
+                </div>
+                    
+                
+            </main>
+        </div>
+        <script type="text/javascript">
+            const db = new DBmanager();
+            document.getElementById("submit").addEventListener("click", async function() {
+                const name = document.getElementById("name");
+                const email = document.getElementById("email");
+                const content = document.getElementById("content-area");
+
+                if (!name.value || !email.value || !content.value){
+                    alert("Fill all of the fields please.")
+                } else {
+                    await db.contact(name.value, email.value, content.value);
+
+                    name.value = "";
+                    email.value = "";
+                    content.value = "";
+
+                    alert("Your message has been sent to us. We will be contacting you shortly. Have a nice day.");
+                }
+            });
+        </script>
+    </body>
+    <footer>&copy;Norlund J. Lukas</footer>
+</html>

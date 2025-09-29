@@ -597,7 +597,7 @@ class DocumentManager {
             const filesContainer    = document.getElementById("filesContainer");
             filesContainer.innerHTML = "";
             // List of supported file types
-            const fileTypes = ["html", "php", "css", "img", "js"];
+            const fileTypes = ["folder", "html", "php", "css", "img", "js"];
             for (let type of fileTypes){
                 const ul    = document.createElement("ul");
                 ul.id       = type + "List";
@@ -683,31 +683,54 @@ class DocumentManager {
                         optionsContainer.append(backBtn);
                     });
 
+                    if (type == "folder") {
+                        const span = document.createElement("span");
+                        span.innerHTML = fileName;
+                        span.addEventListener("click", () => {
+                            this.emptyDisplayContainer();
+                            if (currentPath != null && currentPath.textContent.endsWith("/")) {
+                                this.getFiles(sessionStorage.getItem("user"), currentPath.textContent + fileName);
+                            } else {
+                                this.getFiles(sessionStorage.getItem("user"), fileName);
+                            }
+                            this.appendElementToDisplayContainer(erase);
+                            const path = document.createElement("p");
+                            path.id = "path";
+                            if (currentPath != null && currentPath.textContent.endsWith("/")) {
+                                path.innerHTML = currentPath.textContent + fileName;
+                            } else {
+                                path.innerHTML = fileName;
+                            }
+                            this.updateCurrentPath(path);
+                        });
+                        fileObject.append(span);
+                    }
+
                     // If the file is a HTML or PHP file, add a hyper-link to that file
-                    if (type == "html" || type == "php"){
+                    else if (type == "html" || type == "php"){
                         
-                        if (fileName.endsWith("/")){
-                            const span = document.createElement("span");
-                            span.innerHTML = fileName;
-                            span.addEventListener("click", () => {
-                                this.emptyDisplayContainer();
-                                if (currentPath != null && currentPath.textContent.endsWith("/")) {
-                                    this.getFiles(sessionStorage.getItem("user"), currentPath.textContent + fileName);
-                                } else {
-                                    this.getFiles(sessionStorage.getItem("user"), fileName);
-                                }
-                                this.appendElementToDisplayContainer(erase);
-                                const path = document.createElement("p");
-                                path.id = "path";
-                                if (currentPath != null && currentPath.textContent.endsWith("/")) {
-                                    path.innerHTML = currentPath.textContent + fileName;
-                                } else {
-                                    path.innerHTML = fileName;
-                                }
-                                this.updateCurrentPath(path);
-                            });
-                            fileObject.append(span);
-                        } else {
+                        // if (fileName.endsWith("/")){
+                        //     const span = document.createElement("span");
+                        //     span.innerHTML = fileName;
+                        //     span.addEventListener("click", () => {
+                        //         this.emptyDisplayContainer();
+                        //         if (currentPath != null && currentPath.textContent.endsWith("/")) {
+                        //             this.getFiles(sessionStorage.getItem("user"), currentPath.textContent + fileName);
+                        //         } else {
+                        //             this.getFiles(sessionStorage.getItem("user"), fileName);
+                        //         }
+                        //         this.appendElementToDisplayContainer(erase);
+                        //         const path = document.createElement("p");
+                        //         path.id = "path";
+                        //         if (currentPath != null && currentPath.textContent.endsWith("/")) {
+                        //             path.innerHTML = currentPath.textContent + fileName;
+                        //         } else {
+                        //             path.innerHTML = fileName;
+                        //         }
+                        //         this.updateCurrentPath(path);
+                        //     });
+                        //     fileObject.append(span);
+                        // } else {
                             // Create hyper-link
                             const a = document.createElement("a");
                             // Add a url
@@ -735,7 +758,7 @@ class DocumentManager {
                                 optionsContainer.append(edit);
                                 this.showInfo(fileName);
                             });
-                        }
+                        //}
                     } else {
                         // Append the name object with the span element
                         fileObject.append(name);

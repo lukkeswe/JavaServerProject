@@ -204,6 +204,10 @@ main {
     display: block;
 }
 
+#folderList li span {
+    background-color: orange;
+}
+
 #htmlList li span {
     background-color: red;
     color: white;

@@ -19,8 +19,8 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/style.css">
     <title>File manager</title>
-    <script src="static/js/upmanager.js"></script>
-    <script src="../js/docmanager.js"></script>
+    <script src="js/upmanager.js"></script>
+    <script src="js/docmanager.js"></script>
 </head>
 <body>
     <header><h1>ファイル管理</h1></header>
@@ -118,7 +118,7 @@ if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
 
             const currentPath = document.getElementById("path");
             let path;
-            if (currentPath) path = "html/" + currentPath.textContent;
+            if (currentPath) path = currentPath.textContent;
             else path = "";
 
             const loadImage = document.createElement("img");
