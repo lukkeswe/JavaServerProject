@@ -120,8 +120,9 @@ public class Main {
                         resolvePath = Paths.get(userPath, "static", requestPath, "index.html").normalize();
                         if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
                             resolvePath = Paths.get(userPath, "static", requestPath, "index.php").normalize();
-                            System.out.println("resolvePath: " + resolvePath.toString());
+                            //System.out.println("resolvePath: " + resolvePath.toString());
                             if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
+                                System.out.println("Invalid path:" + resolvePath.toString());
                                 exchange.sendResponseHeaders(403, -1);
                                 return;
                             } else {
@@ -972,12 +973,7 @@ public class Main {
                     Map<String, String> map = parseJsonToMap(body);
                     String content = map.get("content").replace("\r\n", "\n");
                     // Create the file's path
-                    String path;
-                    if (map.get("path") != null && !map.get("path").equals("")){
-                        path = "/home/lukas/users/" + map.get("user") + "/static/html/" + map.get("path") + map.get("filename");
-                    } else {
-                        path = "/home/lukas/users/" + map.get("user") + "/static/" + map.get("type") + "/" + map.get("filename");
-                    }
+                    String path = "/home/lukas/users/" + map.get("user") + "/static/" + map.get("path") + map.get("filename");
                     // Save the file
                     if (writeFile(path, content)){
                         String msg = "Success";
