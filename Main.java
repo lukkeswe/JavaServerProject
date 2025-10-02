@@ -832,23 +832,14 @@ public class Main {
                     return;
                 } else {
                     System.out.println("Recived path: " + map.get("path"));
-                    if (map.get("path") != null && !map.get("path").equals("")){
-                        path = Paths.get(
-                            "/home/lukas/users/" +
-                            map.get("user") +
-                            "/static/html/" +
-                            map.get("path") +
-                            map.get("filename")
-                        );
-                    } else {
-                        path = Paths.get(
-                            "/home/lukas/users/" + 
-                            map.get("user") + 
-                            "/static/" + 
-                            map.get("type") +
-                            "/" +
-                            map.get("filename"));
-                    }
+                    path = Paths.get(
+                        "/home/lukas/users/" +
+                        map.get("user") +
+                        "/static/" +
+                        map.get("path") +
+                        map.get("filename")
+                    );
+                    
                     System.out.println("Delete target: " + path.toString());
                     // Make sure the file exist
                     if (Files.exists(path)) {
