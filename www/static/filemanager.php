@@ -1,14 +1,59 @@
 <?php
 require_once(__DIR__ . "/dbmanager.php");
-if(!isset($_COOKIE["email"]) || !isset($_COOKIE["password"])){
-    header("Location:server.php");
-    exit();
-} else {
-    $db = new DBmanager($_COOKIE["email"], $_COOKIE["password"]);
-    if (!$db->login()){
-        header("Location:server.php");
+require_once(__DIR__. "/config.php");
+
+if (isset($_COOKIE["javasession"])){
+    // Initialize cURL
+    $ch = curl_init();
+    // Target server
+    $url = API_SERVER . "/check-session";
+    curl_setopt($ch, CURLOPT_URL, $url);
+    // Set timeout
+    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+    // Enable POST
+    curl_setopt($ch, CURLOPT_POST, true);
+    // Request data
+    $data = ["session" => $_COOKIE["javasession"]];
+    // Convert to JSON
+    $jsonData = json_encode($data);
+    // -- Set request options --
+    // Return response as a string
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    // Prepare POST
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
+    // Set the header with apropriate content type and leangth
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Content-Length: ' . strlen($jsonData) 
+    ]);
+    // Execute POST
+    $response = curl_exec($ch);
+    // Get the HTTP code
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    // Error check
+    if ($response === false || $httpCode != 200) {
+        header("Location:logout.php");
+        exit();
+    } else {
+        $msg = "It worked! " . $response;
+    }
+    // Initialize the DB manager
+    if (isset($_COOKIE["email"]) && isset($_COOKIE["password"])){
+        $db = new DBmanager($_COOKIE["email"], $_COOKIE["password"]);
+        if(!$db->login()){
+            header("Location:logout.php");
+            exit();
+        }
+    } else {
+        header("Location:logout.php");
         exit();
     }
+    
+
+} else {
+    header("Location:server.php");
+    exit();
 }
 ?>
 <!DOCTYPE html>

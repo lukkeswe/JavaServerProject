@@ -39,6 +39,7 @@ public class Main {
         server.createContext("/getFileContent", new FetchFileContent());
         server.createContext("/saveFile", new SaveFileHandler());
         server.createContext("/create-session", new SessionHandler());
+        server.createContext("/check-session", new CheckJavaSession());
         server.setExecutor(Executors.newFixedThreadPool(10));
         server.start();
         System.out.println("Server started on port " + port);
@@ -989,6 +990,37 @@ public class Main {
                         return;
                     }
                 }
+            }
+        }
+    }
+    static class CheckJavaSession implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException{
+            if ("POST".equals(exchange.getRequestMethod())){
+                // Get the request body
+                String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+                // Parse the body to map
+                Map<String, String> map = parseJsonToMap(body);
+                // Verify the user
+                System.out.println("Checking session id: " + map.get("session"));
+                String email = SessionManager.getUsername(map.get("session"));
+                if (email == null) {
+                    System.out.println("Session not approved!");
+                    exchange.sendResponseHeaders(400, -1);
+                    return;
+                } else {
+                    System.out.println("Session is valid!");
+                    System.out.println("Sending response...");
+                    byte[] response = map.get("session").getBytes(StandardCharsets.UTF_8);
+                    exchange.getResponseHeaders().add("Content-Type", "text/plain");
+                    exchange.sendResponseHeaders(200, response.length);
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(response);
+                    os.close();
+                    System.out.println("Response sent!");
+                }
+                exchange.close();
+                return;
             }
         }
     }
