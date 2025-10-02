@@ -117,21 +117,30 @@ public class Main {
                 if (!requestPath.endsWith(".html")) {
                     // If the file isn't an HTML file, check if it is a valid static file format
                     Path resolvePath = Paths.get(userPath, "static", requestPath).normalize();
+                    System.out.println("Looking for: " + resolvePath.toString());
                     if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
                         resolvePath = Paths.get(userPath, "static", requestPath, "index.html").normalize();
+                        System.out.println("Looking for: " + resolvePath.toString());
                         if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
                             resolvePath = Paths.get(userPath, "static", requestPath, "index.php").normalize();
+                            System.out.println("Looking for: " + resolvePath.toString());
                             //System.out.println("resolvePath: " + resolvePath.toString());
                             if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
                                 System.out.println("Invalid path:" + resolvePath.toString());
                                 exchange.sendResponseHeaders(403, -1);
                                 return;
                             } else {
+                                System.out.println("Proccessing: " + resolvePath.toString());
                                 // Proccess the requested PHP file
                                 byte[] requestedPhp = runPhp(exchange);
                                 // If the result isn't null
                                 if (requestedPhp != null) {
-                                    response = requestedPhp;
+                                    exchange.getResponseHeaders().set("Content-Type", contentType + "; charset=UTF-8");
+                                    exchange.sendResponseHeaders(200, requestedPhp.length);
+                                    OutputStream os = exchange.getResponseBody();
+                                    os.write(requestedPhp);
+                                    os.close();
+                                    return;
                                 // Else break the exchange
                                 } else {
                                     exchange.sendResponseHeaders(403, -1);
@@ -1040,12 +1049,19 @@ public class Main {
         String userPath = DomainsConfig.domainMap.getOrDefault(host, null);
 
         Path resolvePath = Paths.get(userPath, "static", requestPath);
+        Path indexPath = Paths.get(resolvePath.toString(), "index.php");
         try {
             // Check if the file exist
-            if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
+            if (
+                (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) &&
+                !Files.exists(indexPath)
+            ) {
                 body = Files.readAllBytes(Paths.get("www/static/notfound.html"));
             } else {
                 String phpFilePath = resolvePath.toString();
+                if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
+                    phpFilePath = indexPath.toString();
+                }
                 // Process the file with PHP if it is a PHP file
                 String username = PhpConfig.phpMap.getOrDefault(host, null);
                 String phpIniPath;
