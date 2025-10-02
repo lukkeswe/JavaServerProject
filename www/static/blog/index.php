@@ -1,3 +1,61 @@
+<?php
+require_once(__DIR__ . "/../dbmanager.php");
+require_once(__DIR__. "/../config.php");
+
+if (isset($_COOKIE["javasession"])){
+    // Initialize cURL
+    $ch = curl_init();
+    // Target server
+    $url = API_SERVER . "/check-session";
+    curl_setopt($ch, CURLOPT_URL, $url);
+    // Set timeout
+    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+    // Enable POST
+    curl_setopt($ch, CURLOPT_POST, true);
+    // Request data
+    $data = ["session" => $_COOKIE["javasession"]];
+    // Convert to JSON
+    $jsonData = json_encode($data);
+    // -- Set request options --
+    // Return response as a string
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    // Prepare POST
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
+    // Set the header with apropriate content type and leangth
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Content-Length: ' . strlen($jsonData) 
+    ]);
+    // Execute POST
+    $response = curl_exec($ch);
+    // Get the HTTP code
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    // Error check
+    if ($response === false || $httpCode != 200) {
+        header("Location:https://norlund-johan-lukas.com/logout.php");
+        exit();
+    } else {
+        $msg = "It worked! " . $response;
+    }
+    // Initialize the DB manager
+    if (isset($_COOKIE["email"]) && isset($_COOKIE["password"])){
+        $db = new DBmanager($_COOKIE["email"], $_COOKIE["password"]);
+        if(!$db->login()){
+            header("Location:https://norlund-johan-lukas.com/logout.php");
+            exit();
+        }
+    } else {
+        header("Location:https://norlund-johan-lukas.com/logout.php");
+        exit();
+    }
+    
+
+} else {
+    header("Location:https://norlund-johan-lukas.com/server.php");
+    exit();
+}
+?>
 <!doctype html>
 <html lang="ja">
 <head>
@@ -41,7 +99,7 @@
     /* small responsive */
     @media (max-width:640px){.toolbar{flex-wrap:wrap}.controls{width:100%;margin:0;justify-content:space-between}}
   </style>
-  <script src="js/upmanager.js"></script>
+  <script src="../js/upmanager.js"></script>
 </head>
 <body>
   <header>
