@@ -133,7 +133,7 @@ if (isset($_COOKIE["javasession"])){
 
             const currentPath = document.getElementById("path");
             let path;
-            if (currentPath) path = "html/" + currentPath.textContent;
+            if (currentPath) path = currentPath.textContent;
             else path = "";
 
             const loadImage = document.createElement("img");
