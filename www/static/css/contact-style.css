@@ -31,7 +31,7 @@ a {
 }
 
 .mainvisual {
-    background-image: url(img/flower.jpg);
+    background-image: url(../img/flower.jpg);
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;

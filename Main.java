@@ -720,9 +720,9 @@ public class Main {
                     return;
                 } else {
                     // Get lists of the files depending on the user
-                    boolean iregularPath = false;
                     String userPath = "/home/lukas/users/" + map.get("user") + "/static/";
-                    if (!map.get("path").equals("") && map.get("path") != null) {
+                    if (map.get("user").equals("norlund_johan_lukas_com")) userPath = "/home/lukas/JavaServerProject/www/static/";
+                    if (!map.get("path").isEmpty() && map.get("path") != null) {
                         userPath = userPath + map.get("path");
                     }
                     System.out.println("Listing files in: " + userPath);
@@ -733,29 +733,6 @@ public class Main {
                     String[] types = {"folder", "html", "php", "css", "img", "js"};
                     boolean success = true;
                     json.append("[{");
-                    // if (!iregularPath){
-                    //     for(String type : types){
-                    //         String[] files;
-                    //         try {
-                    //             files = filesList(userPath + type);
-                    //             json.append("\""). append(type).append("\": [");
-                    //             boolean first = true;
-                    //             for(String file : files){
-                    //                 if (!first) {
-                    //                     json.append(", ");
-                    //                 }
-                    //                 json.append("\"").append(file).append("\"");
-                    //                 first = false;
-                    //             }
-                    //             json.append("], ");
-                    //         } catch (RuntimeException e){
-                    //             System.err.println(e);
-                    //             response = "[{\\\"status\\\": \\\"fail\\\"}]"; 
-                    //             success = false;
-                    //             break;
-                    //         }
-                    //     }
-                    // } else {
                         String[] files;
                         try {
                             files = filesList(userPath);
@@ -784,11 +761,6 @@ public class Main {
                             response = "[{\\\"status\\\": \\\"fail\\\"}]"; 
                             success = false;
                         }
-                        
-
-                    //}
-                    
-
                     if (success) {
                         json.append("\"status\": \"ok\"").append("}]");
                         response = json.toString();
@@ -825,20 +797,18 @@ public class Main {
                 String sessionId = getJavaSessionId(exchange);
                 String email = SessionManager.getUsername(sessionId);
 
-                Path path;
                 if (email == null) {
                     exchange.sendResponseHeaders(403, -1);
                     exchange.getResponseBody().close();
                     return;
                 } else {
                     System.out.println("Recived path: " + map.get("path"));
-                    path = Paths.get(
-                        "/home/lukas/users/" +
-                        map.get("user") +
-                        "/static/" +
-                        map.get("path") +
-                        map.get("filename")
-                    );
+                    String userPath =  "/home/lukas/users/" + map.get("user") + "/static/";
+                    if (map.get("user").equals("norlund_johan_lukas_com")) userPath = "/home/lukas/JavaServerProject/www/static/";
+                    if (!map.get("path").isEmpty() && map.get("path") != null) userPath += map.get("path");
+                    userPath += map.get("filename");
+
+                    Path path = Paths.get(userPath);
                     
                     System.out.println("Delete target: " + path.toString());
                     // Make sure the file exist
@@ -927,13 +897,12 @@ public class Main {
                     // Initialize response
                     byte[] response;
                     // Check if file exists
-                    Path path = Paths.get(
-                            "/home/lukas/users/" +
-                            map.get("user") + 
-                            "/static/" + 
-                            map.get("path") + 
-                            map.get("filename")
-                        );
+                    String userPath =  "/home/lukas/users/" + map.get("user") + "/static/";
+                    if (map.get("user").equals("norlund_johan_lukas_com")) userPath = "/home/lukas/JavaServerProject/www/static/";
+                    if (!map.get("path").isEmpty() && map.get("path") != null) userPath += map.get("path");
+                    userPath += map.get("filename");
+
+                    Path path = Paths.get(userPath);
                     
                     if (!Files.exists(path)){
                         System.out.println("No file found at: " + path.toString());
@@ -974,9 +943,12 @@ public class Main {
                     Map<String, String> map = parseJsonToMap(body);
                     String content = map.get("content").replace("\r\n", "\n");
                     // Create the file's path
-                    String path = "/home/lukas/users/" + map.get("user") + "/static/" + map.get("path") + map.get("filename");
+                    String userPath =  "/home/lukas/users/" + map.get("user") + "/static/";
+                    if (map.get("user").equals("norlund_johan_lukas_com")) userPath = "/home/lukas/JavaServerProject/www/static/";
+                    if (!map.get("path").isEmpty() && map.get("path") != null) userPath += map.get("path");
+                    userPath += map.get("filename");
                     // Save the file
-                    if (writeFile(path, content)){
+                    if (writeFile(userPath, content)){
                         String msg = "Success";
                         byte[] response = msg.getBytes();
                         exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
