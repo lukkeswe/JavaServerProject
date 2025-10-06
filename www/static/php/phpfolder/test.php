@@ -1,5 +1,5 @@
 <?php 
-$msg = "Hello, PHP!";
+$msg = "GAY!";
 ?>
 <!DOCTYPE html>
 <html lang="en">
