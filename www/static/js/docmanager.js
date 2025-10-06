@@ -893,7 +893,7 @@ class DocumentManager {
         const img = document.createElement("img");
         const currentPath = document.getElementById("path");
         img.loading = "lazy";
-        img.src = domain + "img/" + filename;
+        img.src = domain + filename;
         if (currentPath != null && currentPath.textContent != "") {
             img.src = domain + currentPath.textContent + filename;
         }
