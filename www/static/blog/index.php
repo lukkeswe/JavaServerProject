@@ -62,125 +62,7 @@ if (isset($_COOKIE["javasession"])){
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Blog creater tool</title>
-  <style>
-    :root{--bg:#0b0b0d;--panel:#111214;--muted:#9aa0a6;--accent:#6ee7b7;--card:#131316}
-    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial}
-    body{background:linear-gradient(180deg,#070708 0%, #0f0f10 100%);color:#e6eef3}
-
-    header{position:sticky;top:0;z-index:30;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);backdrop-filter:blur(4px);border-bottom:1px solid rgba(255,255,255,0.03)}
-    .toolbar{display:flex;gap:12px;align-items:center;padding:12px 16px}
-    .title{font-weight:700;font-size:18px}
-    .controls{margin-left:auto;display:flex;gap:8px}
-
-    button,select,input[type="range"]{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);padding:8px 10px;border-radius:8px;font-size:13px}
-    button:hover{border-color:rgba(255,255,255,0.12);color:#fff}
-
-    main{max-width:900px;margin:24px auto;padding:8px}
-    .canvas{min-height:60vh;border-radius:12px;padding:18px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));box-shadow:0 6px 20px rgba(2,6,10,0.6)}
-
-    .block{position:relative;margin:18px 0;padding:12px;border-radius:10px;background:rgba(255,255,255,0.01);overflow:hidden}
-    .block:hover{box-shadow:0 6px 20px rgba(0,0,0,0.6)}
-
-    /* overlay toolbar placed on top of the block */
-    .block .overlay{display:flex;gap:8px;align-items:center;z-index:20;backdrop-filter:blur(4px);padding:6px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:linear-gradient(180deg, rgba(0,0,0,0.35), rgba(255,255,255,0.02))}
-
-    .text-content[contenteditable]{min-height:60px;outline:none}
-    .text-content.small{font-size:14px}
-    .text-content.medium{font-size:18px}
-    .text-content.large{font-size:24px}
-
-    .img-wrap{display:flex;align-items:center;justify-content:center}
-    .img-wrap img{max-width:100%;border-radius:6px}
-
-    .muted{color:var(--muted);font-size:13px}
-
-    #grayScreen {display: none; z-index: 1000; position: absolute; background-color: rgba(154, 160, 166, 0.5); width: 100%; height: 100%;}
-    
-    #filesContainer {display:block; position: relative; z-index: 1001; height: 400px;}
-
-    #miniExplorer {display: block; position: relative; z-index: 1001; width: 400px; margin: 0 auto; background-color: white; color: black;}
-
-    #filesContainer ul {display: flex; flex-direction: row; font-size: 7px; flex-wrap: wrap; padding: 0;}
-
-    #filesContainer li {
-      display: flex;
-      flex-direction: column;
-      width: 50px;
-      height: 50px;
-      margin: 5px;
-    }
-
-    #filesContainer li:hover {
-      cursor: pointer;
-    }
-
-    #filesContainer li span {
-      flex: 5;
-      padding: 5px;
-      border-radius: 3px;
-      overflow-wrap: break-word;
-    }
-    #filesContainer li a {
-        flex: 5;
-    }
-
-    #filesContainer li a span {
-        display: block;
-    }
-
-    #folderList li span {
-        background-color: orange;
-    }
-
-    #htmlList li span {
-        background-color: red;
-        color: white;
-        height: 100%;
-    }
-
-    #htmlList li span:hover {
-        background-color: darkred;
-    }
-
-    #cssList li span {
-        background-color: yellow;
-    }
-
-    #cssList li span:hover {
-        background-color: rgb(208, 208, 0);
-    }
-
-    #imgList li span {
-        background-color: skyblue;
-    }
-
-    #imgList li span:hover {
-        background-color: blue;
-    }
-
-    #jsList li span {
-        background-color: aqua;
-    }
-
-    #jsList li span:hover {
-        background-color: blue;
-    }
-
-    #phpList li span {
-        background-color: blueviolet;
-        color: white;
-        height: 100%;
-    }
-
-    #phpList li span:hover {
-        background-color: purple;
-    }
-
-    footer{max-width:900px;margin:12px auto;padding:8px;color:var(--muted);font-size:13px}
-
-    /* small responsive */
-    @media (max-width:640px){.toolbar{flex-wrap:wrap}.controls{width:100%;margin:0;justify-content:space-between}}
-  </style>
+  <link rel="stylesheet" href="css/style.css">
   <script src="../js/upmanager.js"></script>
   <script src="../js/docmanager.js"></script>
 </head>
@@ -218,6 +100,7 @@ if (isset($_COOKIE["javasession"])){
 
   <footer>Background: dark UI • ブロック上のボタンでフォントスタイルやサイズを変更できます</footer>
 
+  <script src="js/blogcreator.js"></script>
   <script>
     const canvas = document.getElementById('canvas');
     const addTextBtn = document.getElementById('addText');
@@ -229,80 +112,6 @@ if (isset($_COOKIE["javasession"])){
 
     const dm = new DocumentManager("<?php echo $db->username; ?>");
     sessionStorage.setItem("user", "<?php echo $db->username; ?>")
-
-    function createBlock(type, initial){
-      const block = document.createElement('section');
-      block.className = 'block';
-
-      const overlay = document.createElement('div');
-      overlay.className = 'overlay';
-
-      const fontSelect = document.createElement('select');
-      ['Sans','Serif','Monospace','Cursive','Georgia','Tahoma'].forEach(f=>{
-        const opt = document.createElement('option'); opt.value = f; opt.textContent = f; fontSelect.appendChild(opt);
-      });
-      overlay.appendChild(fontSelect);
-
-      const sizeInput = document.createElement('input');
-      sizeInput.type = 'range'; sizeInput.min = 12; sizeInput.max = 48; sizeInput.value = 18;
-      overlay.appendChild(sizeInput);
-
-      const boldBtn = document.createElement('button'); boldBtn.textContent = 'B'; overlay.appendChild(boldBtn);
-      const italicBtn = document.createElement('button'); italicBtn.textContent = 'I'; overlay.appendChild(italicBtn);
-
-      const delBtn = document.createElement('button'); delBtn.textContent = '削除'; overlay.appendChild(delBtn);
-      const upBtn = document.createElement('button'); upBtn.textContent = '↑'; overlay.appendChild(upBtn);
-      const downBtn = document.createElement('button'); downBtn.textContent = '↓'; overlay.appendChild(downBtn);
-
-      block.appendChild(overlay);
-
-      if(type==='text'){
-        const t = document.createElement('div');
-        t.className = 'text-content medium';
-        t.contentEditable = true;
-        t.spellcheck = false;
-        t.innerHTML = initial || '<h1>タイトルを書いてください</h1>\n\t\t<p>ここに文章を入力してください...</p>';
-        t.style.fontFamily = 'Sans';
-        block.appendChild(t);
-
-        fontSelect.addEventListener('change',()=>{ t.style.fontFamily = fontSelect.value; });
-        sizeInput.addEventListener('input',()=>{ t.style.fontSize = sizeInput.value + 'px'; });
-        boldBtn.addEventListener('click',()=>{ t.style.fontWeight = (t.style.fontWeight === '700' ? '400' : '700'); });
-        italicBtn.addEventListener('click',()=>{ t.style.fontStyle = (t.style.fontStyle === 'italic' ? 'normal' : 'italic'); });
-      } else if(type==='image'){
-        const wrap = document.createElement('div'); wrap.className='img-wrap';
-        const img = document.createElement('img'); img.alt = 'uploaded image';
-        if(initial) img.src = initial;
-        wrap.appendChild(img);
-        block.appendChild(wrap);
-
-        fontSelect.style.display='none';
-        sizeInput.style.display='none';
-        boldBtn.style.display='none';
-        italicBtn.style.display='none';
-
-        overlay.addEventListener('click',async ()=>{
-          hiddenFile.onchange = async e=>{
-            const f = e.target.files[0]; if(!f) return;
-            if(toggleBase64.checked){
-              const r = new FileReader(); r.onload = ev=>{ img.src = ev.target.result; }; r.readAsDataURL(f);
-            } else {
-              const path = f.name;
-              const uploadedPath = await uploadFile("<?php echo $db->username; ?>", path);
-              img.src = uploadedPath;
-            }
-            hiddenFile.value = '';
-          };
-          hiddenFile.click();
-        });
-      }
-
-      delBtn.addEventListener('click',()=>{ if(confirm('このブロックを削除しますか？')) block.remove(); });
-      upBtn.addEventListener('click',()=>{ const prev = block.previousElementSibling; if(prev) canvas.insertBefore(block, prev); });
-      downBtn.addEventListener('click',()=>{ const next = block.nextElementSibling; if(next) canvas.insertBefore(next, block); });
-
-      return block;
-    }
 
     addTextBtn.addEventListener('click', ()=>{
       const b = createBlock('text');
