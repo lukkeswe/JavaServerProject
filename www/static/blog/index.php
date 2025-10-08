@@ -94,14 +94,108 @@ if (isset($_COOKIE["javasession"])){
 
     .muted{color:var(--muted);font-size:13px}
 
+    #grayScreen {display: none; z-index: 1000; position: absolute; background-color: rgba(154, 160, 166, 0.5); width: 100%; height: 100%;}
+    
+    #filesContainer {display:block; position: relative; z-index: 1001; height: 400px;}
+
+    #miniExplorer {display: block; position: relative; z-index: 1001; width: 400px; margin: 0 auto; background-color: white; color: black;}
+
+    #filesContainer ul {display: flex; flex-direction: row; font-size: 7px; flex-wrap: wrap; padding: 0;}
+
+    #filesContainer li {
+      display: flex;
+      flex-direction: column;
+      width: 50px;
+      height: 50px;
+      margin: 5px;
+    }
+
+    #filesContainer li:hover {
+      cursor: pointer;
+    }
+
+    #filesContainer li span {
+      flex: 5;
+      padding: 5px;
+      border-radius: 3px;
+      overflow-wrap: break-word;
+    }
+    #filesContainer li a {
+        flex: 5;
+    }
+
+    #filesContainer li a span {
+        display: block;
+    }
+
+    #folderList li span {
+        background-color: orange;
+    }
+
+    #htmlList li span {
+        background-color: red;
+        color: white;
+        height: 100%;
+    }
+
+    #htmlList li span:hover {
+        background-color: darkred;
+    }
+
+    #cssList li span {
+        background-color: yellow;
+    }
+
+    #cssList li span:hover {
+        background-color: rgb(208, 208, 0);
+    }
+
+    #imgList li span {
+        background-color: skyblue;
+    }
+
+    #imgList li span:hover {
+        background-color: blue;
+    }
+
+    #jsList li span {
+        background-color: aqua;
+    }
+
+    #jsList li span:hover {
+        background-color: blue;
+    }
+
+    #phpList li span {
+        background-color: blueviolet;
+        color: white;
+        height: 100%;
+    }
+
+    #phpList li span:hover {
+        background-color: purple;
+    }
+
     footer{max-width:900px;margin:12px auto;padding:8px;color:var(--muted);font-size:13px}
 
     /* small responsive */
     @media (max-width:640px){.toolbar{flex-wrap:wrap}.controls{width:100%;margin:0;justify-content:space-between}}
   </style>
   <script src="../js/upmanager.js"></script>
+  <script src="../js/docmanager.js"></script>
 </head>
 <body>
+  <div id="grayScreen">
+    <div id="miniExplorer">
+      <input id="filename" type="text" value="index" style="width: 150px;"><span>.html</span>
+      <div id="pathContainer"></div>
+      <div id="optionsContainer"></div>
+      <div id="displayContainer" style="display: none;"></div>
+      <div id="filesContainer"></div>
+      <div id="uploadBtnContainer"></div>
+      <button id="cancel">Cancel</button>
+    </div>
+  </div>
   <header>
     <div class="toolbar">
       <div class="title">Blog creater tool — ブログ作成ツール</div>
@@ -111,6 +205,7 @@ if (isset($_COOKIE["javasession"])){
         <button id="addImage">＋ 画像を追加</button>
         <label><input type="checkbox" id="toggleBase64" checked> Base64画像</label>
         <button id="download">↓ HTMLをダウンロード</button>
+        <button id="save">↑ HTMLを保存</button>
         <input id="hiddenFile" type="file" accept="image/*" style="display:none" />
       </div>
     </div>
@@ -130,6 +225,10 @@ if (isset($_COOKIE["javasession"])){
     const hiddenFile = document.getElementById('hiddenFile');
     const downloadBtn = document.getElementById('download');
     const toggleBase64 = document.getElementById('toggleBase64');
+    const saveBtn = document.getElementById('save');
+
+    const dm = new DocumentManager("<?php echo $db->username; ?>");
+    sessionStorage.setItem("user", "<?php echo $db->username; ?>")
 
     function createBlock(type, initial){
       const block = document.createElement('section');
@@ -242,14 +341,10 @@ if (isset($_COOKIE["javasession"])){
           if(t.style.fontSize) style.push('font-size:' + t.style.fontSize);
           if(t.style.fontWeight) style.push('font-weight:' + t.style.fontWeight);
           if(t.style.fontStyle) style.push('font-style:' + t.style.fontStyle);
-          bodyInner += `\t<div style="${style.join(';')};margin:18px 0;">\n
-                          \t\t${html}\n
-                        \t</div>\n`;
+          bodyInner += `\t<div style="${style.join(';')};margin:18px 0;">\n\t\t${html}\n\t</div>\n`;
         } else if(b.querySelector('img')){
           const img = b.querySelector('img');
-          bodyInner += `\t<div style=\"margin:18px 0;text-align:center;\">\n
-                          \t\t<img src=\"${img.src}\" alt=\"image\" style=\"max-width:100%;height:auto;border-radius:6px;\"/>\n
-                        \t</div>`;
+          bodyInner += `\t<div style=\"margin:18px 0;text-align:center;\">\n\t\t<img src=\"${img.src}\" alt=\"image\" style=\"max-width:100%;height:auto;border-radius:6px;\"/>\n\t</div>`;
         }
       });
 
@@ -258,6 +353,80 @@ if (isset($_COOKIE["javasession"])){
       const blob = new Blob([template], {type:'text/html'});
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a'); a.href = url; a.download = 'blog.html'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    });
+
+    saveBtn.addEventListener("click", async ()=> {
+      const blocks = Array.from(canvas.children);
+      let bodyInner = '';
+      blocks.forEach(b=>{
+        if(b.querySelector('.text-content')){
+          const t = b.querySelector('.text-content');
+          let html = t.innerHTML.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '');
+          const style = [];
+          if(t.style.fontFamily) style.push('font-family:' + t.style.fontFamily);
+          if(t.style.fontSize) style.push('font-size:' + t.style.fontSize);
+          if(t.style.fontWeight) style.push('font-weight:' + t.style.fontWeight);
+          if(t.style.fontStyle) style.push('font-style:' + t.style.fontStyle);
+          bodyInner += `\t<div style="${style.join(';')};margin:18px 0;">\n\t\t${html}\n\t</div>\n`;
+        } else if(b.querySelector('img')){
+          const img = b.querySelector('img');
+          bodyInner += `\t<div style=\"margin:18px 0;text-align:center;\">\n\t\t<img src=\"${img.src}\" alt=\"image\" style=\"max-width:100%;height:auto;border-radius:6px;\"/>\n\t</div>`;
+        }
+      });
+
+      const template = `<!doctype html>\n<html lang=\"ja\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<title>My Blog</title>\n<style>body{background:#111;color:#fff;font-family:system-ui,Arial;line-height:1.6;padding:28px;max-width:750px;margin:0 auto}</style>\n</head>\n<body>\n${bodyInner}\n</body>\n</html>`;
+
+      const blob = new Blob([template], {type:'text/html'});
+
+      const user = "<?php echo $db->username; ?>";
+      let path = "test/";
+
+      document.getElementById("grayScreen").style.display = "block";
+
+      let currentPath = document.getElementById("path");
+      console.log("currentPath: " + !currentPath);
+      
+      if (currentPath) dm.getFilesMini("<?php echo $db->username; ?>", currentPath.textContent);
+      else dm.getFilesMini("<?php echo $db->username; ?>", "");
+
+      const uploadBtnContainer = document.getElementById("uploadBtnContainer");
+      const uploadBtn = document.createElement("button");
+      uploadBtn.id = "uploadBtn";
+      uploadBtn.innerHTML = "Upload";
+
+      uploadBtn.addEventListener("click", async ()=> {
+        const filename = document.getElementById("filename").value;
+
+        const file = new File([blob], filename + ".html", {type: "text/html"});
+
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        fileInput.files = dataTransfer.files;
+
+        fileInput.id = "fileInput";
+        document.body.appendChild(fileInput);
+
+        currentPath = document.getElementById("path");
+        if (currentPath && currentPath.innerHTML != ""){
+          path = currentPath.textContent;
+        }
+        await uploadFile(user, path);
+
+        document.body.removeChild(fileInput);
+        uploadBtn.remove();
+        alert("Blog saved to: " + path);
+
+        document.getElementById("grayScreen").style.display = "none";
+      });
+
+      uploadBtnContainer.append(uploadBtn);
+    });
+
+    document.getElementById("cancel").addEventListener("click", ()=> {
+      document.getElementById("uploadBtn").remove();
+      document.getElementById("grayScreen").style.display = "none";
     });
 
     canvas.appendChild(createBlock('text', '<h1>タイトルを書いてください</h1>\n\t\t<p>イントロダクション...</p>'));

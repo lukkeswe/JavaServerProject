@@ -708,29 +708,6 @@ class DocumentManager {
 
                     // If the file is a HTML or PHP file, add a hyper-link to that file
                     else if (type == "html" || type == "php"){
-                        
-                        // if (fileName.endsWith("/")){
-                        //     const span = document.createElement("span");
-                        //     span.innerHTML = fileName;
-                        //     span.addEventListener("click", () => {
-                        //         this.emptyDisplayContainer();
-                        //         if (currentPath != null && currentPath.textContent.endsWith("/")) {
-                        //             this.getFiles(sessionStorage.getItem("user"), currentPath.textContent + fileName);
-                        //         } else {
-                        //             this.getFiles(sessionStorage.getItem("user"), fileName);
-                        //         }
-                        //         this.appendElementToDisplayContainer(erase);
-                        //         const path = document.createElement("p");
-                        //         path.id = "path";
-                        //         if (currentPath != null && currentPath.textContent.endsWith("/")) {
-                        //             path.innerHTML = currentPath.textContent + fileName;
-                        //         } else {
-                        //             path.innerHTML = fileName;
-                        //         }
-                        //         this.updateCurrentPath(path);
-                        //     });
-                        //     fileObject.append(span);
-                        // } else {
                             // Create hyper-link
                             const a = document.createElement("a");
                             // Add a url
@@ -783,6 +760,143 @@ class DocumentManager {
 
                                 this.showInfo(fileName);
                                 optionsContainer.append(edit);
+                            });
+                        }
+                    }
+                    ul.append(fileObject);
+                    list.push(fileName);
+                }
+                // Save the list of files in session storage
+                sessionStorage.setItem(ul.id, JSON.stringify(list));
+                // Append the ul
+                filesContainer.append(ul);
+            }
+
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    async getFilesMini(user, path = ""){
+        console.log("Fetching files...");
+        
+        let requestObject = {
+            "user" : user,
+            "path" : path
+        };
+        console.log("requestObject: " + JSON.stringify(requestObject));
+        
+        try {
+            const response = await fetch("/listAllFiles", {
+                method  : 'POST',
+                headers : {"Content-Type": "application/json"},
+                body    : JSON.stringify(requestObject)
+            });
+            if (!response.ok){
+                throw new Error(`Server responded with status ${response.status}`);
+            }
+            const data = await response.json();
+            console.log("Response from server:", data);
+            const optionsContainer = document.getElementById("optionsContainer");
+            optionsContainer.innerHTML = "";
+            const currentPath = document.getElementById("path");
+            const backBtn = document.createElement("button");
+            document.getElementById("displayContainer").innerHTML = "";
+            let previousPath = "";
+            if (currentPath != null && currentPath.textContent != "") {
+                backBtn.innerHTML = "↑";
+                backBtn.className = "btn";
+                backBtn.addEventListener("click", () => {
+                    const slice = currentPath.textContent.split("/");
+                    console.log("slice: " + slice);
+                    
+                    for (let i = 0; i < slice.length - 2; i++) {
+                        previousPath = previousPath + slice[i] + "/";
+                    }
+                    console.log("targetPath: " + previousPath);
+                    
+                    this.getFilesMini(sessionStorage.getItem("user"), previousPath);
+                    currentPath.innerHTML = previousPath;
+                    backBtn.remove();
+                });
+                document.getElementById("displayContainer").innerHTML = "";
+                optionsContainer.append(backBtn);
+            }
+            const filesContainer    = document.getElementById("filesContainer");
+            filesContainer.innerHTML = "";
+            // List of supported file types
+            const fileTypes = ["folder", "html", "php", "css", "img", "js"];
+            for (let type of fileTypes){
+                const ul    = document.createElement("ul");
+                ul.id       = type + "List";
+                let list = [];
+                for (let file = 0; file < data[0][type].length; file++){
+                    const fileName = data[0][type][file];
+                    
+                    const fileObject  = document.createElement("li");
+                    
+                    const name      = document.createElement("span");
+                    name.className  = "fileName";
+                    name.innerHTML  = fileName;
+
+                    if (type == "folder") {
+                        const span = document.createElement("span");
+                        span.innerHTML = fileName;
+                        span.addEventListener("click", () => {
+                            if (currentPath != null && currentPath.textContent.endsWith("/")) {
+                                this.getFilesMini(sessionStorage.getItem("user"), currentPath.textContent + fileName);
+                            } else {
+                                this.getFilesMini(sessionStorage.getItem("user"), fileName);
+                            }
+                            const path = document.createElement("p");
+                            path.id = "path";
+                            if (currentPath != null && currentPath.textContent.endsWith("/")) {
+                                path.innerHTML = currentPath.textContent + fileName;
+                            } else {
+                                path.innerHTML = fileName;
+                            }
+                            this.updateCurrentPath(path);
+                        });
+                        fileObject.append(span);
+                    }
+
+                    // If the file is a HTML or PHP file, add a hyper-link to that file
+                    else if (type == "html" || type == "php"){
+                            // Create hyper-link
+                            const a = document.createElement("a");
+                            // Append the span
+                            a.append(name);
+                            // Append the hyper-link
+                            fileObject.append(a);
+                            // Add eventlistener
+                            a.addEventListener("click", () => {
+                                // Empty optioins container
+                                optionsContainer.innerHTML = "";
+                                // Add back the back button
+                                optionsContainer.append(backBtn);
+                                // Add the edit button
+                                this.showInfo(fileName);
+                            });
+                        //}
+                    } else {
+                        // Append the name object with the span element
+                        fileObject.append(name);
+                        // If the file type is of "img" type
+                        if (type == "img") {
+                            name.addEventListener("click", () => {
+                                this.showInfo(fileName);
+                                this.showImage(fileName, "https://" + sessionStorage.getItem("domain") + "/");
+                                // Update the current path
+                                this.updateCurrentPath(currentPath);
+                                // Update the options container
+                                optionsContainer.innerHTML = "";
+                                optionsContainer.append(backBtn);
+                            });
+                        } else if(type == "css" || type == "js"){
+                            // If the file is a css or JavaScript file
+                            // Add event listener
+                            name.addEventListener("click", () => {
+
+                                this.showInfo(fileName);
                             });
                         }
                     }
