@@ -111,7 +111,8 @@ if (isset($_COOKIE["javasession"])){
     const saveBtn = document.getElementById('save');
 
     const dm = new DocumentManager("<?php echo $db->username; ?>");
-    sessionStorage.setItem("user", "<?php echo $db->username; ?>")
+    sessionStorage.setItem("user", "<?php echo $db->username; ?>");
+    sessionStorage.setItem("domain", "<?php echo $db->domain;?>");
 
     addTextBtn.addEventListener('click', ()=>{
       const b = createBlock('text');

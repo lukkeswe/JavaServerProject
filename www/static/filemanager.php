@@ -103,7 +103,8 @@ if (isset($_COOKIE["javasession"])){
     <!-- Ace Editor JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.9/ace.js"></script>
     <script type="text/javascript">
-        sessionStorage.setItem("user", "<?php echo $db->username; ?>")
+        sessionStorage.setItem("user", "<?php echo $db->username; ?>");
+        sessionStorage.setItem("domain", "<?php echo $db->domain;?>");
         const dm = new DocumentManager("<?php echo $db->username; ?>");
         console.log("dm.user = " + dm.user);
         
