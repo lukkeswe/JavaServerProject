@@ -70,11 +70,11 @@ if (isset($_COOKIE["javasession"])){
   <div id="grayScreen">
     <div id="miniExplorer">
       <input id="filename" type="text" value="index" style="width: 150px;"><span>.html</span>
-      <div id="pathContainer"></div>
-      <div id="optionsContainer"></div>
-      <div id="displayContainer" style="display: none;"></div>
-      <div id="filesContainer"></div>
-      <div id="uploadBtnContainer"></div>
+      <div id="pathContainerMini"></div>
+      <div id="optionsContainerMini"></div>
+      <div id="displayContainerMini" style="display: none;"></div>
+      <div id="filesContainerMini"></div>
+      <div id="uploadBtnContainerMini"></div>
       <button id="cancel">Cancel</button>
     </div>
   </div>
@@ -190,47 +190,50 @@ if (isset($_COOKIE["javasession"])){
 
       const user = "<?php echo $db->username; ?>";
       let path = "test/";
-
+      // Show the explorer
       document.getElementById("grayScreen").style.display = "block";
-
-      let currentPath = document.getElementById("path");
-      console.log("currentPath: " + !currentPath);
-      
+      // Get the current path
+      let currentPath = document.getElementById("pathMini");
+      // Get the files
       if (currentPath) dm.getFilesMini("<?php echo $db->username; ?>", currentPath.textContent);
       else dm.getFilesMini("<?php echo $db->username; ?>", "");
-
-      const uploadBtnContainer = document.getElementById("uploadBtnContainer");
+      // Create an upload button
+      const uploadBtnContainer = document.getElementById("uploadBtnContainerMini");
       const uploadBtn = document.createElement("button");
       uploadBtn.id = "uploadBtn";
       uploadBtn.innerHTML = "Upload";
-
+      // Add an eventlistener
       uploadBtn.addEventListener("click", async ()=> {
+        // Get the filename
         const filename = document.getElementById("filename").value;
-
+        // Create a file
         const file = new File([blob], filename + ".html", {type: "text/html"});
-
+        // Create a temporary file input element
         const fileInput = document.createElement("input");
         fileInput.type = "file";
+        // Tranfer the data from the "blob" to the input element
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(file);
         fileInput.files = dataTransfer.files;
-
+        // Append the input element to the document (so it can be used by the upload function)
         fileInput.id = "fileInput";
         document.body.appendChild(fileInput);
-
-        currentPath = document.getElementById("path");
+        // Get the current path
+        currentPath = document.getElementById("pathMini");
         if (currentPath && currentPath.innerHTML != ""){
           path = currentPath.textContent;
         }
+        // Upload the file to the server
         await uploadFile(user, path);
-
+        // Remove temporary elements
         document.body.removeChild(fileInput);
         uploadBtn.remove();
+        // Alert the user
         alert("Blog saved to: " + path);
-
+        // Close the explorer
         document.getElementById("grayScreen").style.display = "none";
       });
-
+      // Append the upload button
       uploadBtnContainer.append(uploadBtn);
     });
 

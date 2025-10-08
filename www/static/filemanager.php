@@ -69,6 +69,17 @@ if (isset($_COOKIE["javasession"])){
     <script src="js/docmanager.js"></script>
 </head>
 <body>
+    <div id="grayScreen">
+        <div id="miniExplorer">
+            <input id="filename" type="text" value="index" style="width: 150px;"><span id="extention"></span>
+            <div id="pathContainerMini"></div>
+            <div id="optionsContainerMini"></div>
+            <div id="displayContainerMini" style="display: none;"></div>
+            <div id="filesContainerMini"></div>
+            <div id="uploadBtnContainerMini"></div>
+            <button id="cancel">Cancel</button>
+        </div>
+    </div>
     <header><h1>ファイル管理</h1></header>
     <div id="container">
         <main id="main-content">
@@ -179,6 +190,10 @@ if (isset($_COOKIE["javasession"])){
             else dm.getFiles("<?php echo $db->username; ?>");
             dm.emptyDisplayContainer();
             dm.showInfo();
+        });
+        document.getElementById("cancel").addEventListener("click", ()=> {
+            document.getElementById("uploadBtnMini").remove();
+            document.getElementById("grayScreen").style.display = "none";
         });
 
     </script>

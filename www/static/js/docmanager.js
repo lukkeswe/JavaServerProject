@@ -6,6 +6,7 @@ class DocumentManager {
         this.db;
         this.user           = user;
         this.pathContainer  = document.getElementById("pathContainer");
+        this.pathContainerMini  = document.getElementById("pathContainerMini");
     }
     flexContainer(){
         this.container.style.display = "flex";
@@ -796,11 +797,11 @@ class DocumentManager {
             }
             const data = await response.json();
             console.log("Response from server:", data);
-            const optionsContainer = document.getElementById("optionsContainer");
+            const optionsContainer = document.getElementById("optionsContainerMini");
             optionsContainer.innerHTML = "";
-            const currentPath = document.getElementById("path");
+            const currentPath = document.getElementById("pathMini");
             const backBtn = document.createElement("button");
-            document.getElementById("displayContainer").innerHTML = "";
+            document.getElementById("displayContainerMini").innerHTML = "";
             let previousPath = "";
             if (currentPath != null && currentPath.textContent != "") {
                 backBtn.innerHTML = "↑";
@@ -818,10 +819,10 @@ class DocumentManager {
                     currentPath.innerHTML = previousPath;
                     backBtn.remove();
                 });
-                document.getElementById("displayContainer").innerHTML = "";
+                document.getElementById("displayContainerMini").innerHTML = "";
                 optionsContainer.append(backBtn);
             }
-            const filesContainer    = document.getElementById("filesContainer");
+            const filesContainer    = document.getElementById("filesContainerMini");
             filesContainer.innerHTML = "";
             // List of supported file types
             const fileTypes = ["folder", "html", "php", "css", "img", "js"];
@@ -848,13 +849,13 @@ class DocumentManager {
                                 this.getFilesMini(sessionStorage.getItem("user"), fileName);
                             }
                             const path = document.createElement("p");
-                            path.id = "path";
+                            path.id = "pathMini";
                             if (currentPath != null && currentPath.textContent.endsWith("/")) {
                                 path.innerHTML = currentPath.textContent + fileName;
                             } else {
                                 path.innerHTML = fileName;
                             }
-                            this.updateCurrentPath(path);
+                            this.updateCurrentPathMini(path);
                         });
                         fileObject.append(span);
                     }
@@ -886,7 +887,7 @@ class DocumentManager {
                                 this.showInfo(fileName);
                                 this.showImage(fileName, "https://" + sessionStorage.getItem("domain") + "/");
                                 // Update the current path
-                                this.updateCurrentPath(currentPath);
+                                this.updateCurrentPathMini(currentPath);
                                 // Update the options container
                                 optionsContainer.innerHTML = "";
                                 optionsContainer.append(backBtn);
@@ -939,6 +940,47 @@ class DocumentManager {
         });
         // Append the save button to the options container
         document.getElementById("optionsContainer").append(save);
+        // Creeate a 「名前を付けて保存」button
+        const saveAs = document.createElement("button");
+        saveAs.innerHTML = "名前を付けて保存";
+        saveAs.className = "btn";
+        // Add eventlistener
+        saveAs.addEventListener("click", ()=> {
+            // Show the explorer
+            document.getElementById("grayScreen").style.display = "block";
+            // Get the current path
+            let currentPath = document.getElementById("pathMini");
+            // Get the files
+            if (currentPath) this.getFilesMini(sessionStorage.getItem("user"), currentPath.textContent);
+            else this.getFilesMini(sessionStorage.getItem("user"), "");
+            // Create a save button
+            const uploadBtnContainer = document.getElementById("uploadBtnContainerMini");
+            const uploadBtn = document.createElement("button");
+            uploadBtn.id = "uploadBtnMini";
+            uploadBtn.innerHTML = "保存";
+            // Add an eventlistener
+            uploadBtn.addEventListener("click", async ()=> {
+                // Get the filename
+                const filename = document.getElementById("filename").value;
+                // Get the current path
+                let savePath = "";
+                currentPath = document.getElementById("pathMini");
+                if (currentPath && currentPath.innerHTML != ""){
+                savePath = currentPath.textContent;
+                }
+                // Save the file to the server
+                await saveContentToFile(sessionStorage.getItem("user"), savePath, type, filename + "." + type, editor.getValue());
+                // Remove the temporary upload button
+                uploadBtn.remove();
+                // Close the explorer
+                document.getElementById("grayScreen").style.display = "none";
+            });
+            uploadBtnContainer.append(uploadBtn);
+        });
+        // Append the correct file extention
+        document.getElementById("extention").innerHTML = "." + type;
+        // Append the "save as" button to the options container
+        document.getElementById("optionsContainer").append(saveAs);
     }
     async fetchFileContent (file, type, path = "") {
         let requestObject = {
@@ -997,6 +1039,17 @@ class DocumentManager {
         // Append the elements to the path container
         this.pathContainer.append(span);
         this.pathContainer.append(path);
+    }
+    // Update the current path
+    updateCurrentPathMini(path){
+        // Empty the path container
+        this.pathContainerMini.innerHTML = "";
+        // Create a span element, containing the user's domain
+        const span = document.createElement("span");
+        span.innerHTML = sessionStorage.getItem("domain") + "/";
+        // Append the elements to the path container
+        this.pathContainerMini.append(span);
+        this.pathContainerMini.append(path);
     }
     appendElementToDisplayContainer(element){
         const displayContainer = document.getElementById("displayContainer");

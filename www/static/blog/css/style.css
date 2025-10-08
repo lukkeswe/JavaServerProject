@@ -140,7 +140,7 @@ main {
   height: 100%;
 }
 
-#filesContainer {
+#filesContainerMini {
   display: block;
   position: relative;
   z-index: 1001;
@@ -157,7 +157,7 @@ main {
   color: black;
 }
 
-#filesContainer ul {
+#filesContainerMini ul {
   display: flex;
   flex-direction: row;
   font-size: 7px;
@@ -165,7 +165,7 @@ main {
   padding: 0;
 }
 
-#filesContainer li {
+#filesContainerMini li {
   display: flex;
   flex-direction: column;
   width: 50px;
@@ -173,21 +173,21 @@ main {
   margin: 5px;
 }
 
-#filesContainer li:hover {
+#filesContainerMini li:hover {
   cursor: pointer;
 }
 
-#filesContainer li span {
+#filesContainerMini li span {
   flex: 5;
   padding: 5px;
   border-radius: 3px;
   overflow-wrap: break-word;
 }
-#filesContainer li a {
+#filesContainerMini li a {
   flex: 5;
 }
 
-#filesContainer li a span {
+#filesContainerMini li a span {
   display: block;
 }
 
