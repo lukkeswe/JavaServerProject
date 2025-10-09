@@ -98,7 +98,18 @@ if (isset($_COOKIE["javasession"])){
                     <button id="folderBtn" class="btn">フォルダ</button>
                     <button id="cancelUpload" class="btn">キャンセル</button>
                 </div>
+                <div id="newFileOptions" style="display: none;">
+                    <input type="text" id="newFilename" value="filename">
+                    <select name="extention" id="extentionSelect">
+                        <option value="html" selected>HTML</option>
+                        <option value="css">CSS</option>
+                        <option value="js">JavaScript</option>
+                        <option value="php">PHP</option>
+                    </select>
+                    <button id="create">作成</button>
+                </div>
                 <button class="btn" id="showUploadBtn">アップロード</button>
+                <button class="btn" id="newFile">新規ファイル</button>
                 <div id="optionsContainer"></div>
                 <div id="displayContainer"></div>
             </div>
@@ -195,7 +206,27 @@ if (isset($_COOKIE["javasession"])){
             document.getElementById("uploadBtnMini").remove();
             document.getElementById("grayScreen").style.display = "none";
         });
-
+        document.getElementById("newFile").addEventListener("click", ()=> {
+            document.getElementById("newFile").style.display = "none";
+            document.getElementById("showUploadBtn").style.display = "none";
+            document.getElementById("newFileOptions").style.display = "block";
+            document.getElementById("create").addEventListener("click", ()=> {
+                const filename = document.createElement("h2");
+                const name = document.getElementById("newFilename").value;
+                // Empty the display container
+                document.getElementById("displayContainer").innerHTML = "";
+                // Append the file name to the display container
+                document.getElementById("displayContainer").append(filename);
+                const backBtn = dm.editorBackButton();
+                const extention = document.getElementById("extentionSelect").value;
+                filename.innerHTML = name + "." + extention;
+                document.getElementById("newFileOptions").style.display = "none";
+                document.getElementById("newFile").style.display = "none";
+                document.getElementById("showUploadBtn").style.display = "block";
+                dm.createFile(name + "." + extention, extention);
+                document.getElementById("optionsContainer").append(backBtn);
+            });
+        });
     </script>
 </body>
 </html>

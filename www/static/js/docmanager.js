@@ -226,6 +226,7 @@ class DocumentManager {
         const domain            = document.createElement("li");
         const database          = document.createElement("li");
         const file              = document.createElement("li");
+        const blog              = document.createElement("li");
         const logout            = document.createElement("li");
         // Add ids
         burgerContainer.id  = "burgerContainer";
@@ -235,6 +236,7 @@ class DocumentManager {
         domain.id           = "domainBurger";
         database.id         = "databaseBurger";
         file.id             = "fileBurger";
+        blog.id             = "blogBurger";
         logout.id           = "logout";
         // Add text content
         burgerBtn.innerHTML = "🈪";
@@ -242,6 +244,7 @@ class DocumentManager {
         domain.innerHTML    = "ドメイン";
         database.innerHTML  = "データベース管理";
         file.innerHTML      = "ファイル管理";
+        blog.innerHTML      = "ブログ作成";
         logout.innerHTML    = "ログアウト";
         // Add event listeners
         burgerBtn.addEventListener("click", () => {
@@ -265,6 +268,9 @@ class DocumentManager {
         file.addEventListener("click", () => {
             window.location.href = "filemanager.php";
         });
+        blog.addEventListener("click", () => {
+            window.location.href = "blog/";
+        });
         logout.addEventListener("click", () => {
             window.location.href = "logout.php";
         });
@@ -273,6 +279,7 @@ class DocumentManager {
         burger.append(domain);
         //burger.append(database); // <- Add this back when the database manager is ready
         burger.append(file);
+        burger.append(blog);
         burger.append(logout);
         burgerContainer.append(burgerBtn);
         burgerContainer.append(burger);
@@ -958,6 +965,10 @@ class DocumentManager {
             const uploadBtn = document.createElement("button");
             uploadBtn.id = "uploadBtnMini";
             uploadBtn.innerHTML = "保存";
+            // Get the file name (if there is one)
+            const filename = document.getElementById("displayContainer");
+            // Append the file name into the file name input field
+            if (filename) document.getElementById("filename").value = filename.textContent.replace("." + type, "");
             // Add an eventlistener
             uploadBtn.addEventListener("click", async ()=> {
                 // Get the filename
@@ -981,6 +992,18 @@ class DocumentManager {
         document.getElementById("extention").innerHTML = "." + type;
         // Append the "save as" button to the options container
         document.getElementById("optionsContainer").append(saveAs);
+    }
+    // Create a new file
+    async createFile(fileName, type){
+        // Hide the upload button
+        document.getElementById("showUploadBtn").style.display = "none";
+        // Empty the files container
+        document.getElementById("filesContainer").innerHTML = "";
+        // Create a list of comments with correct syntax for each language
+        const comment = {"html": "<!-- Code here -->", "css": "/* Code here */", "js": "// Code here", "php": "// Code here"};
+        // Initialize the editor with the fetched content
+        if (type == "js") this.showEditor(comment[type], "javascript", type, fileName);
+        else this.showEditor(comment[type], type, type, fileName);
     }
     async fetchFileContent (file, type, path = "") {
         let requestObject = {
@@ -1124,5 +1147,29 @@ class DocumentManager {
         document.getElementById("fileUploadContainer").style.display = "none";
         document.getElementById("folderUploadContainer").style.display = "none";
         document.getElementById("uploadBtnsContainer").style.display = "flex";;
+    }
+    editorBackButton(){
+        // Create a back button
+        const backBtn = document.createElement("button");
+        backBtn.className = "btn";
+        backBtn.innerHTML = "↑";
+        // Add an eventlistener
+        backBtn.addEventListener("click", () => {
+            // Get the path
+            const path = document.getElementById("path");
+            // Hide the editor
+            document.getElementById("editor").style.display = "none";
+            // Display the files in the current directory
+            if (path != null && path.textContent != "") this.getFiles(this.user, path.textContent);
+            else this.getFiles(this.user, "");
+            // Remove the back button
+            backBtn.remove();
+            optionsContainer.innerHTML = "";
+            // Display the upload button
+            document.getElementById("showUploadBtn").style.display = "block";
+            // Display the "New file" button
+            document.getElementById("newFile").style.display = "block";
+        });
+        return backBtn;
     }
 }
