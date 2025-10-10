@@ -647,8 +647,6 @@ class DocumentManager {
                     edit.innerHTML  = "編集";
                     // Add eventlistener 
                     edit.addEventListener("click", async () => {
-                        // Hide the upload button
-                        document.getElementById("showUploadBtn").style.display = "none";
                         // Get the current path
                         const path = document.getElementById("path");
                         // If the path isn't root
@@ -685,8 +683,6 @@ class DocumentManager {
                             // Remove the back button
                             backBtn.remove();
                             optionsContainer.innerHTML = "";
-                            // Display the upload button
-                            document.getElementById("showUploadBtn").style.display = "block";
                         });
                         optionsContainer.append(backBtn);
                     });
@@ -930,7 +926,7 @@ class DocumentManager {
         editor.setValue(content, -1); // Append the content
         document.getElementById("editor").style.display = "block"; // Display the editor
         document.getElementById("optionsContainer").innerHTML = ""; // Empty the options container
-
+        
         // Create a save button
         const save = document.createElement("button");
         save.innerHTML = "保存";
@@ -979,8 +975,14 @@ class DocumentManager {
                 if (currentPath && currentPath.innerHTML != ""){
                 savePath = currentPath.textContent;
                 }
+                
+                const newFolder = document.getElementById("newFolder");
+                let newPath = "";
+                if (newFolder != null && newFolder.value != null && newFolder != "") newPath = newFolder.value;
+        
+                
                 // Save the file to the server
-                await saveContentToFile(sessionStorage.getItem("user"), savePath, type, filename + "." + type, editor.getValue());
+                await saveContentToFile(sessionStorage.getItem("user"), savePath + newPath, type, filename + "." + type, editor.getValue());
                 // Remove the temporary upload button
                 uploadBtn.remove();
                 // Close the explorer
@@ -995,8 +997,6 @@ class DocumentManager {
     }
     // Create a new file
     async createFile(fileName, type){
-        // Hide the upload button
-        document.getElementById("showUploadBtn").style.display = "none";
         // Empty the files container
         document.getElementById("filesContainer").innerHTML = "";
         // Create a list of comments with correct syntax for each language
@@ -1113,16 +1113,13 @@ class DocumentManager {
     }
     toggleShowUploadBtn(){
         const btnContainer = document.getElementById("uploadBtnsContainer");
-        const displayBtn = document.getElementById("showUploadBtn");
         const options = document.getElementById("optionsContainer");
         if (btnContainer.style.display == "none") {
             btnContainer.style.display = "flex";
-            displayBtn.style.display = "none";
             options.style.display = "none";
         }
         else {
             btnContainer.style.display = "none";
-            displayBtn.style.display = "block";
             options.style.display = "flex";
         } 
     }
@@ -1165,8 +1162,6 @@ class DocumentManager {
             // Remove the back button
             backBtn.remove();
             optionsContainer.innerHTML = "";
-            // Display the upload button
-            document.getElementById("showUploadBtn").style.display = "block";
             // Display the "New file" button
             document.getElementById("newFile").style.display = "block";
         });

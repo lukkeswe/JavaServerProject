@@ -118,6 +118,14 @@ main {
     min-height: 700px;
 }
 
+.createBtn {
+    margin-bottom: 5px;
+    padding: 5px;
+    border: solid black 1px;
+    border-top: none;
+    border-radius: 0px 0px 2px 2px;
+}
+
 #dashBoard {
     display: block;
     border-top: solid black 1px;
@@ -141,6 +149,7 @@ main {
 #upload-container {
     background-color: white;
     padding: 10px;
+    padding-top: 0px;
     border: solid black 1px;
     height: fit-content;
     min-width: 320px;

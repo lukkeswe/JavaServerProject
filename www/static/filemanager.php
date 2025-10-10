@@ -71,7 +71,8 @@ if (isset($_COOKIE["javasession"])){
 <body>
     <div id="grayScreen">
         <div id="miniExplorer">
-            <input id="filename" type="text" value="index" style="width: 150px;"><span id="extention"></span>
+            <input id="filename" type="text" value="index" style="width: 150px;"><span id="extention"></span><br>
+            <input id="newFolder" type="text" style="width: 150px;">
             <div id="pathContainerMini"></div>
             <div id="optionsContainerMini"></div>
             <div id="displayContainerMini" style="display: none;"></div>
@@ -84,6 +85,11 @@ if (isset($_COOKIE["javasession"])){
     <div id="container">
         <main id="main-content">
             <div id="upload-container">
+                <div id="createButtons">
+                    <button class="createBtn" id="createFileBtn">📄</button>
+                    <button class="createBtn" id="createFolderBtn">📁</button>
+                    <button class="createBtn" id="uploadSomeBtn">📤</button>
+                </div>
                 <button id="uploadBackBtn" class="btn" style="display: none;">戻る↩</button>
                 <div id="fileUploadContainer" style="display: none;">
                     <input type="file" id="fileInput" style="border: solid black 1px;">
@@ -108,8 +114,6 @@ if (isset($_COOKIE["javasession"])){
                     </select>
                     <button id="create">作成</button>
                 </div>
-                <button class="btn" id="showUploadBtn">アップロード</button>
-                <button class="btn" id="newFile">新規ファイル</button>
                 <div id="optionsContainer"></div>
                 <div id="displayContainer"></div>
             </div>
@@ -133,7 +137,7 @@ if (isset($_COOKIE["javasession"])){
         dm.flexContainer();
         dm.fileBurgerMenu();
         dm.getFiles("<?php echo $db->username; ?>");
-        document.getElementById("showUploadBtn").addEventListener("click", () => {
+        document.getElementById("uploadSomeBtn").addEventListener("click", () => {
             dm.toggleShowUploadBtn();
         });
         document.getElementById("cancelUpload").addEventListener("click", () => {
@@ -206,8 +210,11 @@ if (isset($_COOKIE["javasession"])){
             document.getElementById("uploadBtnMini").remove();
             document.getElementById("grayScreen").style.display = "none";
         });
-        document.getElementById("newFile").addEventListener("click", ()=> {
-            document.getElementById("newFile").style.display = "none";
+        document.getElementById("createFileBtn").addEventListener("click", ()=>{
+            createFileFunc();
+        });
+        
+        function createFileFunc() {
             document.getElementById("showUploadBtn").style.display = "none";
             document.getElementById("newFileOptions").style.display = "block";
             document.getElementById("create").addEventListener("click", ()=> {
@@ -221,12 +228,11 @@ if (isset($_COOKIE["javasession"])){
                 const extention = document.getElementById("extentionSelect").value;
                 filename.innerHTML = name + "." + extention;
                 document.getElementById("newFileOptions").style.display = "none";
-                document.getElementById("newFile").style.display = "none";
                 document.getElementById("showUploadBtn").style.display = "block";
                 dm.createFile(name + "." + extention, extention);
                 document.getElementById("optionsContainer").append(backBtn);
             });
-        });
+        }
     </script>
 </body>
 </html>
