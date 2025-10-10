@@ -215,7 +215,6 @@ if (isset($_COOKIE["javasession"])){
         });
         
         function createFileFunc() {
-            document.getElementById("showUploadBtn").style.display = "none";
             document.getElementById("newFileOptions").style.display = "block";
             document.getElementById("create").addEventListener("click", ()=> {
                 const filename = document.createElement("h2");
@@ -228,7 +227,6 @@ if (isset($_COOKIE["javasession"])){
                 const extention = document.getElementById("extentionSelect").value;
                 filename.innerHTML = name + "." + extention;
                 document.getElementById("newFileOptions").style.display = "none";
-                document.getElementById("showUploadBtn").style.display = "block";
                 dm.createFile(name + "." + extention, extention);
                 document.getElementById("optionsContainer").append(backBtn);
             });
