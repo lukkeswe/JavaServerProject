@@ -1,0 +1,441 @@
+header {
+    border: 1px solid black;
+}
+
+header h1 {
+    color: black;
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+    padding: 32px;
+}
+/*  */
+.welcome {
+    text-align: center;
+    font-size: 42px;
+    margin-top: 20px;
+}
+#loginContainer {
+    display: block;
+    text-align: left;
+    font-size: 36px;
+    background-color: ghostwhite;
+    border: solid black 1px;
+    border-radius: 3px;
+    padding: 30px;
+    width: max-content;
+    margin: 0 auto;
+    margin-top: 100px;
+}
+
+#loginContainer input{
+    background-color: white;
+}
+
+#loginBtn {
+    margin: 0 auto;
+    margin-top: 20px;
+}
+
+#dbManager {
+    display: none;
+}
+
+.btn {
+    display: block;
+    color: black;
+    width: max-content;
+    border: solid black 1px;
+    background-color: gainsboro;
+    border-radius: 2px;
+    padding: 5px;
+}
+
+.btn:hover {
+    background-color: grey;
+    color: white;
+}
+
+.textInput {
+    border: solid black 1px;
+}
+
+main table {
+    background-color: white;
+    width: fit-content;
+    margin: 10px;
+}
+
+main thead {
+    border-right: solid black 1px;
+    border-top: solid black 1px;
+}
+
+main td {
+    border-right: solid black 1px;
+    border-bottom: solid black 1px;
+    padding: 5px;
+}
+
+main tr {
+    border-left: solid black 1px;
+}
+
+#burgerContainer {
+    border: 1px solid black;
+}
+
+#burger {
+    width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: width 1s ease;
+}
+
+#burger.open {
+    width: 150px;
+}
+
+#burgerBtn {
+    font-size: 42px;
+}
+
+#burger li {
+    cursor: pointer;
+    font-size: 16px;
+    padding: 5px;
+}
+
+#burger li:hover {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+main {
+    flex: 4;
+    display: flex;
+    background-color: lightgrey;
+    min-height: 700px;
+}
+
+.createBtn {
+    margin-bottom: 5px;
+    padding: 5px;
+    border: solid black 1px;
+    border-top: none;
+    border-radius: 0px 0px 2px 2px;
+}
+
+#dashBoard {
+    display: block;
+    border-top: solid black 1px;
+}
+
+#editContainer {
+    background-color: white;
+    border: 1px solid black;
+    padding: 5px;
+    width: fit-content;
+}
+
+#editContainer input {
+    border: 1px solid black;
+}
+
+#columnContainer {
+    border-top: 1px solid black;
+}
+
+#upload-container {
+    background-color: white;
+    padding: 10px;
+    padding-top: 0px;
+    border: solid black 1px;
+    height: fit-content;
+    min-width: 320px;
+    margin: 10px;
+}
+
+#optionsContainer {
+    display: flex;
+}
+
+#uploadBtn {
+    margin-top: 20px;
+}
+
+#explorer {
+    display: block;
+    width: 100%;
+    min-width: 320px;
+}
+
+#pathContainer {
+    display: flex;
+    width: 100%;
+    background-color: white;
+    border: solid black 1px;
+    border-top: none;
+    margin-left: 5px;
+    padding: 3px;
+}
+
+#filesContainer ul {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+#filesContainer li {
+    display: flex;
+    flex-direction: column;
+    width: 100px;
+    height: 100px;
+    margin: 5px;
+}
+
+#filesContainer li:hover {
+    cursor: pointer;
+}
+
+#filesContainer li span {
+    flex: 5;
+    padding: 5px;
+    border-radius: 3px;
+    overflow-wrap: break-word;
+}
+
+#filesContainer li a {
+    flex: 5;
+}
+
+#filesContainer li a span {
+    display: block;
+}
+
+#folderList li span {
+    background-color: orange;
+}
+
+#htmlList li span {
+    background-color: red;
+    color: white;
+    height: 100%;
+}
+
+#htmlList li span:hover {
+    background-color: darkred;
+}
+
+#cssList li span {
+    background-color: yellow;
+}
+
+#cssList li span:hover {
+    background-color: rgb(208, 208, 0);
+}
+
+#imgList li span {
+    background-color: skyblue;
+}
+
+#imgList li span:hover {
+    background-color: blue;
+}
+
+#jsList li span {
+    background-color: aqua;
+}
+
+#jsList li span:hover {
+    background-color: blue;
+}
+
+#phpList li span {
+    background-color: blueviolet;
+    color: white;
+    height: 100%;
+}
+
+#phpList li span:hover {
+    background-color: purple;
+}
+
+#displayContainer {
+    margin-top: 20px;
+}
+
+#displayContainer img {
+    width: 300px;
+}
+
+#editor {
+    display: none;
+    width: 100%;
+    height: calc(100% - 25px);
+    max-height: 800px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    margin-left: 5px;
+}
+
+#signUpForm {
+    display: block;
+    width: fit-content;
+    padding: 20px;
+    background-color: ghostwhite;
+    border-radius: 5px;
+    border: solid black 1px;
+    margin: 0 auto;
+    margin-top: 50px;
+}
+
+#signUpForm label {
+    display: block;
+    margin-bottom: 3px;
+}
+
+#signUpForm input {
+    display: block;
+    background-color: white;
+    border: solid black 1px;
+    margin-bottom: 10px;
+}
+
+#signUpForm button {
+    margin: 0 auto;
+    margin-top: 20px;
+}
+
+/*  */
+
+.active {
+    display: block;
+}
+
+.inactive {
+    display: none;
+}
+
+.text-hidden li {
+    opacity: 0;
+}
+
+footer {
+    border: 1px solid black;
+}
+
+footer p {
+    color: black;
+    font-size: 14px;
+    text-align: center;
+    padding: 20px;
+}
+/*  */
+#grayScreen {
+  display: none;
+  z-index: 1000;
+  position: absolute;
+  background-color: rgba(154, 160, 166, 0.5);
+  width: 100%;
+  height: 100%;
+}
+
+#filesContainerMini {
+  display: block;
+  position: relative;
+  z-index: 1001;
+  height: 400px;
+}
+
+#miniExplorer {
+  display: block;
+  position: relative;
+  z-index: 1001;
+  width: 400px;
+  margin: 0 auto;
+  background-color: white;
+  color: black;
+}
+
+#filesContainerMini ul {
+  display: flex;
+  flex-direction: row;
+  font-size: 7px;
+  flex-wrap: wrap;
+  padding: 0;
+}
+
+#filesContainerMini li {
+  display: flex;
+  flex-direction: column;
+  width: 50px;
+  height: 50px;
+  margin: 5px;
+}
+
+#filesContainerMini li:hover {
+  cursor: pointer;
+}
+
+#filesContainerMini li span {
+  flex: 5;
+  padding: 5px;
+  border-radius: 3px;
+  overflow-wrap: break-word;
+}
+#filesContainerMini li a {
+  flex: 5;
+}
+
+#filesContainerMini li a span {
+  display: block;
+}
+/*  */
+
+@media screen and (max-width: 768px){
+    #container {
+        flex-direction: column;
+    }
+
+    main {
+        flex-direction: column;
+        min-height: 10px;
+        min-width: 320px;
+    }
+
+    #displayContainer {
+        text-align: center;
+    }
+
+    #editor {
+        height: 500px;
+        margin-left: 0;
+    }
+
+    #burger {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 1s ease;
+    }
+    #burger.open {
+        width: 100%;
+        max-height: 500px;
+    }
+
+    #upload-container {
+        margin-bottom: 0;
+    }
+
+    #explorer {
+        margin: 0 10px;
+        width: calc(100% - 20px);
+    }
+
+    #pathContainer {
+        margin: 0;
+        overflow-wrap: break-word;
+    }
+
+
+}

@@ -603,6 +603,7 @@ class DocumentManager {
                 optionsContainer.append(backBtn);
             }
             const filesContainer    = document.getElementById("filesContainer");
+            filesContainer.style.padding = "18px";
             filesContainer.innerHTML = "";
             // List of supported file types
             const fileTypes = ["folder", "html", "php", "css", "img", "js"];
@@ -621,7 +622,7 @@ class DocumentManager {
 
                     // Create a delete button
                     const erase     = document.createElement("button");
-                    erase.innerHTML = "X";
+                    erase.innerHTML = "🗑️";
                     erase.className = "btn";
                     // Add an event listener
                     erase.addEventListener("click", async () => {
@@ -644,7 +645,7 @@ class DocumentManager {
                     // Create am edit button
                     const edit      = document.createElement("button");
                     edit.className  = "btn";
-                    edit.innerHTML  = "編集";
+                    edit.innerHTML  = "📝";
                     // Add eventlistener 
                     edit.addEventListener("click", async () => {
                         // Get the current path
@@ -731,12 +732,13 @@ class DocumentManager {
                                 this.emptyDisplayContainer();
                                 // Empty optioins container
                                 optionsContainer.innerHTML = "";
-                                // Add back the back button
-                                optionsContainer.append(backBtn);
-                                // Add the delete button to the options container
-                                optionsContainer.append(erase);
                                 // Add the edit button
                                 optionsContainer.append(edit);
+                                // Add the delete button to the options container
+                                optionsContainer.append(erase);
+                                // Add back the back button
+                                optionsContainer.append(backBtn);
+                                
                                 this.showInfo(fileName);
                             });
                         //}
@@ -763,7 +765,10 @@ class DocumentManager {
                                 this.emptyDisplayContainer();
 
                                 this.showInfo(fileName);
+                                optionsContainer.innerHTML = "";
                                 optionsContainer.append(edit);
+                                optionsContainer.append(erase);
+                                optionsContainer.append(backBtn);
                             });
                         }
                     }
@@ -929,7 +934,7 @@ class DocumentManager {
         
         // Create a save button
         const save = document.createElement("button");
-        save.innerHTML = "保存";
+        save.innerHTML = "💾";
         save.className = "btn";
         // Add an eventlistener
         save.addEventListener("click", async () => {
@@ -945,7 +950,7 @@ class DocumentManager {
         document.getElementById("optionsContainer").append(save);
         // Creeate a 「名前を付けて保存」button
         const saveAs = document.createElement("button");
-        saveAs.innerHTML = "名前を付けて保存";
+        saveAs.innerHTML = "✏️";
         saveAs.className = "btn";
         // Add eventlistener
         saveAs.addEventListener("click", ()=> {
@@ -960,7 +965,8 @@ class DocumentManager {
             const uploadBtnContainer = document.getElementById("uploadBtnContainerMini");
             const uploadBtn = document.createElement("button");
             uploadBtn.id = "uploadBtnMini";
-            uploadBtn.innerHTML = "保存";
+            uploadBtn.className = "btn";
+            uploadBtn.innerHTML = "💾";
             // Get the file name (if there is one)
             const filename = document.getElementById("displayContainer");
             // Append the file name into the file name input field
@@ -994,6 +1000,8 @@ class DocumentManager {
         document.getElementById("extention").innerHTML = "." + type;
         // Append the "save as" button to the options container
         document.getElementById("optionsContainer").append(saveAs);
+        // Subtract the filecontainer's padding
+        document.getElementById("filesContainer").style.padding = "0px";
     }
     // Create a new file
     async createFile(fileName, type){

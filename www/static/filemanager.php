@@ -72,13 +72,15 @@ if (isset($_COOKIE["javasession"])){
     <div id="grayScreen">
         <div id="miniExplorer">
             <input id="filename" type="text" value="index" style="width: 150px;"><span id="extention"></span><br>
-            <input id="newFolder" type="text" style="width: 150px;">
+            <input id="newFolder" type="hidden" style="width: 150px;">
             <div id="pathContainerMini"></div>
             <div id="optionsContainerMini"></div>
             <div id="displayContainerMini" style="display: none;"></div>
             <div id="filesContainerMini"></div>
-            <div id="uploadBtnContainerMini"></div>
-            <button id="cancel">Cancel</button>
+            <div class="cancelContainer">
+                <div id="uploadBtnContainerMini"></div>
+                <button class="btn" id="cancel">❌</button>
+            </div>
         </div>
     </div>
     <header><h1>ファイル管理</h1></header>
@@ -90,29 +92,30 @@ if (isset($_COOKIE["javasession"])){
                     <button class="createBtn" id="createFolderBtn">📁</button>
                     <button class="createBtn" id="uploadSomeBtn">📤</button>
                 </div>
-                <button id="uploadBackBtn" class="btn" style="display: none;">戻る↩</button>
+                <button id="uploadBackBtn" class="btn" style="display: none;">❌</button>
                 <div id="fileUploadContainer" style="display: none;">
                     <input type="file" id="fileInput" style="border: solid black 1px;">
-                    <button id="uploadBtn" class="btn">アップロード</button>
+                    <button id="uploadBtn" class="btn">✅</button>
                 </div>
                 <div id="folderUploadContainer" style="display: none;">
                     <input type="file" id="folderInput" webkitdirectory multiple style="border: solid black 1px;">
-                    <button id="uploadFolderBtn" class="btn">アップロード</button>
+                    <button id="uploadFolderBtn" class="btn">✅</button>
                 </div>
                 <div id="uploadBtnsContainer" style="display: none;">
-                    <button id="fileBtn" class="btn">ファイル</button>
-                    <button id="folderBtn" class="btn">フォルダ</button>
-                    <button id="cancelUpload" class="btn">キャンセル</button>
+                    <button id="fileBtn" class="btn">📎</button>
+                    <button id="folderBtn" class="btn">📂</button>
+                    <button id="cancelUpload" class="btn">❌</button>
                 </div>
                 <div id="newFileOptions" style="display: none;">
                     <input type="text" id="newFilename" value="filename">
-                    <select name="extention" id="extentionSelect">
+                    <select name="extention" id="extentionSelect" class="btn">
                         <option value="html" selected>HTML</option>
                         <option value="css">CSS</option>
                         <option value="js">JavaScript</option>
                         <option value="php">PHP</option>
-                    </select>
-                    <button id="create">作成</button>
+                    </select><br>
+                    <button id="create" class="btn">✅</button>
+                    <button id="cancelFile" class="btn">❌</button>
                 </div>
                 <div id="optionsContainer"></div>
                 <div id="displayContainer"></div>
@@ -141,8 +144,6 @@ if (isset($_COOKIE["javasession"])){
             dm.toggleShowUploadBtn();
         });
         document.getElementById("cancelUpload").addEventListener("click", () => {
-            console.log("Cancel");
-            
             dm.toggleShowUploadBtn();
         });
         document.getElementById("fileBtn").addEventListener("click", () => {
@@ -212,6 +213,9 @@ if (isset($_COOKIE["javasession"])){
         });
         document.getElementById("createFileBtn").addEventListener("click", ()=>{
             createFileFunc();
+        });
+        document.getElementById("cancelFile").addEventListener("click", ()=> {
+            document.getElementById("newFileOptions").style.display = "none";
         });
         
         function createFileFunc() {
