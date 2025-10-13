@@ -1855,6 +1855,10 @@ public class Main {
                 //-----
                 String relativePath = extractFilePath(headers);
                 String fullPath = "/home/lukas/users/" + user + "/static/" + path + relativePath;
+
+                if (user.equals("norlund_johan_lukas_com")) {
+                    fullPath = "/home/lukas/JavaServerProject/www/static/" + path + relativePath;
+                }
                 
                 System.out.println("Full path: " + fullPath);
                 System.out.println("File path: " + relativePath);
@@ -1888,8 +1892,12 @@ public class Main {
         }
         return msg;
     }
-    private static void saveFile(String fileName, byte[] data, String fileType, String user) throws IOException {
-        Path uploadDir = Paths.get("/home/lukas/users", user, "static", fileType);
+    private static void saveFile(String fileName, byte[] data, String path, String user) throws IOException {
+        Path uploadDir = Paths.get("/home/lukas/users", user, "static", path);
+
+        if (user.equals("norlund_johan_lukas_com")) {
+            uploadDir = Paths.get("/home/lukas/JavaServerProject/www/static", path);
+        }
         
         if (!Files.exists(uploadDir)) {
             Files.createDirectories(uploadDir);
