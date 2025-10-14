@@ -115,6 +115,32 @@ async function saveContentToFile(user, path ="", type, file, content) {
     
 }
 
+async function createFolder(user, path) {
+    let requestObject = {
+        "user"  : user,
+        "path"  : path
+    };
+    console.log("Creating folder..");
+    
+    if (!isValidPath(path)){
+        console.log(`Invalid path: ${path}`);
+        return;
+    }
+
+    const response = await fetch("/createFolder", {
+        method  : "POST",
+        headers : {"Content-Type" : "application/json"},
+        body    : JSON.stringify(requestObject)
+    });
+
+    let msg = await response.text();
+    
+    console.log(msg);
+
+    if (msg == "Success") alert("Folder created");
+    else alert("Failed to create folder...");
+}
+
 function isValidFileName(fileName){
     if (!fileName || fileName.trim() === "") return false;
     const validPattern = /^[a-zA-Z0-9._-]+$/;

@@ -71,10 +71,15 @@ if (isset($_COOKIE["javasession"])){
 <body>
     <div id="grayScreen">
         <div id="miniExplorer">
+            <button class="createBtn" id="createFolderBtnMini">📁</button>
             <input id="filename" type="text" value="index" style="width: 150px;"><span id="extention"></span><br>
             <input id="newFolder" type="hidden" style="width: 150px;">
-            <div id="pathContainerMini"></div>
+            <div id="pathContainerMini"><p id="pathMini"></p></div>
             <div id="optionsContainerMini"></div>
+            <div id="newFolderOptionsMini">
+                <input id="folderNameMini" type="text" style="width: 200px;">
+                <button id="createNewFolderMini" class="btn">✅</button>
+            </div>
             <div id="displayContainerMini" style="display: none;"></div>
             <div id="filesContainerMini"></div>
             <div class="cancelContainer">
@@ -117,11 +122,15 @@ if (isset($_COOKIE["javasession"])){
                     <button id="create" class="btn">✅</button>
                     <button id="cancelFile" class="btn">❌</button>
                 </div>
+                <div id="newFolderOptions" style="display: none;">
+                    <input id="folderName" type="text" style="width: 200px;">
+                    <button id="createNewFolder" class="btn">✅</button>
+                </div>
                 <div id="optionsContainer"></div>
                 <div id="displayContainer"></div>
             </div>
             <div id="explorer">
-                <div id="pathContainer"><span><?php echo $db->domain; ?>/</span></div>
+                <div id="pathContainer"><span><?php echo $db->domain; ?>/</span><p id="path"></p></div>
                 <div id="filesContainer"></div>
                 <div id="editor"></div>
             </div>
@@ -216,6 +225,44 @@ if (isset($_COOKIE["javasession"])){
         });
         document.getElementById("cancelFile").addEventListener("click", ()=> {
             document.getElementById("newFileOptions").style.display = "none";
+        });
+        document.getElementById("createFolderBtn").addEventListener("click", ()=> {
+            const options = document.getElementById("newFolderOptions");
+            if (options.style.display == "none") options.style.display = "block";
+            else options.style.display = "none";
+        });
+        document.getElementById("createNewFolder").addEventListener("click", async ()=> {
+            const folderName = document.getElementById("folderName");
+            const path = document.getElementById("path");
+            if (path) {
+                await createFolder("<?php echo $db->username; ?>", path.textContent + folderName.value);
+                await dm.getFiles("<?php echo $db->username; ?>", path.textContent);
+            }
+            else {
+                await createFolder("<?php echo $db->username; ?>", folderName.value);
+                await dm.getFiles("<?php echo $db->username; ?>", "");
+            }
+            document.getElementById("newFolderOptions").style.display = "none";
+        });
+        document.getElementById("createFolderBtnMini").addEventListener("click", ()=> {
+            const options = document.getElementById("newFolderOptionsMini");
+            if (options.style.display == "none") options.style.display = "block";
+            else options.style.display = "none";
+        });
+        document.getElementById("createNewFolderMini").addEventListener("click", async ()=> {
+            const folderName = document.getElementById("folderNameMini");
+            const path = document.getElementById("pathMini");
+            console.log("new path: " + path.textContent + folderName.value);
+            
+            if (path) {
+                await createFolder("<?php echo $db->username; ?>", path.textContent + folderName.value);
+                await dm.getFilesMini("<?php echo $db->username; ?>", path.textContent);
+            }
+            else {
+                await createFolder("<?php echo $db->username; ?>", folderName.value);
+                await dm.getFilesMini("<?php echo $db->username; ?>", "");
+            }
+            document.getElementById("newFolderOptionsMini").style.display = "none";
         });
         
         function createFileFunc() {

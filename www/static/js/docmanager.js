@@ -957,10 +957,12 @@ class DocumentManager {
             // Show the explorer
             document.getElementById("grayScreen").style.display = "block";
             // Get the current path
-            let currentPath = document.getElementById("pathMini");
+            let currentPath = document.getElementById("path");
             // Get the files
             if (currentPath) this.getFilesMini(sessionStorage.getItem("user"), currentPath.textContent);
             else this.getFilesMini(sessionStorage.getItem("user"), "");
+            // Update the mini path
+            if (currentPath) document.getElementById("pathMini").innerHTML = currentPath.textContent;
             // Create a save button
             const uploadBtnContainer = document.getElementById("uploadBtnContainerMini");
             const uploadBtn = document.createElement("button");
@@ -981,14 +983,10 @@ class DocumentManager {
                 if (currentPath && currentPath.innerHTML != ""){
                 savePath = currentPath.textContent;
                 }
-                
-                const newFolder = document.getElementById("newFolder");
-                let newPath = "";
-                if (newFolder != null && newFolder.value != null && newFolder != "") newPath = newFolder.value;
-        
-                
                 // Save the file to the server
-                await saveContentToFile(sessionStorage.getItem("user"), savePath + newPath, type, filename + "." + type, editor.getValue());
+                await saveContentToFile(sessionStorage.getItem("user"), savePath, type, filename + "." + type, editor.getValue());
+                // Update the current path
+                this.updateCurrentPath(currentPath.textContent);
                 // Remove the temporary upload button
                 uploadBtn.remove();
                 // Close the explorer
@@ -1075,11 +1073,7 @@ class DocumentManager {
     updateCurrentPathMini(path){
         // Empty the path container
         this.pathContainerMini.innerHTML = "";
-        // Create a span element, containing the user's domain
-        const span = document.createElement("span");
-        span.innerHTML = sessionStorage.getItem("domain") + "/";
         // Append the elements to the path container
-        this.pathContainerMini.append(span);
         this.pathContainerMini.append(path);
     }
     appendElementToDisplayContainer(element){

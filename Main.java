@@ -20,12 +20,8 @@ public class Main {
         int port = 80;
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext("/", new RootHandler());
-        //server.createContext("/static", new StaticFileHandler());
         server.createContext("/upload", new UploadHandler());
         server.createContext("/uploadFolder", new UploadFolderHandler());
-        //server.createContext("/css", new StaticFileHandler());
-        //server.createContext("/img", new StaticFileHandler());
-        //server.createContext("/js", new StaticFileHandler());
         server.createContext("/query", new QueryHandler());
         server.createContext("/deleteRows", new DeleteHandler());
         server.createContext("/login", new LoginHandler());
@@ -38,6 +34,7 @@ public class Main {
         server.createContext("/deleteFile", new DeleteFileHandler());
         server.createContext("/getFileContent", new FetchFileContent());
         server.createContext("/saveFile", new SaveFileHandler());
+        server.createContext("/createFolder", new CreateFolderHandler());
         server.createContext("/create-session", new SessionHandler());
         server.createContext("/check-session", new CheckJavaSession());
         server.setExecutor(Executors.newFixedThreadPool(10));
@@ -997,6 +994,53 @@ public class Main {
         }
     }
 
+    static class CreateFolderHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if ("POST".equals(exchange.getRequestMethod())) {
+                // Get the request body
+                String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+                // Parse the body into a map
+                Map<String, String> map = parseJsonToMap(body);
+                // Verify the user
+                String sessionId = getJavaSessionId(exchange);
+                String email = SessionManager.getUsername(sessionId);
+                // Reject the request if verification fails
+                if (email == null) {
+                    System.out.println("Rejected: session not valid");
+                    exchange.sendResponseHeaders(403, -1);
+                    exchange.getResponseBody().close();
+                    return;
+                } else {
+                    // Build the new path
+                    String path = "/home/lukas/users/" + map.get("user") + "/static/" + map.get("path");
+                    if ("norlund_johan_lukas_com".equals(map.get("user"))) {
+                        path = "/home/lukas/JavaServerProject/www/static/" + map.get("path");
+                    }
+                    // Create the new path
+                    String msg = "Fail";
+                    Path newPath = Paths.get(path);
+                    try {
+                        Files.createDirectory(newPath);
+                        msg = "Success";
+                    } catch (FileAlreadyExistsException e) {
+                        System.out.println("Directory already exist: " + path);
+                    }
+                    byte[] response = msg.getBytes();
+                    exchange.getResponseHeaders().set("Content-Type", "text/plain");
+                    exchange.sendResponseHeaders(200, response.length);
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(response);
+                    os.close();
+                }
+            } else {
+                exchange.sendResponseHeaders(403, -1);
+                exchange.getResponseBody().close();
+                return;
+            }
+        }
+    }
+    
     private static byte[] runPhp(HttpExchange exchange){
         byte[] body;
 
