@@ -352,8 +352,7 @@ header h1 {
 }
 
 /* The colored label area (you already used span inside li) */
-#filesContainer li span,
-#filesContainer li a span {
+#filesContainer li span {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -386,7 +385,7 @@ header h1 {
 }
 #htmlList li span {
   background: linear-gradient(180deg,#e26a6a,#c74a4a);
-  color: #fff;
+  color: #111;
 }
 #cssList li span {
   background: linear-gradient(180deg,#e0cc56,#c9b23a);
@@ -398,7 +397,7 @@ header h1 {
 }
 #phpList li span {
   background: linear-gradient(180deg,#9b7ae5,#7f59d1);
-  color: #fff;
+  color: #111;
 }
 #imgList li span {
   background: linear-gradient(180deg,#7ec8f6,#54aeda);

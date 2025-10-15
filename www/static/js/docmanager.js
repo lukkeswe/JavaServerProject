@@ -691,7 +691,7 @@ class DocumentManager {
                     if (type == "folder") {
                         const span = document.createElement("span");
                         span.innerHTML = fileName;
-                        span.addEventListener("click", () => {
+                        span.addEventListener("dblclick", () => {
                             this.emptyDisplayContainer();
                             if (currentPath != null && currentPath.textContent.endsWith("/")) {
                                 this.getFiles(sessionStorage.getItem("user"), currentPath.textContent + fileName);
@@ -723,23 +723,32 @@ class DocumentManager {
                             }
                             // Add setting
                             a.target = "_blank";
+                            // Add an icon to the hyper-link
+                            a.innerHTML = "🌍";
+                            // Add a classname
+                            a.className = "btn";
                             // Append the span
-                            a.append(name);
-                            // Append the hyper-link
-                            fileObject.append(a);
+                            fileObject.append(name);
                             // Add eventlistener
-                            a.addEventListener("click", () => {
+                            name.addEventListener("click", () => {
                                 this.emptyDisplayContainer();
                                 // Empty optioins container
                                 optionsContainer.innerHTML = "";
                                 // Add the edit button
                                 optionsContainer.append(edit);
+                                // Add the hyper-link
+                                optionsContainer.append(a);
                                 // Add the delete button to the options container
                                 optionsContainer.append(erase);
                                 // Add back the back button
                                 optionsContainer.append(backBtn);
                                 
                                 this.showInfo(fileName);
+                            });
+                            // Add a double click eventlistener
+                            name.addEventListener("dblclick", ()=> {
+                                // Redirect the user
+                                window.open(a.href, "_blank");
                             });
                         //}
                     } else {
