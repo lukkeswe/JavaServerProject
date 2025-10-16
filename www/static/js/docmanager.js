@@ -1,4 +1,7 @@
-class DocumentManager {
+import { deleteFolder } from './upmanager.js';
+import { saveContentToFile } from './upmanager.js';
+
+export default class DocumentManager {
     constructor(user) {
         this.container      = document.getElementById("container");
         this.main           = document.getElementById("main-content");
@@ -707,6 +710,25 @@ class DocumentManager {
                                 path.innerHTML = fileName;
                             }
                             this.updateCurrentPath(path);
+                        });
+                        span.addEventListener("click", async ()=> {
+                            // Create a delete folder option
+                            const deleteFolderBtn = document.createElement("button");
+                            deleteFolderBtn.innerHTML = "🗑️";
+                            deleteFolderBtn.className = "btn";
+                            deleteFolderBtn.addEventListener("click", async ()=> {
+                                // Warn the user and make them confirm the action
+                                if (confirm(`Are you sure you want to delete "${name.innerHTML}", and all it's contents permanently? `)){
+                                    await deleteFolder(sessionStorage.getItem("user"), currentPath.textContent + name.textContent);
+                                    console.log("Done!")
+                                    this.getFiles(sessionStorage.getItem("user"), currentPath.textContent);
+                                } else {
+                                    console.log("Aborting...");
+                                }
+                            });
+                            optionsContainer.innerHTML = "";
+                            optionsContainer.append(deleteFolderBtn);
+                            optionsContainer.append(backBtn);
                         });
                         fileObject.append(span);
                     }

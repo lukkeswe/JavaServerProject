@@ -1,4 +1,4 @@
-async function uploadFile(user, path = "") {
+export async function uploadFile(user, path = "") {
     const files = document.getElementById('fileInput').files;
     const formData = new FormData();
     let htmlFiles = sessionStorage.getItem("htmlList");
@@ -40,7 +40,7 @@ async function uploadFile(user, path = "") {
     }
 }
 
-async function uploadFolder(user, path = ""){
+export async function uploadFolder(user, path = ""){
     const input = document.getElementById("folderInput");
     const files = input.files;
 
@@ -87,7 +87,7 @@ async function uploadFolder(user, path = ""){
     
 }
 
-async function saveContentToFile(user, path ="", type, file, content) {
+export async function saveContentToFile(user, path ="", type, file, content) {
     let requestObject = {
         "user"      : user,
         "path"      : path,
@@ -115,7 +115,7 @@ async function saveContentToFile(user, path ="", type, file, content) {
     
 }
 
-async function createFolder(user, path) {
+export async function createFolder(user, path) {
     let requestObject = {
         "user"  : user,
         "path"  : path
@@ -137,17 +137,38 @@ async function createFolder(user, path) {
     
     console.log(msg);
 
-    if (msg == "Success") alert("Folder created");
+    if (msg == "Success") return;
     else alert("Failed to create folder...");
 }
 
-function isValidFileName(fileName){
+export async function deleteFolder(user, path){
+    let requestObject = { 
+        "user"  : user,
+        "path"  : path
+    };
+    console.log("Deleting folder...");
+
+    const response = await fetch("/deleteFolder", {
+        method  : "POST",
+        headers : {"Content-Type" : "application/json"},
+        body    : JSON.stringify(requestObject)
+    });
+
+    let msg = await response.text();
+
+    console.log(msg);
+
+    if (msg == "Success") alert("Folder deleted");
+    else alert("Failed to delete folder...");
+}
+
+export function isValidFileName(fileName){
     if (!fileName || fileName.trim() === "") return false;
     const validPattern = /^[a-zA-Z0-9._-]+$/;
     return validPattern.test(fileName);
 }
 
-function isValidPath(path) {
+export function isValidPath(path) {
     if (!path || path.trim() === "") return false;
 
     const validPattern = /^[a-zA-Z0-9._-]+$/;

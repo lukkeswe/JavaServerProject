@@ -277,11 +277,11 @@ header h1 {
 }
 .btn:hover { background: #3c3f42; transform: translateY(-1px); }
 
-#newFileOptions {
+.newOptions {
     margin-top: 8px;
 }
 
-#newFileOptions input {
+.textInput {
     box-shadow: var(--shadow-subtle) inset;
     border-radius: 8px;
     padding: 8px;

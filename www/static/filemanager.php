@@ -65,8 +65,8 @@ if (isset($_COOKIE["javasession"])){
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <title>File manager</title>
-    <script src="js/upmanager.js"></script>
-    <script src="js/docmanager.js"></script>
+    <script type="module" src="js/upmanager.js"></script>
+    <script type="module" src="js/docmanager.js"></script>
 </head>
 <body>
     <div id="grayScreen">
@@ -111,8 +111,8 @@ if (isset($_COOKIE["javasession"])){
                     <button id="folderBtn" class="btn">📂</button>
                     <button id="cancelUpload" class="btn">❌</button>
                 </div>
-                <div id="newFileOptions" style="display: none;">
-                    <input type="text" id="newFilename" value="filename">
+                <div id="newFileOptions" class="newOptions" style="display: none;">
+                    <input type="text" id="newFilename" class="textInput" value="filename">
                     <select name="extention" id="extentionSelect" class="btn">
                         <option value="html" selected>HTML</option>
                         <option value="css">CSS</option>
@@ -122,8 +122,8 @@ if (isset($_COOKIE["javasession"])){
                     <button id="create" class="btn">✅</button>
                     <button id="cancelFile" class="btn">❌</button>
                 </div>
-                <div id="newFolderOptions" style="display: none;">
-                    <input id="folderName" type="text" style="width: 200px;">
+                <div id="newFolderOptions" class="newOptions" style="display: none;">
+                    <input id="folderName" class="textInput" type="text" style="width: 200px;">
                     <button id="createNewFolder" class="btn">✅</button>
                 </div>
                 <div id="optionsContainer"></div>
@@ -140,10 +140,13 @@ if (isset($_COOKIE["javasession"])){
     <footer><p>&copy;Norlund J. Lukas</p></footer>
     <!-- Ace Editor JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.9/ace.js"></script>
-    <script type="text/javascript">
+    <script type="module">
+        import DM from './js/docmanager.js';
+        import * as UpManager from "./js/upmanager.js";
+
         sessionStorage.setItem("user", "<?php echo $db->username; ?>");
         sessionStorage.setItem("domain", "<?php echo $db->domain;?>");
-        const dm = new DocumentManager("<?php echo $db->username; ?>");
+        const dm = new DM("<?php echo $db->username; ?>");
         console.log("dm.user = " + dm.user);
         
         dm.flexContainer();
@@ -176,7 +179,7 @@ if (isset($_COOKIE["javasession"])){
             const loadImage = document.createElement("img");
             loadImage.src = "img/muppet-load.gif";
             files.append(loadImage);
-            const file = await uploadFile("<?php echo $db->username; ?>", path);
+            const file = await UpManager.uploadFile("<?php echo $db->username; ?>", path);
             if (currentPath) {
                 dm.getFiles("<?php echo $db->username; ?>", currentPath.textContent);
                 console.log("Sending: ", currentPath.textContent);
@@ -207,7 +210,7 @@ if (isset($_COOKIE["javasession"])){
             const loadImage = document.createElement("img");
             loadImage.src = "img/muppet-load.gif";
             files.append(loadImage);
-            const folder = await uploadFolder("<?php echo $db->username; ?>", path);
+            const folder = await UpManager.uploadFolder("<?php echo $db->username; ?>", path);
             if (currentPath) {
                 dm.getFiles("<?php echo $db->username; ?>", currentPath.textContent);
                 console.log("Sending: ", currentPath.textContent);
@@ -221,7 +224,12 @@ if (isset($_COOKIE["javasession"])){
             document.getElementById("grayScreen").style.display = "none";
         });
         document.getElementById("createFileBtn").addEventListener("click", ()=>{
-            createFileFunc();
+            if (document.getElementById("newFileOptions").style.display == "block") {
+                document.getElementById("newFileOptions").style.display = "none";
+            } else {
+                document.getElementById("newFileOptions").style.display = "block";
+                createFileFunc();
+            }
         });
         document.getElementById("cancelFile").addEventListener("click", ()=> {
             document.getElementById("newFileOptions").style.display = "none";
@@ -235,11 +243,11 @@ if (isset($_COOKIE["javasession"])){
             const folderName = document.getElementById("folderName");
             const path = document.getElementById("path");
             if (path) {
-                await createFolder("<?php echo $db->username; ?>", path.textContent + folderName.value);
+                await UpManager.createFolder("<?php echo $db->username; ?>", path.textContent + folderName.value);
                 await dm.getFiles("<?php echo $db->username; ?>", path.textContent);
             }
             else {
-                await createFolder("<?php echo $db->username; ?>", folderName.value);
+                await UpManager.createFolder("<?php echo $db->username; ?>", folderName.value);
                 await dm.getFiles("<?php echo $db->username; ?>", "");
             }
             document.getElementById("newFolderOptions").style.display = "none";
@@ -255,18 +263,17 @@ if (isset($_COOKIE["javasession"])){
             console.log("new path: " + path.textContent + folderName.value);
             
             if (path) {
-                await createFolder("<?php echo $db->username; ?>", path.textContent + folderName.value);
+                await UpManager.createFolder("<?php echo $db->username; ?>", path.textContent + folderName.value);
                 await dm.getFilesMini("<?php echo $db->username; ?>", path.textContent);
             }
             else {
-                await createFolder("<?php echo $db->username; ?>", folderName.value);
+                await UpManager.createFolder("<?php echo $db->username; ?>", folderName.value);
                 await dm.getFilesMini("<?php echo $db->username; ?>", "");
             }
             document.getElementById("newFolderOptionsMini").style.display = "none";
         });
         
         function createFileFunc() {
-            document.getElementById("newFileOptions").style.display = "block";
             document.getElementById("create").addEventListener("click", ()=> {
                 const filename = document.createElement("h2");
                 const name = document.getElementById("newFilename").value;

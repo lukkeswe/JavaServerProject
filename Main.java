@@ -9,6 +9,8 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.nio.*;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.Headers;
@@ -35,6 +37,7 @@ public class Main {
         server.createContext("/getFileContent", new FetchFileContent());
         server.createContext("/saveFile", new SaveFileHandler());
         server.createContext("/createFolder", new CreateFolderHandler());
+        server.createContext("/deleteFolder", new DeleteFolderHandler());
         server.createContext("/create-session", new SessionHandler());
         server.createContext("/check-session", new CheckJavaSession());
         server.setExecutor(Executors.newFixedThreadPool(10));
@@ -993,7 +996,6 @@ public class Main {
             }
         }
     }
-
     static class CreateFolderHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
@@ -1027,7 +1029,7 @@ public class Main {
                         System.out.println("Directory already exist: " + path);
                     }
                     byte[] response = msg.getBytes();
-                    exchange.getResponseHeaders().set("Content-Type", "text/plain");
+                    exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
                     exchange.sendResponseHeaders(200, response.length);
                     OutputStream os = exchange.getResponseBody();
                     os.write(response);
@@ -1039,6 +1041,85 @@ public class Main {
                 return;
             }
         }
+    }
+    static class DeleteFolderHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if ("POST".equals(exchange.getRequestMethod())){
+                // Get the request body
+                String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+                // Parse the body into map
+                Map<String, String> map = parseJsonToMap(body);
+                // Verify the user
+                String sessionId = getJavaSessionId(exchange);
+                String email = SessionManager.getUsername(sessionId);
+                // Reject the request if verification fails
+                if (email == null && !map.get("path").isEmpty()) {
+                    if (map.get("path").isEmpty()) System.out.println("Rejected: Empty path");
+                    else System.out.println("Rejected: session not valid");
+                    exchange.sendResponseHeaders(403, -1);
+                    exchange.getResponseBody().close();
+                    return;
+                } else {
+                    String path = "/home/lukas/users/" + map.get("user") + "/static/" + map.get("path");
+                    if (map.get("user").equals("norlund_johan_lukas_com")) {
+                        path = "/home/lukas/JavaServerProject/www/static/" + map.get("path");
+                    }
+                    System.out.println("Deleting: " + path.toString());
+                    String msg = "Fail";
+                    if (deleteFolder(Paths.get(path))){
+                        msg = "Success";
+                        byte[] response = msg.getBytes();
+                        exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
+                        exchange.sendResponseHeaders(200, response.length);
+                        OutputStream os = exchange.getResponseBody();
+                        os.write(response);
+                        os.close();
+                    }
+                }
+
+            } else {
+                exchange.sendResponseHeaders(403, -1);
+                exchange.getRequestBody().close();
+                return;
+            }
+        }
+    }
+
+    public static boolean deleteFolder(Path path) throws IOException {
+        // Check if the path exsists
+        if (!Files.exists(path)) return false;
+        // Walk through all files and delete them
+        try {
+            Files.walkFileTree(path, new SimpleFileVisitor<Path>(){
+                // Walk through all the files
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                    try {
+                        Files.delete(file); // Delete file
+
+                    } catch (IOException e) {
+                        return FileVisitResult.TERMINATE;
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+                // Walk through all the directories
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException e) {
+                    if (e != null) return FileVisitResult.TERMINATE;
+                    try {
+                        Files.delete(dir); // Delete directory
+                    } catch (IOException ex) {
+                        return FileVisitResult.TERMINATE;
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            return false;
+        }
+        
+        return !Files.exists(path); // Double-check that it’s gone
     }
     
     private static byte[] runPhp(HttpExchange exchange){
