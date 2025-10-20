@@ -99,20 +99,21 @@ if (isset($_COOKIE["javasession"])){
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <script src="js/docmanager.js"></script>
+    <script type="module" src="js/docmanager.js"></script>
     <title>Home</title>
 </head>
 <body>
     <header><h1>サーバーチーム</h1></header>
     <div id="container"></div>
     <footer><p>&copy;Norlund J. Lukas</p></footer>
-    <script type="text/javascript">
+    <script type="module">
+        import DM from './js/docmanager.js';
         if (getCookie("javasession") != null){
             console.log("<?php echo $msg;?>");
             sessionStorage.setItem("email", "<?php echo $db->email; ?>");
             sessionStorage.setItem("domain", "<?php echo $db->domain;?>");
-            sessionStorage.setItem("phone", <?php echo $db->phone;?>);
-            const dm = new DocumentManager();
+            sessionStorage.setItem("phone", "<?php echo $db->phone;?>");
+            const dm = new DM("<?php echo $db->username; ?>");
             dm.flexContainer();
             dm.burgerMenu();
             dm.mainContainer();
