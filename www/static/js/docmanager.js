@@ -2,12 +2,11 @@ import { deleteFolder } from './upmanager.js';
 import { saveContentToFile } from './upmanager.js';
 
 export default class DocumentManager {
-    constructor(user) {
+    constructor() {
         this.container      = document.getElementById("container");
         this.main           = document.getElementById("main-content");
         this.table          = document.getElementById("table");
         this.db;
-        this.user           = user;
         this.pathContainer  = document.getElementById("pathContainer");
         this.pathContainerMini  = document.getElementById("pathContainerMini");
     }
@@ -562,11 +561,10 @@ export default class DocumentManager {
         editContainer.append(createBtn);
         this.main.append(editContainer);
     }
-    async getFiles(user, path = ""){
+    async getFiles(path = ""){
         console.log("Fetching files...");
         
         let requestObject = {
-            "user" : user,
             "path" : path
         };
         try {
@@ -598,7 +596,7 @@ export default class DocumentManager {
                     }
                     console.log("targetPath: " + previousPath);
                     
-                    this.getFiles(sessionStorage.getItem("user"), previousPath);
+                    this.getFiles(previousPath);
                     currentPath.innerHTML = previousPath;
                     backBtn.remove();
                 });
@@ -682,8 +680,8 @@ export default class DocumentManager {
                             // Hide the editor
                             document.getElementById("editor").style.display = "none";
                             // Display the files in the current directory
-                            if (path != null && path.textContent != "") this.getFiles(this.user, path.textContent);
-                            else this.getFiles(this.user, "");
+                            if (path != null && path.textContent != "") this.getFiles(path.textContent);
+                            else this.getFiles("");
                             // Remove the back button
                             backBtn.remove();
                             optionsContainer.innerHTML = "";
@@ -697,9 +695,9 @@ export default class DocumentManager {
                         span.addEventListener("dblclick", () => {
                             this.emptyDisplayContainer();
                             if (currentPath != null && currentPath.textContent.endsWith("/")) {
-                                this.getFiles(sessionStorage.getItem("user"), currentPath.textContent + fileName);
+                                this.getFiles(currentPath.textContent + fileName);
                             } else {
-                                this.getFiles(sessionStorage.getItem("user"), fileName);
+                                this.getFiles(fileName);
                             }
                             this.appendElementToDisplayContainer(erase);
                             const path = document.createElement("p");
@@ -719,9 +717,9 @@ export default class DocumentManager {
                             deleteFolderBtn.addEventListener("click", async ()=> {
                                 // Warn the user and make them confirm the action
                                 if (confirm(`Are you sure you want to delete "${name.innerHTML}", and all it's contents permanently? `)){
-                                    await deleteFolder(sessionStorage.getItem("user"), currentPath.textContent + name.textContent);
+                                    await deleteFolder(currentPath.textContent + name.textContent);
                                     console.log("Done!")
-                                    this.getFiles(sessionStorage.getItem("user"), currentPath.textContent);
+                                    this.getFiles(currentPath.textContent);
                                 } else {
                                     console.log("Aborting...");
                                 }
@@ -816,11 +814,10 @@ export default class DocumentManager {
             console.error(error);
         }
     }
-    async getFilesMini(user, path = ""){
+    async getFilesMini(path = ""){
         console.log("Fetching files...");
         
         let requestObject = {
-            "user" : user,
             "path" : path
         };
         console.log("requestObject: " + JSON.stringify(requestObject));
@@ -854,7 +851,7 @@ export default class DocumentManager {
                     }
                     console.log("targetPath: " + previousPath);
                     
-                    this.getFilesMini(sessionStorage.getItem("user"), previousPath);
+                    this.getFilesMini(previousPath);
                     currentPath.innerHTML = previousPath;
                     backBtn.remove();
                 });
@@ -883,9 +880,9 @@ export default class DocumentManager {
                         span.innerHTML = fileName;
                         span.addEventListener("click", () => {
                             if (currentPath != null && currentPath.textContent.endsWith("/")) {
-                                this.getFilesMini(sessionStorage.getItem("user"), currentPath.textContent + fileName);
+                                this.getFilesMini(currentPath.textContent + fileName);
                             } else {
-                                this.getFilesMini(sessionStorage.getItem("user"), fileName);
+                                this.getFilesMini(fileName);
                             }
                             const path = document.createElement("p");
                             path.id = "pathMini";
@@ -972,9 +969,9 @@ export default class DocumentManager {
             const path = document.getElementById("path");
             // Call the function in Upmanager.jp to save the file
             if (path != null && path.textContent != ""){
-                await saveContentToFile(sessionStorage.getItem("user"), path.textContent, type, filename, editor.getValue());
+                await saveContentToFile(path.textContent, type, filename, editor.getValue());
             } else {
-                await saveContentToFile(sessionStorage.getItem("user"), "", type, filename, editor.getValue());
+                await saveContentToFile("", type, filename, editor.getValue());
             }
         });
         // Append the save button to the options container
@@ -990,8 +987,8 @@ export default class DocumentManager {
             // Get the current path
             let currentPath = document.getElementById("path");
             // Get the files
-            if (currentPath) this.getFilesMini(sessionStorage.getItem("user"), currentPath.textContent);
-            else this.getFilesMini(sessionStorage.getItem("user"), "");
+            if (currentPath) this.getFilesMini(currentPath.textContent);
+            else this.getFilesMini("");
             // Update the mini path
             if (currentPath) document.getElementById("pathMini").innerHTML = currentPath.textContent;
             // Create a save button
@@ -1015,7 +1012,7 @@ export default class DocumentManager {
                 savePath = currentPath.textContent;
                 }
                 // Save the file to the server
-                await saveContentToFile(sessionStorage.getItem("user"), savePath, type, filename + "." + type, editor.getValue());
+                await saveContentToFile(savePath, type, filename + "." + type, editor.getValue());
                 // Update the current path
                 this.updateCurrentPath(currentPath.textContent);
                 // Remove the temporary upload button
@@ -1046,8 +1043,7 @@ export default class DocumentManager {
         let requestObject = {
             "filename"  : file,
             "type"      : type,
-            "path"      : path,
-            "user"      : this.user
+            "path"      : path
         };
         console.log(`Fetching ${path + file}'s content...`);
         let response = await fetch("/getFileContent", {
@@ -1067,8 +1063,7 @@ export default class DocumentManager {
         let requsetObject = {
             "filename"  : file,
             "type"      : type,
-            "path"      : path,
-            "user"      : this.user
+            "path"      : path
         };
         console.log(`Deleting ${path + file}`);
         let response = await fetch("/deleteFile", {
@@ -1141,7 +1136,6 @@ export default class DocumentManager {
         sessionStorage.removeItem("password");
         sessionStorage.removeItem("domain");
         sessionStorage.removeItem("phone");
-        sessionStorage.removeItem("username");
         window.location.href = "logout.php";
     }
     toggleShowUploadBtn(){
@@ -1190,8 +1184,8 @@ export default class DocumentManager {
             // Hide the editor
             document.getElementById("editor").style.display = "none";
             // Display the files in the current directory
-            if (path != null && path.textContent != "") this.getFiles(this.user, path.textContent);
-            else this.getFiles(this.user, "");
+            if (path != null && path.textContent != "") this.getFiles(path.textContent);
+            else this.getFiles("");
             // Remove the back button
             backBtn.remove();
             optionsContainer.innerHTML = "";

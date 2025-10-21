@@ -113,7 +113,7 @@ if (isset($_COOKIE["javasession"])){
             sessionStorage.setItem("email", "<?php echo $db->email; ?>");
             sessionStorage.setItem("domain", "<?php echo $db->domain;?>");
             sessionStorage.setItem("phone", "<?php echo $db->phone;?>");
-            const dm = new DM("<?php echo $db->username; ?>");
+            const dm = new DM();
             dm.flexContainer();
             dm.burgerMenu();
             dm.mainContainer();

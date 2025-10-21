@@ -1,4 +1,4 @@
-export async function uploadFile(user, path = "") {
+export async function uploadFile(path = "") {
     const files = document.getElementById('fileInput').files;
     const formData = new FormData();
     let htmlFiles = sessionStorage.getItem("htmlList");
@@ -26,7 +26,6 @@ export async function uploadFile(user, path = "") {
         isValidFile = true;
     }
     if (isValidFile) {
-        formData.append("user", user);
         formData.append("path", path);
         console.log("Uploading file...");
         
@@ -40,7 +39,7 @@ export async function uploadFile(user, path = "") {
     }
 }
 
-export async function uploadFolder(user, path = ""){
+export async function uploadFolder(path = ""){
     const input = document.getElementById("folderInput");
     const files = input.files;
 
@@ -51,7 +50,6 @@ export async function uploadFolder(user, path = ""){
 
     const formData = new FormData();
 
-    formData.append("user", user);
     formData.append("path", path);
 
     let htmlFiles = sessionStorage.getItem("htmlList");
@@ -87,9 +85,8 @@ export async function uploadFolder(user, path = ""){
     
 }
 
-export async function saveContentToFile(user, path ="", type, file, content) {
+export async function saveContentToFile(path ="", type, file, content) {
     let requestObject = {
-        "user"      : user,
         "path"      : path,
         "type"      : type,
         "filename"  : file,
@@ -115,11 +112,8 @@ export async function saveContentToFile(user, path ="", type, file, content) {
     
 }
 
-export async function createFolder(user, path) {
-    let requestObject = {
-        "user"  : user,
-        "path"  : path
-    };
+export async function createFolder(path) {
+    let requestObject = {"path"  : path};
     console.log("Creating folder..");
     
     if (!isValidPath(path)){
@@ -141,11 +135,8 @@ export async function createFolder(user, path) {
     else alert("Failed to create folder...");
 }
 
-export async function deleteFolder(user, path){
-    let requestObject = { 
-        "user"  : user,
-        "path"  : path
-    };
+export async function deleteFolder(path){
+    let requestObject = {"path"  : path};
     console.log("Deleting folder...");
 
     const response = await fetch("/deleteFolder", {

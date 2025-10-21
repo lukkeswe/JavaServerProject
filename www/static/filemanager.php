@@ -144,14 +144,12 @@ if (isset($_COOKIE["javasession"])){
         import DM from './js/docmanager.js';
         import * as UpManager from "./js/upmanager.js";
 
-        sessionStorage.setItem("user", "<?php echo $db->username; ?>");
         sessionStorage.setItem("domain", "<?php echo $db->domain;?>");
-        const dm = new DM("<?php echo $db->username; ?>");
-        console.log("dm.user = " + dm.user);
+        const dm = new DM();
         
         dm.flexContainer();
         dm.fileBurgerMenu();
-        dm.getFiles("<?php echo $db->username; ?>");
+        dm.getFiles();
         document.getElementById("uploadSomeBtn").addEventListener("click", () => {
             dm.toggleShowUploadBtn();
         });
@@ -179,12 +177,12 @@ if (isset($_COOKIE["javasession"])){
             const loadImage = document.createElement("img");
             loadImage.src = "img/muppet-load.gif";
             files.append(loadImage);
-            const file = await UpManager.uploadFile("<?php echo $db->username; ?>", path);
+            const file = await UpManager.uploadFile(path);
             if (currentPath) {
-                dm.getFiles("<?php echo $db->username; ?>", currentPath.textContent);
+                dm.getFiles(currentPath.textContent);
                 console.log("Sending: ", currentPath.textContent);
             }
-            else dm.getFiles("<?php echo $db->username; ?>");
+            else dm.getFiles();
             dm.emptyDisplayContainer();
             dm.showInfo(file);
             if (
@@ -210,12 +208,12 @@ if (isset($_COOKIE["javasession"])){
             const loadImage = document.createElement("img");
             loadImage.src = "img/muppet-load.gif";
             files.append(loadImage);
-            const folder = await UpManager.uploadFolder("<?php echo $db->username; ?>", path);
+            const folder = await UpManager.uploadFolder(path);
             if (currentPath) {
-                dm.getFiles("<?php echo $db->username; ?>", currentPath.textContent);
+                dm.getFiles(currentPath.textContent);
                 console.log("Sending: ", currentPath.textContent);
             }
-            else dm.getFiles("<?php echo $db->username; ?>");
+            else dm.getFiles();
             dm.emptyDisplayContainer();
             dm.showInfo();
         });
@@ -243,12 +241,12 @@ if (isset($_COOKIE["javasession"])){
             const folderName = document.getElementById("folderName");
             const path = document.getElementById("path");
             if (path) {
-                await UpManager.createFolder("<?php echo $db->username; ?>", path.textContent + folderName.value);
-                await dm.getFiles("<?php echo $db->username; ?>", path.textContent);
+                await UpManager.createFolder(path.textContent + folderName.value);
+                await dm.getFiles(path.textContent);
             }
             else {
-                await UpManager.createFolder("<?php echo $db->username; ?>", folderName.value);
-                await dm.getFiles("<?php echo $db->username; ?>", "");
+                await UpManager.createFolder(folderName.value);
+                await dm.getFiles("");
             }
             document.getElementById("newFolderOptions").style.display = "none";
         });
@@ -263,12 +261,12 @@ if (isset($_COOKIE["javasession"])){
             console.log("new path: " + path.textContent + folderName.value);
             
             if (path) {
-                await UpManager.createFolder("<?php echo $db->username; ?>", path.textContent + folderName.value);
-                await dm.getFilesMini("<?php echo $db->username; ?>", path.textContent);
+                await UpManager.createFolder(path.textContent + folderName.value);
+                await dm.getFilesMini(path.textContent);
             }
             else {
-                await UpManager.createFolder("<?php echo $db->username; ?>", folderName.value);
-                await dm.getFilesMini("<?php echo $db->username; ?>", "");
+                await UpManager.createFolder(folderName.value);
+                await dm.getFilesMini("");
             }
             document.getElementById("newFolderOptionsMini").style.display = "none";
         });

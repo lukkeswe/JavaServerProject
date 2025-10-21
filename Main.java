@@ -413,8 +413,8 @@ public class Main {
             if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 // Verify the user
                 String sessionId = getJavaSessionId(exchange);
-                String email = SessionManager.getUsername(sessionId);
-                if (email == null) {
+                String user = SessionManager.getUsername(sessionId);
+                if (user == null) {
                     exchange.sendResponseHeaders(403, -1);
                     exchange.getResponseBody().close();
                     return;
@@ -432,7 +432,7 @@ public class Main {
                             // Extract the body's content type
                             String bodyContentType = extractContentType(bodyHeaders);
                             System.out.println("bodyContentType: " + bodyContentType);
-                            String response = handleMultipartFormData(body, requestContentType);
+                            String response = handleMultipartFormData(body, requestContentType, user);
                             byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
 
                             exchange.sendResponseHeaders(200, responseBytes.length);
@@ -459,8 +459,8 @@ public class Main {
             if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 // Verify the user
                 String sessionId = getJavaSessionId(exchange);
-                String email = SessionManager.getUsername(sessionId);
-                if (email == null) {
+                String user = SessionManager.getUsername(sessionId);
+                if (user == null) {
                     exchange.sendResponseHeaders(403, -1);
                     exchange.getResponseBody().close();
                     return;
@@ -473,7 +473,7 @@ public class Main {
                             String requestContentType = requestHeaders.getFirst("Content-Type");
                             // Get the body in bytes
                             byte[] body = inputStreamToBytes(exchange.getRequestBody());
-                            String response = handleMultipartFormDataFolder(body, requestContentType);
+                            String response = handleMultipartFormDataFolder(body, requestContentType, user);
                             byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
 
                             exchange.sendResponseHeaders(200, responseBytes.length);
@@ -713,15 +713,15 @@ public class Main {
                 Map<String, String> map = parseJsonToMap(recivedString);
                 // Verify the user
                 String sessionId = getJavaSessionId(exchange);
-                String email = SessionManager.getUsername(sessionId);
-                if (email == null) {
+                String user = SessionManager.getUsername(sessionId);
+                if (user == null) {
                     exchange.sendResponseHeaders(403, -1);
                     exchange.getResponseBody().close();
                     return;
                 } else {
                     // Get lists of the files depending on the user
-                    String userPath = "/home/lukas/users/" + map.get("user") + "/static/";
-                    if (map.get("user").equals("norlund_johan_lukas_com")) userPath = "/home/lukas/JavaServerProject/www/static/";
+                    String userPath = "/home/lukas/users/" + user + "/static/";
+                    if (user.equals("norlund_johan_lukas_com")) userPath = "/home/lukas/JavaServerProject/www/static/";
                     if (!map.get("path").isEmpty() && map.get("path") != null) {
                         userPath = userPath + map.get("path");
                     }
@@ -795,16 +795,16 @@ public class Main {
                 String response = "An error occured deleting the file";
                 // Verify the user
                 String sessionId = getJavaSessionId(exchange);
-                String email = SessionManager.getUsername(sessionId);
+                String user = SessionManager.getUsername(sessionId);
 
-                if (email == null) {
+                if (user == null) {
                     exchange.sendResponseHeaders(403, -1);
                     exchange.getResponseBody().close();
                     return;
                 } else {
                     System.out.println("Recived path: " + map.get("path"));
-                    String userPath =  "/home/lukas/users/" + map.get("user") + "/static/";
-                    if (map.get("user").equals("norlund_johan_lukas_com")) userPath = "/home/lukas/JavaServerProject/www/static/";
+                    String userPath =  "/home/lukas/users/" + user + "/static/";
+                    if (user.equals("norlund_johan_lukas_com")) userPath = "/home/lukas/JavaServerProject/www/static/";
                     if (!map.get("path").isEmpty() && map.get("path") != null) userPath += map.get("path");
                     userPath += map.get("filename");
 
@@ -844,14 +844,25 @@ public class Main {
 
                     System.out.println("Recieved body: " + body);
 
-                    // Map<String, String> params = parseFormData(body);
-                    // String email = params.get("email");
-
                     Map<String, String> map = parseJsonToMap(body);
                     String email = map.get("email");
 
+                    // Get the username from the database
+                    StringBuilder sql = new StringBuilder();
+                    sql.append("Select name FROM users WHERE email = ").append("'").append(email).append("'");
+                    String result = executeQuery(
+                        DB_PROPERTIES.getProperty("db.database"), 
+                        DB_PROPERTIES.getProperty("db.user"), 
+                        DB_PROPERTIES.getProperty("db.password"), 
+                        sql.toString()
+                    );
+                    Map<String, String> resultMap = new HashMap<>();
+                    resultMap = parseFirstJsonObject(result);
+
+                    System.out.println("name: " + resultMap.get("name"));
+
                     if (email != null && !email.isEmpty()) {
-                        String sessionId = SessionManager.createSession(email);
+                        String sessionId = SessionManager.createSession(resultMap.get("name"));
                         System.out.println("SessionId: " + sessionId);
 
                         String response = sessionId;
@@ -885,9 +896,9 @@ public class Main {
                 String body = reader.lines().collect(Collectors.joining());
                 // Verify the user
                 String sessionId = getJavaSessionId(exchange);
-                String email = SessionManager.getUsername(sessionId);
+                String user = SessionManager.getUsername(sessionId);
                 // Reject the request if verification fails
-                if (email == null) {
+                if (user == null) {
                     exchange.sendResponseHeaders(403, -1);
                     exchange.getResponseBody().close();
                     return;
@@ -897,8 +908,8 @@ public class Main {
                     // Initialize response
                     byte[] response;
                     // Check if file exists
-                    String userPath =  "/home/lukas/users/" + map.get("user") + "/static/";
-                    if (map.get("user").equals("norlund_johan_lukas_com")) userPath = "/home/lukas/JavaServerProject/www/static/";
+                    String userPath =  "/home/lukas/users/" + user + "/static/";
+                    if (user.equals("norlund_johan_lukas_com")) userPath = "/home/lukas/JavaServerProject/www/static/";
                     if (!map.get("path").isEmpty() && map.get("path") != null) userPath += map.get("path");
                     userPath += map.get("filename");
 
@@ -931,9 +942,9 @@ public class Main {
                 String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
                 // Verify the user
                 String sessionId = getJavaSessionId(exchange);
-                String email = SessionManager.getUsername(sessionId);
+                String user = SessionManager.getUsername(sessionId);
                 // Reject the request if verification fails
-                if (email == null) {
+                if (user == null) {
                     System.out.println("Rejected: session not valid");
                     exchange.sendResponseHeaders(403, -1);
                     exchange.getResponseBody().close();
@@ -943,8 +954,8 @@ public class Main {
                     Map<String, String> map = parseJsonToMap(body);
                     String content = map.get("content").replace("\r\n", "\n");
                     // Create the file's path
-                    String userPath =  "/home/lukas/users/" + map.get("user") + "/static/";
-                    if (map.get("user").equals("norlund_johan_lukas_com")) userPath = "/home/lukas/JavaServerProject/www/static/";
+                    String userPath =  "/home/lukas/users/" + user + "/static/";
+                    if (user.equals("norlund_johan_lukas_com")) userPath = "/home/lukas/JavaServerProject/www/static/";
                     if (!map.get("path").isEmpty() && map.get("path") != null) userPath += map.get("path");
                     userPath += map.get("filename");
                     // Save the file
@@ -1006,17 +1017,17 @@ public class Main {
                 Map<String, String> map = parseJsonToMap(body);
                 // Verify the user
                 String sessionId = getJavaSessionId(exchange);
-                String email = SessionManager.getUsername(sessionId);
+                String user = SessionManager.getUsername(sessionId);
                 // Reject the request if verification fails
-                if (email == null) {
+                if (user == null) {
                     System.out.println("Rejected: session not valid");
                     exchange.sendResponseHeaders(403, -1);
                     exchange.getResponseBody().close();
                     return;
                 } else {
                     // Build the new path
-                    String path = "/home/lukas/users/" + map.get("user") + "/static/" + map.get("path");
-                    if ("norlund_johan_lukas_com".equals(map.get("user"))) {
+                    String path = "/home/lukas/users/" + user + "/static/" + map.get("path");
+                    if ("norlund_johan_lukas_com".equals(user)) {
                         path = "/home/lukas/JavaServerProject/www/static/" + map.get("path");
                     }
                     // Create the new path
@@ -1052,17 +1063,17 @@ public class Main {
                 Map<String, String> map = parseJsonToMap(body);
                 // Verify the user
                 String sessionId = getJavaSessionId(exchange);
-                String email = SessionManager.getUsername(sessionId);
+                String user = SessionManager.getUsername(sessionId);
                 // Reject the request if verification fails
-                if (email == null && !map.get("path").isEmpty()) {
+                if (user == null && !map.get("path").isEmpty()) {
                     if (map.get("path").isEmpty()) System.out.println("Rejected: Empty path");
                     else System.out.println("Rejected: session not valid");
                     exchange.sendResponseHeaders(403, -1);
                     exchange.getResponseBody().close();
                     return;
                 } else {
-                    String path = "/home/lukas/users/" + map.get("user") + "/static/" + map.get("path");
-                    if (map.get("user").equals("norlund_johan_lukas_com")) {
+                    String path = "/home/lukas/users/" + user + "/static/" + map.get("path");
+                    if (user.equals("norlund_johan_lukas_com")) {
                         path = "/home/lukas/JavaServerProject/www/static/" + map.get("path");
                     }
                     System.out.println("Deleting: " + path.toString());
@@ -1121,7 +1132,6 @@ public class Main {
         
         return !Files.exists(path); // Double-check that it’s gone
     }
-    
     private static byte[] runPhp(HttpExchange exchange){
         byte[] body;
 
@@ -1532,7 +1542,24 @@ public class Main {
         }
         return sb.toString();
     }
-
+    // --- Helper: Parse first object in a JSON array ---
+    private static Map<String, String> parseFirstJsonObject(String json){
+        json = json.trim();
+        if (json.startsWith("[")) {
+            // Find first '{' and it's matching '}'
+            int start = json.indexOf('{');
+            int end = json.indexOf('}', start);
+            if (start != -1 && end != -1) {
+                String object = json.substring(start, end + 1);
+                return parseJsonToMap(object);
+            }
+            // If it's already a single object
+            if (json.startsWith("{")){
+                return parseJsonToMap(json);
+            }
+        }
+        return new HashMap<>();
+    }
     private static String parseMapToJson(Map<String, String> map){
         StringBuilder jsonBuilder = new StringBuilder();
         jsonBuilder.append("[{");
@@ -1816,7 +1843,7 @@ public class Main {
         }
         return buffer.toByteArray();
     }
-    private static String handleMultipartFormData(byte[] body, String contentType) throws IOException {
+    private static String handleMultipartFormData(byte[] body, String contentType, String user) throws IOException {
         String boundary = contentType.split("boundary=")[1];
         byte[] boundaryBytes = ("--" + boundary).getBytes(StandardCharsets.UTF_8);
         byte[] closingBoundaryBytes = ("--" + boundary + "--").getBytes(StandardCharsets.UTF_8);
@@ -1826,7 +1853,6 @@ public class Main {
         int pos = 0;
         byte[] data = null;
         boolean allowed = true;
-        String user = "temp";
         String fileName = "placeholder.jpg";
         String fileType = "img";
         String path = "";
@@ -1906,12 +1932,6 @@ public class Main {
                 continue;
             }
 
-            if (headers.contains("name=\"user\"")) {
-                user = new String(fileContent, StandardCharsets.UTF_8).trim();
-                System.out.println("Received user: " + user);
-                continue;
-            }
-
             if (headers.contains("name=\"path\"")){
                 path = new String(fileContent, StandardCharsets.UTF_8).trim();
                 System.out.println("Recived path: " + path);
@@ -1923,7 +1943,7 @@ public class Main {
         }
         return msg;
     }
-    private static String handleMultipartFormDataFolder(byte[] body, String contentType) throws IOException {
+    private static String handleMultipartFormDataFolder(byte[] body, String contentType, String user) throws IOException {
         String boundary = contentType.split("boundary=")[1];
         byte[] boundaryBytes = ("--" + boundary).getBytes(StandardCharsets.UTF_8);
         byte[] closingBoundaryBytes = ("--" + boundary + "--").getBytes(StandardCharsets.UTF_8);
@@ -1932,7 +1952,6 @@ public class Main {
         
         int pos = 0;
         byte[] data = null;
-        String user = "temp";
         String path = "";
 
         while (true) {
@@ -2001,12 +2020,6 @@ public class Main {
                     continue;
                 }
                 //-----
-            }
-
-            if (headers.contains("name=\"user\"")) {
-                user = new String(fileContent, StandardCharsets.UTF_8).trim();
-                System.out.println("Received user: " + user);
-                continue;
             }
 
             if (headers.contains("name=\"path\"")){
