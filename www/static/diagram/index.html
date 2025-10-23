@@ -22,6 +22,7 @@
   <button onclick="setTool('rect')">☐</button>
   <button onclick="setTool('ellipse')">〇</button>
   <button onclick="setTool('diamond')">◇</button>
+  <button onclick="setTool('line')">|</button>
   <button onclick="setTool('arrow')">↘</button>
   <button onclick="setTool('text')">T</button>
 </div>
@@ -82,6 +83,7 @@ canvas.addEventListener('mousemove', e=>{
   if(currentTool==='rect') ctx.strokeRect(startX, startY, w, h);
   else if(currentTool==='ellipse'){ctx.beginPath();ctx.ellipse(startX+w/2,startY+h/2,Math.abs(w/2),Math.abs(h/2),0,0,Math.PI*2);ctx.stroke();}
   else if(currentTool==='diamond'){ctx.beginPath();ctx.moveTo(startX+w/2,startY);ctx.lineTo(startX+w,startY+h/2);ctx.lineTo(startX+w/2,startY+h);ctx.lineTo(startX,startY+h/2);ctx.closePath();ctx.stroke();}
+  else if(currentTool==='line'){ctx.beginPath();ctx.moveTo(startX,startY);ctx.lineTo(x,y);ctx.stroke();}
   else if(currentTool==='arrow'){
     const headlen = 10;
     const angle = Math.atan2(y-startY, x-startX);
@@ -128,6 +130,11 @@ function draw(){
       ctx.lineTo(s.startX+w/2,s.startY+h);
       ctx.lineTo(s.startX,s.startY+h/2);
       ctx.closePath();
+      ctx.stroke();
+    } else if(s.tool==='line'){
+      ctx.beginPath();
+      ctx.moveTo(s.startX,s.startY);
+      ctx.lineTo(s.endX,s.endY);
       ctx.stroke();
     } else if(s.tool==='arrow'){
       const headlen = 10;
