@@ -1064,8 +1064,8 @@ public class Main {
                 // Verify the user
                 String sessionId = getJavaSessionId(exchange);
                 String user = SessionManager.getUsername(sessionId);
-                // Reject the request if verification fails
-                if (user == null && !map.get("path").isEmpty()) {
+                // Reject the request if verification fails or the path is empty
+                if (user == null || map.get("path").isEmpty()) {
                     if (map.get("path").isEmpty()) System.out.println("Rejected: Empty path");
                     else System.out.println("Rejected: session not valid");
                     exchange.sendResponseHeaders(403, -1);
@@ -1080,6 +1080,13 @@ public class Main {
                     String msg = "Fail";
                     if (deleteFolder(Paths.get(path))){
                         msg = "Success";
+                        byte[] response = msg.getBytes();
+                        exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
+                        exchange.sendResponseHeaders(200, response.length);
+                        OutputStream os = exchange.getResponseBody();
+                        os.write(response);
+                        os.close();
+                    } else {
                         byte[] response = msg.getBytes();
                         exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
                         exchange.sendResponseHeaders(200, response.length);
