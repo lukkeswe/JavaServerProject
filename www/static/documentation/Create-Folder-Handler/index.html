@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Documentation</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        background: '#07111a',
+        primaryColor: '#1f2937',
+        primaryTextColor: '#e6eef8',
+        lineColor: '#60a5fa',
+        fontFamily: 'Inter, Roboto, Arial, sans-serif'
+      }
+    });
+  </script>
+
+  <style>
+    body {
+      margin: 20px;
+      background: #07111a;
+      color: #e6eef8;
+      font-family: Inter, Roboto, Arial, sans-serif;
+    }
+    h1 { color: #93c5fd; margin-bottom: 8px; }
+    p { color: #9fb6e3; margin-bottom: 14px; }
+    .wrap { background: #07111a; padding: 12px; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); }
+    .mermaid { min-height: 620px; }
+  </style>
+</head>
+<body>
+  <h1>Create Folder Handler Flowchart</h1>
+  <p>The Create Folder Handler creates a new folder/directory in the user's account.</p>
+
+  <div class="wrap">
+    <div class="mermaid">
+flowchart TD
+
+A(Start handle) --> B{Request method == POST?}
+B --> |No| C[Send 405 Method Not Allowed]
+B --> |Yes| D[Get Java session ID]
+C --> T(End)
+D --> E[Get username from SessionManager]
+E --> F{User == null?}
+F --> |Yes| G[Send 403 Forbidden<br>Close response body]
+F --> |No| H[Init userPath]
+G --> T
+H --> I{User == Admin?}
+I --> |Yes| J[Build path to Admin's path]
+I --> |No| K[Build path to user's path]
+J --> M{Make directory from targeted path}
+K --> M
+M -->|Fail| N[response = Fail]
+M -->|Success| O[response = Success]
+O --> P[Send heasers 200 and response bytes]
+N --> P
+P --> T
+    </div>
+  </div>
+</body>
+</html>

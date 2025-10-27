@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Documentation</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        background: '#07111a',
+        primaryColor: '#1f2937',
+        primaryTextColor: '#e6eef8',
+        lineColor: '#60a5fa',
+        fontFamily: 'Inter, Roboto, Arial, sans-serif'
+      }
+    });
+  </script>
+
+  <style>
+    body {
+      margin: 20px;
+      background: #07111a;
+      color: #e6eef8;
+      font-family: Inter, Roboto, Arial, sans-serif;
+    }
+    h1 { color: #93c5fd; margin-bottom: 8px; }
+    p { color: #9fb6e3; margin-bottom: 14px; }
+    .wrap { background: #07111a; padding: 12px; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); }
+    .mermaid { min-height: 620px; }
+  </style>
+</head>
+<body>
+  <h1>Upload File Handler Flowchart</h1>
+  <p>The Upload File Handler uploads files to user's accounts.</p>
+
+  <div class="wrap">
+    <div class="mermaid">
+flowchart TD
+
+A[Start handle] --> B{Request method == POST?}
+B --> |No| C[Send 405 Method Not Allowed]
+B --> |Yes| D[Get Java session ID]
+C --> T[End]
+D --> E[Get username from SessionManager]
+E --> F{User == null?}
+F --> |Yes| G[Send 403 Forbidden<br>Close response body]
+F --> |No| H{Try block}
+G --> T
+H --> I[Log Receiving upload...]
+I --> J[Get request headers]
+J --> K[Get Content-Type from headers]
+K --> L[Read request body as bytes]
+L --> M[Extract headers from body]
+M --> N[Extract body content type]
+N --> O[Log bodyContentType]
+O --> P[Call handleMultipartFormData...]
+P --> Q[Convert response to bytes]
+Q --> R[Send 200 OK <br>Write response to OutputStream]
+R --> S[Close OutputStream]
+S --> T
+
+H -->|Exception| U[Catch Exception]
+U --> V[Log stack trace]
+V --> W[Create response: Upload failed:  + e.getMessage]
+W --> X[Send 500 Internal Server Error]
+X --> Y[Write response to OutputStream]
+Y --> Z[Close OutputStream]
+Z --> T
+    </div>
+  </div>
+</body>
+</html>
