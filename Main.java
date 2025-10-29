@@ -98,6 +98,12 @@ public class Main {
                     response = requestedPhp;
                 // Else break the exchange
                 } else {
+                    response = Files.readAllBytes(Paths.get("www/static/notfound.html"));
+                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+                    exchange.sendResponseHeaders(404, response.length);
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(response);
+                    os.close();
                     return;
                 }
 
@@ -127,7 +133,12 @@ public class Main {
                             //System.out.println("resolvePath: " + resolvePath.toString());
                             if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
                                 System.out.println("Invalid path:" + resolvePath.toString());
-                                exchange.sendResponseHeaders(403, -1);
+                                response = Files.readAllBytes(Paths.get("www/static/notfound.html"));
+                                exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+                                exchange.sendResponseHeaders(404, response.length);
+                                OutputStream os = exchange.getResponseBody();
+                                os.write(response);
+                                os.close();
                                 return;
                             } else {
                                 System.out.println("Proccessing: " + resolvePath.toString());
@@ -143,7 +154,12 @@ public class Main {
                                     return;
                                 // Else break the exchange
                                 } else {
-                                    exchange.sendResponseHeaders(403, -1);
+                                    response = Files.readAllBytes(Paths.get("www/static/notfound.html"));
+                                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+                                    exchange.sendResponseHeaders(404, response.length);
+                                    OutputStream os = exchange.getResponseBody();
+                                    os.write(response);
+                                    os.close();
                                     return;
                                 }
                             }
