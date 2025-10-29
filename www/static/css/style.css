@@ -34,17 +34,24 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.welcome {
+  margin: 0 auto;
+  margin-top: 56px;
+  font-size: 42px;
+}
+
 #loginContainer {
     display: block;
     text-align: left;
     font-size: 36px;
-    background-color: ghostwhite;
-    border: solid black 1px;
+    background: var(--panel-2);
+    box-shadow: var(--shadow-subtle);
+    border: solid #fff 1px;
     border-radius: 3px;
     padding: 30px;
     width: max-content;
     margin: 0 auto;
-    margin-top: 100px;
+    margin-top: 56px;
 }
 
 #loginContainer input{
@@ -54,6 +61,15 @@ body {
 #loginBtn {
     margin: 0 auto;
     margin-top: 20px;
+    border: solid white 1px;
+}
+
+#contactBtn {
+  font-size: 16px;
+}
+
+#contactBtn:hover {
+  font-weight: bold;
 }
 
 #grayScreen {

@@ -11,14 +11,12 @@
 <body>
     <h1 class="welcome">ようこそ！</h1>
     <form id="loginContainer" method="post" action="home.php">
-        <label for="username">ユーザー名：</label><br>
+        <label for="username">メールアドレス：</label><br>
         <input type="text" name="email" id="email" class="textInput"><br>
         <label for="password">パスワード：</label><br>
         <input type="password" name="password" id="password" class="textInput"><br>
         <button type="submit" class="btn" id="loginBtn">ログイン</button><br>
+        <a id="contactBtn" href="contact.html">連絡先</a>
     </form>
-    <div id="container">
-        <a class="btn" href="contact.html">contact</a>
-    </div>
 </body>
 </html>
