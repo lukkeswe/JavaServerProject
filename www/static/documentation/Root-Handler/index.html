@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>RootHandler Flowchart (Dark) - Validated</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        background: '#07111a',
+        primaryColor: '#1f2937',
+        primaryTextColor: '#e6eef8',
+        lineColor: '#60a5fa',
+        fontFamily: 'Inter, Roboto, Arial, sans-serif'
+      }
+    });
+  </script>
+
+  <style>
+    body {
+      margin: 20px;
+      background: #07111a;
+      color: #e6eef8;
+      font-family: Inter, Roboto, Arial, sans-serif;
+    }
+    h1 { color: #93c5fd; margin-bottom: 8px; }
+    p { color: #9fb6e3; margin-bottom: 14px; }
+    .wrap { background: #07111a; padding: 12px; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); }
+    .mermaid { min-height: 620px; }
+  </style>
+</head>
+<body>
+  <h1>Root Handler Flowchart</h1>
+  <p>The Root Handler validates requests and return web related files.</p>
+
+  <div class="wrap">
+    <div class="mermaid">
+flowchart TD
+A(Start) --> B(Get Headers and Host)
+B --> C{Host is null}
+C -->|Yes| D(Set host to unknown)
+C -->|No| E(Get request path and split)
+D --> E
+E --> F(Init htmlFilePath targetFile userPath)
+F --> G{userPath is null}
+G -->|Yes| H(Set default userPath notfound)
+G -->|No| I(Continue)
+H --> I
+I --> J{Path ends with html}
+J -->|Yes| K(Set targetFile)
+J -->|No| L{Path ends with php}
+L -->|Yes| M(Run PHP)
+L -->|No| N(Skip PHP)
+M --> O{PHP result not null}
+O -->|No| P[Collect the 404 file<br>Set headers to 404<br>Return the response]
+O -->|Yes| Q(Set response)
+K --> R(Check Host type)
+Q --> R
+P --> Z(End)
+R --> S{Host is dev or ludwig}
+S -->|Yes| S1(Set htmlFilePath = userPath)
+S -->|No| S2(Check if path not root and not php)
+S1 --> T(Continue)
+S2 --> T
+T --> U(Handle static or irregular path)
+U --> V(Check file exists or fallback)
+V --> W{index.php exists}
+W -->|Yes| X(Run runPhp and send)
+W -->|No| Y(Send 403 or 404)
+X --> Z
+Y --> Z
+V --> AA(Check static extension CSS JS Image or fallback to index.html)
+AA --> AB(Serve or set content type then send)
+AB --> Z
+    </div>
+  </div>
+</body>
+</html>
