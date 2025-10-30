@@ -268,13 +268,13 @@ export default class DocumentManager {
             window.location.href = "databasemanager.php";
         });
         file.addEventListener("click", () => {
-            window.location.href = "filemanager.php";
+            window.location.href = "/home/";
         });
         blog.addEventListener("click", () => {
             window.location.href = "blog/";
         });
         logout.addEventListener("click", () => {
-            window.location.href = "logout.php";
+            window.location.href = "/logout/";
         });
         // Append elements
         burger.append(user);
@@ -436,7 +436,7 @@ export default class DocumentManager {
         logout.id           = "logout";
         // Add hyper link
         const a     = document.createElement("a");
-        a.href      = "home.php";
+        a.href      = "/user/";
         // Add text content
         burgerBtn.innerHTML     = "🈪";
         a.innerHTML             = "戻る";
@@ -447,7 +447,7 @@ export default class DocumentManager {
             burger.classList.toggle("open");;
         });
         logout.addEventListener("click", () => {
-            window.location.href = "logout.php";
+            window.location.href = "/logout/";
         });
         // Append elements
         home.append(a);
@@ -1136,7 +1136,7 @@ export default class DocumentManager {
         sessionStorage.removeItem("password");
         sessionStorage.removeItem("domain");
         sessionStorage.removeItem("phone");
-        window.location.href = "logout.php";
+        window.location.href = "/logout/";
     }
     toggleShowUploadBtn(){
         const btnContainer = document.getElementById("uploadBtnsContainer");

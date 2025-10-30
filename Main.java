@@ -26,7 +26,6 @@ public class Main {
         server.createContext("/uploadFolder", new UploadFolderHandler());
         server.createContext("/query", new QueryHandler());
         server.createContext("/deleteRows", new DeleteHandler());
-        server.createContext("/login", new LoginHandler());
         server.createContext("/invite", new CheckInvite());
         server.createContext("/newuser", new NewUser());
         server.createContext("/questionForm", new QuestionForm());
