@@ -112,6 +112,10 @@ body {
     border: solid black 1px;
 }
 
+#newFolderOptionsMini {
+  display: none;
+}
+
 #filesContainerMini ul {
   display: flex;
   flex-direction: row;
