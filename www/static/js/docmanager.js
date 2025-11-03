@@ -679,6 +679,8 @@ export default class DocumentManager {
                             const path = document.getElementById("path");
                             // Hide the editor
                             document.getElementById("editor").style.display = "none";
+                            // Display the creat buttons
+                            document.getElementById("createButtons").style.display = "block";
                             // Display the files in the current directory
                             if (path != null && path.textContent != "") this.getFiles(path.textContent);
                             else this.getFiles("");
@@ -959,6 +961,8 @@ export default class DocumentManager {
         editor.setValue(content, -1); // Append the content
         document.getElementById("editor").style.display = "block"; // Display the editor
         document.getElementById("optionsContainer").innerHTML = ""; // Empty the options container
+        // Hide create buttons
+        document.getElementById("createButtons").style.display = "none";
         
         // Create a save button
         const save = document.createElement("button");
@@ -1014,7 +1018,7 @@ export default class DocumentManager {
                 // Save the file to the server
                 await saveContentToFile(savePath, type, filename + "." + type, editor.getValue());
                 // Update the current path
-                this.updateCurrentPath(currentPath.textContent);
+                document.getElementById("path").textContent = currentPath.textContent;
                 // Remove the temporary upload button
                 uploadBtn.remove();
                 // Close the explorer
@@ -1179,6 +1183,8 @@ export default class DocumentManager {
         backBtn.innerHTML = "↑";
         // Add an eventlistener
         backBtn.addEventListener("click", () => {
+            // Display the create buttons
+            document.getElementById("createButtons").style.display = "block";
             // Get the path
             const path = document.getElementById("path");
             // Hide the editor
