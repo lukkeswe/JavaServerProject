@@ -11,7 +11,10 @@
 //}
 
 // Get list of directories
-$dirs = array_filter(glob('*'), 'is_dir');
+$items = array_filter(glob('*'), function ($path) {
+    return is_dir($path) || strtolower(pathinfo($path, PATHINFO_EXTENSION)) === 'pdf';
+});
+
 ?>
 
 <!DOCTYPE html>
@@ -97,8 +100,8 @@ $dirs = array_filter(glob('*'), 'is_dir');
 <?php endif; ?>
 
 <ul>
-<?php foreach ($dirs as $dir): ?>
-    <li><a href="<?= urlencode($dir) ?>/"><?= str_replace("-", " ", htmlspecialchars($dir)) ?></a></li>
+<?php foreach ($items as $item): ?>
+    <li><a href="<?= urlencode($item) ?>/"><?= str_replace("-", " ", htmlspecialchars($item)) ?></a></li>
 <?php endforeach; ?>
 </ul>
 

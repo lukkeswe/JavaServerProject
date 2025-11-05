@@ -166,12 +166,13 @@ public class Main {
                         }
                     }
                     // Check if it is a CSS or JavaScript file
-                    if (resolvePath.toString().endsWith(".css") || resolvePath.toString().endsWith(".js")){
+                    if (resolvePath.toString().endsWith(".css") || resolvePath.toString().endsWith(".js") || resolvePath.toString().endsWith(".pdf")){
                         // Set the full target path to the resolvePath
                         fullPath = resolvePath;
                         // Set the content type
                         if (resolvePath.toString().endsWith(".css")) contentType = "text/css";
                         else if (resolvePath.toString().endsWith(".js")) contentType = "application/javascript";
+                        else if (resolvePath.toString().endsWith(".pdf")) contentType = "application/pdf";
                     } else {
                         // Check if the file is an image file
                         boolean isImage = false;
@@ -292,8 +293,7 @@ public class Main {
             String pathLower = requestPath.toLowerCase();
             for (String extention : IMAGE_EXTENSIONS){
                 if (pathLower.endsWith(extention.toLowerCase())) {
-                    filePath = user + "/static/img/" + fileName;
-                    contentType = Files.probeContentType(Path.of(filePath));
+                    contentType = Files.probeContentType(Path.of(requestPath));
                     if (contentType == null){
                         contentType = "application/octet-stream";
                     }
