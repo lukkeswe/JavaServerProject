@@ -101,7 +101,7 @@ $items = array_filter(glob('*'), function ($path) {
 
 <ul>
 <?php foreach ($items as $item): ?>
-    <li><a href="<?= urlencode($item) ?>/"><?= str_replace("-", " ", htmlspecialchars($item)) ?></a></li>
+    <li><a href="<?= urlencode($item) ?>"><?= str_replace("-", " ", htmlspecialchars($item)) ?></a></li>
 <?php endforeach; ?>
 </ul>
 
