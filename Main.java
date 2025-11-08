@@ -37,6 +37,7 @@ public class Main {
         server.createContext("/saveFile", new SaveFileHandler());
         server.createContext("/createFolder", new CreateFolderHandler());
         server.createContext("/deleteFolder", new DeleteFolderHandler());
+        server.createContext("/moveIt", new MoveItHandler());
         server.createContext("/create-session", new SessionHandler());
         server.createContext("/check-session", new CheckJavaSession());
         server.setExecutor(Executors.newFixedThreadPool(10));
@@ -1113,12 +1114,73 @@ public class Main {
 
             } else {
                 exchange.sendResponseHeaders(403, -1);
-                exchange.getRequestBody().close();
+                exchange.getResponseBody().close();
+                return;
+            }
+        }
+    }
+    static class MoveItHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if ("POST".equals(exchange.getRequestMethod())){
+                System.out.println("moveit");
+                // Get the request body
+                String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+                // Parse the requestbody to map
+                Map<String, String> map = parseJsonToMap(body);
+                // Verify the user
+                String sessionId = getJavaSessionId(exchange);
+                String user = SessionManager.getUsername(sessionId);
+                // Reject the request if verification fails or the path is empty
+                if (user == null) {
+                    if (map.get("path").isEmpty()) System.out.println("Rejected: Empty path");
+                    else System.out.println("Rejected: session not valid");
+                    exchange.sendResponseHeaders(403, -1);
+                    exchange.getResponseBody().close();
+                    return;
+                } else {
+                    // Move the file or folder
+                    String msg = "Fail";
+                    int responseCode = 403;
+                    String userPath = "/home/lukas/users/" + user + "/static/";
+                    if (user.equals("norlund_johan_lukas_com")) {
+                        userPath = "/home/lukas/JavaServerProject/www/static/";
+                    }
+                    if (moveIt(
+                        Paths.get(userPath + map.get("source")), 
+                        Paths.get(userPath + map.get("target"))
+                        )){
+                            msg = "Success";
+                            responseCode = 200;
+                        }
+                    byte[] response = msg.getBytes();
+                    exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
+                    exchange.sendResponseHeaders(responseCode, response.length);
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(response);
+                    os.close();
+                }
+            } else {
+                exchange.sendResponseHeaders(403, -1);
+                exchange.getResponseBody().close();
                 return;
             }
         }
     }
 
+    public static boolean moveIt(Path source, Path target){
+        // Check if the path exists
+        if (!Files.exists(source)) return false;
+        // Move the file or path
+        try {
+            Files.createDirectories(target.getParent());
+            Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
     public static boolean deleteFolder(Path path) throws IOException {
         // Check if the path exsists
         if (!Files.exists(path)) return false;

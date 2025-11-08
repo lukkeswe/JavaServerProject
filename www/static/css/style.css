@@ -307,6 +307,10 @@ header h1 {
     padding: 8px;
 }
 
+#newName {
+  width: 150px;
+}
+
 /* --- Explorer (RIGHT) --- */
 #explorer {
   flex: 1;                      /* occupies the rest of the horizontal space */

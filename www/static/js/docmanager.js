@@ -1,5 +1,6 @@
 import { deleteFolder } from './upmanager.js';
 import { saveContentToFile } from './upmanager.js';
+import { moveIt } from './upmanager.js';
 
 export default class DocumentManager {
     constructor() {
@@ -643,7 +644,7 @@ export default class DocumentManager {
                         fileObject.remove();
                     });
 
-                    // Create am edit button
+                    // Create an edit button
                     const edit      = document.createElement("button");
                     edit.className  = "btn";
                     edit.innerHTML  = "📝";
@@ -689,6 +690,40 @@ export default class DocumentManager {
                             optionsContainer.innerHTML = "";
                         });
                         optionsContainer.append(backBtn);
+                    });
+                    // Create a name change button
+                    const nameChange        = document.createElement("button");
+                    nameChange.className    = "btn";
+                    nameChange.innerHTML    = "🔤";
+                    // Add eventlistener
+                    nameChange.addEventListener("click", ()=>{
+                        // Hide the optionscontainer
+                        optionsContainer.style.display = "none";
+                        // Create a input for the new name
+                        const nameInput     = document.createElement("input");
+                        nameInput.type      = "text";
+                        nameInput.id        = "newName";
+                        nameInput.className = "textInput";
+                        // Give the input a submit button
+                        const confirm       = document.createElement("button");
+                        confirm.innerHTML   = "✅";
+                        confirm.className   = "btn";
+                        confirm.addEventListener("click", async () => {
+                            let oldName = name.textContent;
+                            let newName = nameInput.value + "." + type;
+                            if (nameInput.value && nameInput.value.replace(" ", "") != "") {
+                                // Send a request to change the name of the file
+                                await moveIt(currentPath.textContent + oldName, currentPath.textContent + newName);
+                                optionsContainer.style.display = "block";
+                                document.getElementById("displayContainer").innerHTML = "";
+                                this.getFiles(currentPath.textContent);
+                            } else {
+                                alert("Name fail");
+                            }
+                        });
+                        // Append the input and submit button
+                        document.getElementById("displayContainer").append(nameInput);
+                        document.getElementById("displayContainer").append(confirm);
                     });
 
                     if (type == "folder") {
@@ -758,6 +793,8 @@ export default class DocumentManager {
                                 optionsContainer.innerHTML = "";
                                 // Add the edit button
                                 optionsContainer.append(edit);
+                                // Add name change button
+                                optionsContainer.append(nameChange);
                                 // Add the hyper-link
                                 optionsContainer.append(a);
                                 // Add the delete button to the options container
@@ -797,8 +834,13 @@ export default class DocumentManager {
 
                                 this.showInfo(fileName);
                                 optionsContainer.innerHTML = "";
+                                // Add edit button
                                 optionsContainer.append(edit);
+                                // Add name change button
+                                optionsContainer.append(nameChange);
+                                // Add delete button
                                 optionsContainer.append(erase);
+                                // Add back button
                                 optionsContainer.append(backBtn);
                             });
                         }

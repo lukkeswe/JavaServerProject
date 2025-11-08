@@ -153,6 +153,23 @@ export async function deleteFolder(path){
     else alert("Failed to delete folder...");
 }
 
+export async function moveIt(source, target){
+    let requestObject = {
+        "source" : source,
+        "target" : target
+    };
+    console.log("Moving it...");
+
+    const response = await fetch("/moveIt", {
+        method  : "POST",
+        headers : {"Content-Type" : "application/json"},
+        body    : JSON.stringify(requestObject)
+    });
+
+    let msg = await response.text();
+    console.log(msg);
+}
+
 export function isValidFileName(fileName){
     if (!fileName || fileName.trim() === "") return false;
     const validPattern = /^[a-zA-Z0-9._-]+$/;
