@@ -2,3 +2,7 @@
 *.mp4
 *.mov
 *.avi
+
+# Ignore your AfterEffects folder
+www/static/school/AfterEffects/
+www/static/school/RedBull-400-2025/
