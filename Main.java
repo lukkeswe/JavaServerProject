@@ -175,18 +175,25 @@ public class Main {
                         else if (resolvePath.toString().endsWith(".js")) contentType = "application/javascript";
                         else if (resolvePath.toString().endsWith(".pdf")) contentType = "application/pdf";
                     } else {
-                        // Check if the file is an image file
+                        // Check if the file is an image or video file
                         boolean isImage = false;
-                        // Cycle through the supported file formats
-                        for (String extension : IMAGE_EXTENSIONS){
-                            // If the extention match a suppported format set the content type to "octet-stream"
-                            if (resolvePath.toString().endsWith(extension)) {
-                                isImage = true;
-                                contentType = "application/octet-stream";
+                        boolean isVideo = false;
+                        if (resolvePath.toString().endsWith(".mp4")) {
+                            isVideo = true;
+                            contentType = "video/mp4";
+                        } else {
+                            // Cycle through the supported file formats
+                            for (String extension : IMAGE_EXTENSIONS){
+                                // If the extention match a suppported format set the content type to "octet-stream"
+                                if (resolvePath.toString().endsWith(extension)) {
+                                    isImage = true;
+                                    contentType = "application/octet-stream";
+                                    break;
+                                }
                             }
                         }
-                        // Set the full target path to the resolve path if the file is an image
-                        if (isImage) fullPath = resolvePath;
+                        // Set the full target path to the resolve path if the file is an image or video
+                        if (isImage || isVideo) fullPath = resolvePath;
                         // If the requested file isn't a supported static file, append "index.html" (fallback)
                         else fullPath = Paths.get(fullPath.toString(), targetFile);
                     }
@@ -199,9 +206,45 @@ public class Main {
                     exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
                     exchange.sendResponseHeaders(404, response.length);
                 } else {
-                    response = Files.readAllBytes(fullPath);
-                    exchange.getResponseHeaders().set("Content-Type", contentType + "; charset=UTF-8");
-                    exchange.sendResponseHeaders(200, response.length);
+                    if (fullPath.toString().endsWith(".mp4")) {
+                        long fileLength = Files.size(fullPath);
+                        String range = exchange.getRequestHeaders().getFirst("Range");
+                        if (range == null) {
+                            // No range request (send whole file)
+                            exchange.getResponseHeaders().set("Content-Type", contentType);
+                            exchange.getResponseHeaders().set("Content-Length", String.valueOf(fileLength));
+                            exchange.sendResponseHeaders(200, fileLength);
+                            Files.copy(fullPath, exchange.getResponseBody());
+                        } else { 
+                            // Parse range header: e.g. "bytes=1000-"
+                            long start  = Long.parseLong(range.replace("bytes=", "").replace("-", ""));
+                            long end    = fileLength - 1;
+                            long length = end - start + 1;
+
+                            exchange.getResponseHeaders().set("Content-Type", contentType);
+                            exchange.getResponseHeaders().set("Accept-Ranges", "bytes");
+                            exchange.getResponseHeaders().set("Content-Range", "bytes " + start + "-" + end + "/" + fileLength);
+                            exchange.sendResponseHeaders(206, length);
+
+                            try (OutputStream os = exchange.getResponseBody();
+                                InputStream is = Files.newInputStream(fullPath)){
+                                is.skip(start);
+                                byte[] buffer = new byte[8192];
+                                long remaining = length;
+                                while (remaining > 0) {
+                                    int read = is.read(buffer, 0, (int) Math.min(buffer.length, remaining));
+                                    if (read == -1) break;
+                                    os.write(buffer, 0, read);
+                                    remaining -= read;
+                                }
+                            }
+                            return;
+                        }
+                    } else {
+                        response = Files.readAllBytes(fullPath);
+                        exchange.getResponseHeaders().set("Content-Type", contentType + "; charset=UTF-8");
+                        exchange.sendResponseHeaders(200, response.length);
+                    }
                 }
                 OutputStream os = exchange.getResponseBody();
                 os.write(response);
