@@ -1,0 +1,4 @@
+# Ignore large videos
+*.mp4
+*.mov
+*.avi
