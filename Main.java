@@ -45,6 +45,8 @@ public class Main {
         System.out.println("Server started on port " + port);
     }
 
+    private static final Set<String> TEXT_EXTENSIONS = Set.of(".html", ".php", ".css", ".js");
+
     private static final Set<String> IMAGE_EXTENSIONS = Set.of(
     ".gif", ".jpg", ".jpeg", ".JPG", ".png", ".webp", ".svg", ".bmp", ".ico", ".avif", ".heic", ".tiff"
     );
@@ -1991,9 +1993,8 @@ public class Main {
         
         int pos = 0;
         byte[] data = null;
-        boolean allowed = true;
+        boolean allowed = false;
         String fileName = "placeholder.jpg";
-        String fileType = "img";
         String path = "";
 
         while (true) {
@@ -2043,31 +2044,18 @@ public class Main {
 
                 msg = "アップロードが成功しました。";
                 
-                if (fileName.endsWith(".html")) {
-                    fileType = "html";
-                } 
-                else if(fileName.endsWith(".php")){
-                    fileType = "php";
-                } 
-                else if (fileName.endsWith(".css")) {
-                    fileType = "css";
-                } else if(fileName.endsWith(".js")){
-                    fileType = "js";
-                } else {
-                    boolean isImgFile = false;
-                    String fileNameLower = fileName.toLowerCase();
-                    for (String extention : IMAGE_EXTENSIONS){
-                        if (fileNameLower.endsWith(extention.toLowerCase())) {
-                            fileType = "img";
-                            isImgFile = true;
+                String fileNameLower = fileName.toLowerCase();
+                List<Set<String>> extensions = List.of(TEXT_EXTENSIONS, IMAGE_EXTENSIONS, VIDEO_EXTENSIONS);
+                for (Set<String> extList : extensions){
+                    for (String extention : extList) {
+                        if (fileNameLower.endsWith(extention.toLowerCase())){
+                            allowed = true;
                             break;
-                        } 
+                        }
                     }
-                    if (!isImgFile) {
-                        allowed = false;
-                        msg = "ファイル型エラー";
-                    }
+                    if (allowed) break;
                 }
+                
                 continue;
             }
 
