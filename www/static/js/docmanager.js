@@ -841,25 +841,26 @@ export default class DocumentManager {
                                 optionsContainer.append(backBtn);
                             });
                         } else if (type == "video") {
-                            // Create hyper-link
-                            const a = document.createElement("a");
-                            // Add a url
-                            if (currentPath != null && currentPath.textContent.endsWith("/")) {
-                                a.href = "https://" + sessionStorage["domain"] + "/" + currentPath.textContent + fileName;
+                            // Create a video element
+                            const video = document.createElement("video");
+                            // Add settings to the video element
+                            video.controls = "true";
+                            video.width = "240";
+                            // Add a source to the video element
+                            const source = document.createElement("source");
+                            if (currentPath != null && currentPath.textContent != "") {
+                                source.src = "https://" + sessionStorage["domain"] + "/" + currentPath.textContent + fileName; 
                             } else {
-                                a.href = "https://" + sessionStorage["domain"] + "/" + fileName;
+                                source.src = "https://" + sessionStorage["domain"] + "/" + fileName; 
                             }
-                            // Add setting
-                            a.target = "_blank";
-                            // Add an icon to the hyper-link
-                            a.innerHTML = "🌍";
-                            // Add a classname
-                            a.className = "btn";
-                            // Append the span
+                            source.type = "video/mp4";
+                            video.append(source);
+                            video.append("Your browser does not support video playback.");
+                            // Add an eventlistener
                             name.addEventListener("click", () => {
                                 this.emptyDisplayContainer();
                                 this.showInfo(fileName);
-                                optionsContainer.append(a);
+                                this.appendElementToDisplayContainer(video);
                                 optionsContainer.append(erase);
                                 optionsContainer.append(backBtn);
                             });
