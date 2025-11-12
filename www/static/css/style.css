@@ -322,6 +322,7 @@ header h1 {
 
 /* Path bar above file grid */
 #pathContainer {
+  display: flex;
   background: rgba(255,255,255,0.02);
   border: 1px solid rgba(255,255,255,0.03);
   padding: 10px 12px;
@@ -425,6 +426,10 @@ header h1 {
 }
 #imgList li span {
   background: linear-gradient(180deg,#7ec8f6,#54aeda);
+  color: #111;
+}
+#videoList li span {
+  background: linear-gradient(180deg,#7ef688,#54da54);
   color: #111;
 }
 

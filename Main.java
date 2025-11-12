@@ -49,6 +49,8 @@ public class Main {
     ".gif", ".jpg", ".jpeg", ".JPG", ".png", ".webp", ".svg", ".bmp", ".ico", ".avif", ".heic", ".tiff"
     );
 
+    private static final Set<String> VIDEO_EXTENSIONS = Set.of(".mp4", ".mov", ".avi");
+
     private static final Set<String> STATIC_EXTENSIONS = Set.of(
         "/static", "/static/css", "/css", "/static/img", "/img", "/static/js", "/js"
     );
@@ -789,7 +791,7 @@ public class Main {
                     StringBuilder json = new StringBuilder();
                     String response = "";
 
-                    String[] types = {"folder", "html", "php", "css", "img", "js"};
+                    String[] types = {"folder", "html", "php", "css", "img", "js", "video"};
                     boolean success = true;
                     json.append("[{");
                         String[] files;
@@ -809,6 +811,16 @@ public class Main {
                                                 if(!first) json.append(", ");
                                                 json.append("\"").append(file).append("\"");
                                                 first = false;
+                                                break;
+                                            }
+                                        }
+                                    } else if (type.equals("video")) {
+                                        for (String extension : VIDEO_EXTENSIONS) {
+                                            if (file.toLowerCase().endsWith(extension)) {
+                                                if(!first) json.append(", ");
+                                                json.append("\"").append(file).append("\"");
+                                                first = false;
+                                                break;
                                             }
                                         }
                                     }

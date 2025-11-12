@@ -608,7 +608,7 @@ export default class DocumentManager {
             filesContainer.style.padding = "18px";
             filesContainer.innerHTML = "";
             // List of supported file types
-            const fileTypes = ["folder", "html", "php", "css", "img", "js"];
+            const fileTypes = ["folder", "html", "php", "css", "img", "js", "video"];
             for (let type of fileTypes){
                 const ul    = document.createElement("ul");
                 ul.id       = type + "List";
@@ -637,7 +637,8 @@ export default class DocumentManager {
                             console.log("No path: " + path.textContent);
                             await this.deleteFile(fileName, type);
                         }
-                        
+                        optionsContainer.innerHTML = "";
+                        optionsContainer.append(backBtn);
                         // Empty the display container
                         this.emptyDisplayContainer();
                         // Remove the element
@@ -737,14 +738,12 @@ export default class DocumentManager {
                                 this.getFiles(fileName);
                             }
                             this.appendElementToDisplayContainer(erase);
-                            const path = document.createElement("p");
-                            path.id = "path";
+                            const path = document.getElementById("path");
                             if (currentPath != null && currentPath.textContent.endsWith("/")) {
                                 path.innerHTML = currentPath.textContent + fileName;
                             } else {
                                 path.innerHTML = fileName;
                             }
-                            this.updateCurrentPath(path);
                         });
                         span.addEventListener("click", async ()=> {
                             // Create a delete folder option
@@ -819,12 +818,10 @@ export default class DocumentManager {
                                 this.emptyDisplayContainer();
                                 this.showInfo(fileName);
                                 this.showImage(fileName, "https://" + sessionStorage.getItem("domain") + "/");
-                                // Update the current path
-                                this.updateCurrentPath(currentPath);
                                 // Update the options container
                                 optionsContainer.innerHTML = "";
-                                optionsContainer.append(backBtn);
                                 optionsContainer.append(erase);
+                                optionsContainer.append(backBtn);
                             });
                         } else if(type == "css" || type == "js"){
                             // If the file is a css or JavaScript file
@@ -841,6 +838,28 @@ export default class DocumentManager {
                                 // Add delete button
                                 optionsContainer.append(erase);
                                 // Add back button
+                                optionsContainer.append(backBtn);
+                            });
+                        } else if (type == "video") {
+                            // Create hyper-link
+                            const a = document.createElement("a");
+                            // Add a url
+                            if (currentPath != null && currentPath.textContent.endsWith("/")) {
+                                a.href = "https://" + sessionStorage["domain"] + "/" + currentPath.textContent + fileName;
+                            } else {
+                                a.href = "https://" + sessionStorage["domain"] + "/" + fileName;
+                            }
+                            // Add setting
+                            a.target = "_blank";
+                            // Add an icon to the hyper-link
+                            a.innerHTML = "🌍";
+                            // Add a classname
+                            a.className = "btn";
+                            // Append the span
+                            name.addEventListener("click", () => {
+                                this.emptyDisplayContainer();
+                                this.showInfo(fileName);
+                                optionsContainer.append(a);
                                 optionsContainer.append(backBtn);
                             });
                         }
@@ -905,7 +924,7 @@ export default class DocumentManager {
             const filesContainer    = document.getElementById("filesContainerMini");
             filesContainer.innerHTML = "";
             // List of supported file types
-            const fileTypes = ["folder", "html", "php", "css", "img", "js"];
+            const fileTypes = ["folder", "html", "php", "css", "img", "js", "video"];
             for (let type of fileTypes){
                 const ul    = document.createElement("ul");
                 ul.id       = type + "List";
@@ -928,58 +947,17 @@ export default class DocumentManager {
                             } else {
                                 this.getFilesMini(fileName);
                             }
-                            const path = document.createElement("p");
-                            path.id = "pathMini";
+                            const path = document.getElementById("pathMini");
                             if (currentPath != null && currentPath.textContent.endsWith("/")) {
                                 path.innerHTML = currentPath.textContent + fileName;
                             } else {
                                 path.innerHTML = fileName;
                             }
-                            this.updateCurrentPathMini(path);
                         });
                         fileObject.append(span);
-                    }
-
-                    // If the file is a HTML or PHP file, add a hyper-link to that file
-                    else if (type == "html" || type == "php"){
-                            // Create hyper-link
-                            const a = document.createElement("a");
-                            // Append the span
-                            a.append(name);
-                            // Append the hyper-link
-                            fileObject.append(a);
-                            // Add eventlistener
-                            a.addEventListener("click", () => {
-                                // Empty optioins container
-                                optionsContainer.innerHTML = "";
-                                // Add back the back button
-                                optionsContainer.append(backBtn);
-                                // Add the edit button
-                                this.showInfo(fileName);
-                            });
-                        //}
                     } else {
                         // Append the name object with the span element
                         fileObject.append(name);
-                        // If the file type is of "img" type
-                        if (type == "img") {
-                            name.addEventListener("click", () => {
-                                this.showInfo(fileName);
-                                this.showImage(fileName, "https://" + sessionStorage.getItem("domain") + "/");
-                                // Update the current path
-                                this.updateCurrentPathMini(currentPath);
-                                // Update the options container
-                                optionsContainer.innerHTML = "";
-                                optionsContainer.append(backBtn);
-                            });
-                        } else if(type == "css" || type == "js"){
-                            // If the file is a css or JavaScript file
-                            // Add event listener
-                            name.addEventListener("click", () => {
-
-                                this.showInfo(fileName);
-                            });
-                        }
                     }
                     ul.append(fileObject);
                     list.push(fileName);
