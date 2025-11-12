@@ -860,6 +860,7 @@ export default class DocumentManager {
                                 this.emptyDisplayContainer();
                                 this.showInfo(fileName);
                                 optionsContainer.append(a);
+                                optionsContainer.append(erase);
                                 optionsContainer.append(backBtn);
                             });
                         }
