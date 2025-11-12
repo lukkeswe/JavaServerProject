@@ -1,5 +1,6 @@
 export async function uploadFile(path = "") {
     const files = document.getElementById('fileInput').files;
+    const progress = document.getElementById("uploadProgress");
     const formData = new FormData();
     let htmlFiles = sessionStorage.getItem("htmlList");
     let phpFiles = sessionStorage.getItem("phpList");
@@ -28,20 +29,42 @@ export async function uploadFile(path = "") {
     if (isValidFile) {
         formData.append("path", path);
         console.log("Uploading file...");
-        
-        await fetch('/upload', {
-            method  : 'POST',
-            body    : formData
-        }).then(res => res.text())
-        .then(msg => alert(msg));
 
-        return fileName;
+        progress.style.display = "block";
+        progress.value = 0;
+
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/upload");
+
+            xhr.upload.addEventListener("progress", (e) => {
+                if (e.lengthComputable) {
+                    const percent = (e.loaded / e.total) * 100;
+                    progress.value = percent;
+                }
+            });
+            
+            xhr.onload = () => {
+                progress.style.display = "none";
+                alert(xhr.responseText);
+                resolve(fileName);
+            };
+
+            xhr.onerror = () => {
+                progress.style.display = "none";
+                alert("アップロード中にエラーが発生しました。");
+                reject(new Error("Upload failed"));
+            };
+
+            xhr.send(formData);
+        });
     }
 }
 
 export async function uploadFolder(path = ""){
     const input = document.getElementById("folderInput");
     const files = input.files;
+    const progress = document.getElementById("uploadProgress");
 
     if (files.lenght === 0){
         alert("フォルダが選択していません！")
@@ -76,11 +99,32 @@ export async function uploadFolder(path = ""){
         if (!replace) isValidFile = false;
     }
     if (isValidFile){
-        const response = await fetch("/uploadFolder", {
-            method: "POST",
-            body: formData
+        progress.style.display = "block";
+        progress.value = 0;        
+        return new Promise ((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/uploadFolder");
+
+            xhr.upload.addEventListener("progress", (e) => {
+                if (e.lengthComputable) {
+                    progress.value = (e.loaded / e.total) * 100;
+                }
+            });
+
+            xhr.onload = () => {
+                progress.style.display = "none";
+                alert(xhr.responseText);
+                resolve();
+            };
+
+            xhr.onerror = () => {
+                progress.style.display = "none";
+                alert("アップロード中にエラーが発生しました。");
+                reject(new Error("Upload failed"));
+            };
+
+            xhr.send(formData);
         });
-        alert(await response.text());
     }
     
 }

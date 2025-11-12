@@ -173,6 +173,7 @@ if (isset($_COOKIE["javasession"])){
                     <button id="createNewFolder" class="btn">✅</button>
                 </div>
                 <div id="optionsContainer"></div>
+                <progress id="uploadProgress" value="0" max="100" style="width: 100%; display: none;"></progress>
                 <div id="displayContainer"></div>
             </div>
             <div id="explorer">
@@ -229,6 +230,8 @@ if (isset($_COOKIE["javasession"])){
                 console.log("Sending: ", currentPath.textContent);
             }
             else dm.getFiles();
+            dm.uploadBack();
+            dm.toggleShowUploadBtn();
             dm.emptyDisplayContainer();
             dm.showInfo(file);
             if (
