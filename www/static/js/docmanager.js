@@ -629,14 +629,20 @@ export default class DocumentManager {
                     // Add an event listener
                     erase.addEventListener("click", async () => {
                         const path = document.getElementById("path");
-                        // Call the delete function
-                        if (path != null && path.textContent != "") {
-                            console.log("Sending path: " + path.textContent);
-                            await this.deleteFile(fileName, type, path.textContent);
+                        // Confirm deletion
+                        if (confirm(`Are you sure you want to delete "${fileName}" permanently? `)){
+                            // Call the delete function
+                            if (path != null && path.textContent != "") {
+                                console.log("Sending path: " + path.textContent);
+                                await this.deleteFile(fileName, type, path.textContent);
+                            } else {
+                                console.log("No path: " + path.textContent);
+                                await this.deleteFile(fileName, type);
+                            }
                         } else {
-                            console.log("No path: " + path.textContent);
-                            await this.deleteFile(fileName, type);
+                            console.log("Aborting...")
                         }
+                        
                         optionsContainer.innerHTML = "";
                         optionsContainer.append(backBtn);
                         // Empty the display container
@@ -710,8 +716,13 @@ export default class DocumentManager {
                         confirm.innerHTML   = "✅";
                         confirm.className   = "btn";
                         confirm.addEventListener("click", async () => {
-                            let oldName = name.textContent;
+                            let oldName = fileName;
                             let newName = nameInput.value + "." + type;
+                            if (type == "folder") newName = nameInput.value + "/";
+                            else if (type == "img" || type == "video") {
+                                const extension = fileName.split(".").pop();
+                                newName = nameInput.value + "." + extension;
+                            }
                             if (nameInput.value && nameInput.value.replace(" ", "") != "") {
                                 // Send a request to change the name of the file
                                 await moveIt(currentPath.textContent + oldName, currentPath.textContent + newName);
@@ -737,7 +748,6 @@ export default class DocumentManager {
                             } else {
                                 this.getFiles(fileName);
                             }
-                            this.appendElementToDisplayContainer(erase);
                             const path = document.getElementById("path");
                             if (currentPath != null && currentPath.textContent.endsWith("/")) {
                                 path.innerHTML = currentPath.textContent + fileName;
@@ -752,8 +762,8 @@ export default class DocumentManager {
                             deleteFolderBtn.className = "btn";
                             deleteFolderBtn.addEventListener("click", async ()=> {
                                 // Warn the user and make them confirm the action
-                                if (confirm(`Are you sure you want to delete "${name.innerHTML}", and all it's contents permanently? `)){
-                                    await deleteFolder(currentPath.textContent + name.textContent);
+                                if (confirm(`Are you sure you want to delete "${fileName}", and all it's contents permanently? `)){
+                                    await deleteFolder(currentPath.textContent + fileName);
                                     console.log("Done!")
                                     this.getFiles(currentPath.textContent);
                                 } else {
@@ -761,6 +771,8 @@ export default class DocumentManager {
                                 }
                             });
                             optionsContainer.innerHTML = "";
+                            this.emptyDisplayContainer();
+                            optionsContainer.append(nameChange);
                             optionsContainer.append(deleteFolderBtn);
                             optionsContainer.append(backBtn);
                         });
@@ -820,6 +832,8 @@ export default class DocumentManager {
                                 this.showImage(fileName, "https://" + sessionStorage.getItem("domain") + "/");
                                 // Update the options container
                                 optionsContainer.innerHTML = "";
+                                // Add name change button
+                                optionsContainer.append(nameChange);
                                 optionsContainer.append(erase);
                                 optionsContainer.append(backBtn);
                             });
@@ -853,14 +867,19 @@ export default class DocumentManager {
                             } else {
                                 source.src = "https://" + sessionStorage["domain"] + "/" + fileName; 
                             }
-                            source.type = "video/mp4";
+                            // Get the extension
+                            const extension = fileName.split(".").pop();
+                            source.type = "video/" + extension;
                             video.append(source);
                             video.append("Your browser does not support video playback.");
                             // Add an eventlistener
                             name.addEventListener("click", () => {
                                 this.emptyDisplayContainer();
                                 this.showInfo(fileName);
+                                // Append the video element to the display container
                                 this.appendElementToDisplayContainer(video);
+                                // Add name change button
+                                optionsContainer.append(nameChange);
                                 optionsContainer.append(erase);
                                 optionsContainer.append(backBtn);
                             });
