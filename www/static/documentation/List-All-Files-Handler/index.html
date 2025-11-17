@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Documentation</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="/css/mermaid.css">
+  <script type="module" src="/js/mermaid.js"></script>
+
+</head>
+<body>
+  <div class="description">
+    <h1>ListAllFiles Handler Documentation</h1>
+    <h2>Overview</h2>
+    <p>
+      The `ListAllFiles` class is a specialized HTTP handler that provides authenticated
+       users with a structured inventory of their website files. It serves as a critical 
+       component of the file management system, enabling users to browse and organize their
+        content through the web-based administrative interface.
+    </p>
+    <h3>Purpose</h3>
+    <p>
+      This handler is designed for a multi-tenant hosting service where each registered 
+      user manages their own domain and associated files. It allows authenticated users to
+       retrieve a categorized listing of all files within their account's directory structure,
+       facilitating file management operations through the web interface.
+    </p>
+    <h2>Core Functionality</h2>
+    <h3>1. Request Validation</h3>
+    <ul>
+      <li>Only accepts POST requests (returns HTTP 405 for other methods)</li>
+      <li>Expects JSON payload containing optional path information</li>
+      <li>Validates all requests against active user sessions</li>
+    </ul>
+    <br>
+    <h3>2. Authentication & Authorization</h3>
+    <ul>
+      <li>Extracts session ID from the request via `getJavaSessionId()`</li>
+      <li>Validates the session through `SessionManager.getUsername()`</li>
+      <li>Returns HTTP 403 (Forbidden) if the session is invalid or expired</li>
+      <li>Ensures users can only access their own file directories</li>
+    </ul>
+    <br>
+    <h3>3. User Path Resolution</h3>
+    <p>The handler determines the appropriate file path based on the authenticated user:</p>
+    <ul>
+      <li>Standard users: `/home/lukas/users/{username}/static/`</li>
+      <li>Special case (`norlund_johan_lukas_com`): `/home/lukas/JavaServerProject/www/static/`</li>
+      <li>Supports subdirectory navigation via the `path` parameter in the request JSON</li>
+    </ul>
+    <br>
+    <h3>4. File Categorization</h3>
+    <p>Files are automatically categorized into seven distinct types:</p>
+    <ul>
+      <li>folder: Directories (identified by trailing `/`)</li>
+      <li>html: HTML files (`.html`)</li>
+      <li>php: PHP files (`.php`)</li>
+      <li>css: Stylesheet files (`.css`)</li>
+      <li>js: JavaScript files (`.js`)</li>
+      <li>img: Image files (matches extensions in `IMAGE_EXTENSIONS` array)</li>
+      <li>video: Video files (matches extensions in `VIDEO_EXTENSIONS` array)</li>
+    </ul>
+    <br>
+    <h3>5. JSON Response Structure</h3>
+    <p>Returns a structured JSON response with files organized by category:</p>
+    <p>
+      [{<br>
+        "folder": ["directory1/", "directory2/"],<br>
+        "html": ["index.html", "about.html"],<br>
+        "php": ["contact.php"],<br>
+        "css": ["style.css"],<br>
+        "img": ["logo.png", "banner.jpg"],<br>
+        "js": ["script.js"],<br>
+        "video": ["intro.mp4"],<br>
+        "status": "ok"<br>
+      }]
+    </p>
+    <br>
+    <h3>6. Error Handling</h3>
+    <ul>
+      <li>Returns `{"status": "fail"}` if the directory listing operation fails</li>
+      <li>Catches and logs `RuntimeException` during file system operations</li>
+      <li>Maintains service stability even when encountering permission or I/O errors</li>
+    </ul>
+    <br>
+    <h3>Request Format</h3>
+    <p>
+      Method: POST<br>  
+      Content-Type: application/json<br>
+      Body:<br>
+      <br>
+      {<br>
+        "path": "subdirectory/path"  // Optional: relative path within user's directory<br>
+      }<br>
+    </p>
+    <br>
+    <h3>Response Codes</h3>
+    <ul>
+      <li>200 OK: Successfully retrieved and categorized file listing</li>
+      <li>403 Forbidden: Invalid or missing session authentication</li>
+      <li>405 Method Not Allowed: Non-POST request attempted</li>
+    </ul>
+    <br>
+    <h3>Security Features</h3>
+    <ul>
+      <li>Session-based authentication: All requests must include a valid session ID</li>
+      <li>User isolation: Each user can only access their own directory structure</li>
+      <li>Path validation: User-provided paths are appended to the base user directory, preventing directory traversal attacks</li>
+      <li>No file content exposure: Only file names and types are returned, not file contents</li>
+    </ul>
+    <br>
+    <h3>Dependencies</h3>
+    <p>This handler relies on several helper methods and components:</p>
+    <ul>
+      <li>`parseJsonToMap()`: Converts JSON request body to a key-value map</li>
+      <li>`getJavaSessionId()`: Extracts session identifier from the request</li>
+      <li>`SessionManager.getUsername()`: Validates session and retrieves username</li>
+      <li>`filesList()`: Retrieves the list of files from the specified directory</li>
+      <li>`IMAGE_EXTENSIONS` and `VIDEO_EXTENSIONS`: Arrays defining supported media file formats</li>
+    </ul>
+    <br>
+    <h3>Use Case</h3>
+    <p>This handler is typically called by the administrative web interface when users:</p>
+    <ul>
+      <li>Navigate through their file directory structure</li>
+      <li>Need to refresh the file listing after upload/delete operations</li>
+      <li>Browse subdirectories within their account</li>
+      <li>Manage their website content through the control panel</li>
+    </ul>
+  </div>
+
+  <div class="wrap">
+    <div class="mermaid">
+flowchart TD
+  A(["Start"]) --> B{"Request method<br/>== POST?"}
+  B -->|No| C["Send 405 Method Not Allowed<br/>Close response"]
+  B -->|Yes| D["Read request body<br/>into String"]
+  D --> E["Parse JSON into Map<br/>using parseJsonToMap"]
+  E --> F["Get sessionId from exchange<br/>via getJavaSessionId"]
+  F --> G["Get username from<br/>SessionManager.getUsername"]
+  G --> H{"Username<br/>is null?"}
+  H -->|Yes| I["Send 403 Forbidden<br/>Close response body"]
+  H -->|No| J["Set base userPath for user"]
+  J --> K{"Username ==<br/>norlund_johan_lukas_com?"}
+  K -->|Yes| L["Set userPath =<br/>/home/lukas/JavaServerProject/www/static/"]
+  K -->|No| M["Set userPath =<br/>/home/lukas/users/{user}/static/"]
+  L --> N
+  M --> N
+  N{"map.get(path) not<br/>empty and not null?"}
+  N -->|Yes| O["Append map path to userPath"]
+  N -->|No| P["Keep userPath as is"]
+  O --> Q["Log: 'Listing files in: {userPath}'"]
+  P --> Q
+  Q --> R["Initialize StringBuilder json<br/>Set success = true<br/>Start JSON array and object"]
+  R --> S["TRY: Call filesList(userPath)"]
+  S --> T{"RuntimeException<br/>thrown?"}
+  T -->|Yes| U["CATCH: Log error<br/>Set response = failure JSON<br/>Set success = false"]
+  T -->|No| V["Start iterating through types array:<br/>folder, html, php, css, img, js, video"]
+  V --> W["Append type name to JSON<br/>Start array for this type"]
+  W --> X["Iterate through all files<br/>from filesList"]
+  X --> Y{"File matches<br/>current type?"}
+  Y -->|folder| Z1["Check: file.endsWith('/')"]
+  Y -->|html/php/css/js| Z2["Check: file.endsWith('.type')"]
+  Y -->|img| Z3["Check against<br/>IMAGE_EXTENSIONS array"]
+  Y -->|video| Z4["Check against<br/>VIDEO_EXTENSIONS array"]
+  
+  Z1 --> AA{"Match found?"}
+  Z2 --> AA
+  Z3 --> AA
+  Z4 --> AA
+  
+  AA -->|Yes| AB["Append file to JSON array<br/>with comma separator"]
+  AA -->|No| AC["Skip this file"]
+  
+  AB --> AD{"More files for<br/>this type?"}
+  AC --> AD
+  AD -->|Yes| X
+  AD -->|No| AE["Close JSON array for type<br/>Add comma"]
+  
+  AE --> AF{"More types to<br/>process?"}
+  AF -->|Yes| V
+  AF -->|No| AG{"success<br/>== true?"}
+  
+  U --> AG
+  
+  AG -->|Yes| AH["Append: 'status': 'ok'<br/>Close JSON object and array<br/>Set response = json.toString"]
+  AG -->|No| AI["Keep response = failure JSON"]
+  
+  AH --> AJ["Log: 'Sending back: {response}'"]
+  AI --> AJ
+  
+  AJ --> AK["Set Content-Type:<br/>application/json"]
+  AK --> AL["Send 200 response<br/>with response.length"]
+  AL --> AM["Write response bytes<br/>to OutputStream"]
+  AM --> AN["Close OutputStream"]
+  
+  AN --> AO(["End"])
+  C --> AO
+  I --> AO
+    </div>
+  </div>
+</body>
+</html>

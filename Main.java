@@ -9,6 +9,9 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.nio.*;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
+import java.nio.channels.WritableByteChannel;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import com.sun.net.httpserver.HttpServer;
@@ -40,7 +43,7 @@ public class Main {
         server.createContext("/moveIt", new MoveItHandler());
         server.createContext("/create-session", new SessionHandler());
         server.createContext("/check-session", new CheckJavaSession());
-        server.setExecutor(Executors.newFixedThreadPool(10));
+        server.setExecutor(Executors.newFixedThreadPool(50));
         server.start();
         System.out.println("Server started on port " + port);
     }
@@ -108,6 +111,7 @@ public class Main {
                     OutputStream os = exchange.getResponseBody();
                     os.write(response);
                     os.close();
+                    exchange.close();
                     return;
                 }
 
@@ -143,6 +147,7 @@ public class Main {
                                 OutputStream os = exchange.getResponseBody();
                                 os.write(response);
                                 os.close();
+                                exchange.close();
                                 return;
                             } else {
                                 System.out.println("Proccessing: " + resolvePath.toString());
@@ -155,6 +160,7 @@ public class Main {
                                     OutputStream os = exchange.getResponseBody();
                                     os.write(requestedPhp);
                                     os.close();
+                                    exchange.close();
                                     return;
                                 // Else break the exchange
                                 } else {
@@ -164,6 +170,7 @@ public class Main {
                                     OutputStream os = exchange.getResponseBody();
                                     os.write(response);
                                     os.close();
+                                    exchange.close();
                                     return;
                                 }
                             }
@@ -213,35 +220,57 @@ public class Main {
                     if (fullPath.toString().endsWith(".mp4")) {
                         long fileLength = Files.size(fullPath);
                         String range = exchange.getRequestHeaders().getFirst("Range");
+
+                        exchange.getResponseHeaders().set("Content-Type", contentType);
+                        exchange.getResponseHeaders().set("Accept-Ranges", "bytes");
+
                         if (range == null) {
                             // No range request (send whole file)
-                            exchange.getResponseHeaders().set("Content-Type", contentType);
                             exchange.getResponseHeaders().set("Content-Length", String.valueOf(fileLength));
                             exchange.sendResponseHeaders(200, fileLength);
-                            Files.copy(fullPath, exchange.getResponseBody());
+                            try (OutputStream os = exchange.getResponseBody()){
+                                Files.copy(fullPath, os);
+                            }                            
                         } else { 
                             // Parse range header: e.g. "bytes=1000-"
-                            long start  = Long.parseLong(range.replace("bytes=", "").replace("-", ""));
-                            long end    = fileLength - 1;
+                            String[] parts = range.replace("bytes=", "").split("-");
+                            long start = Long.parseLong(parts[0]);
+                            long end = (parts.length > 1 && !parts[1].isEmpty()) ? Long.parseLong(parts[1]) : fileLength - 1;
+                            // Clamp range (void out of bounds)
+                            start = Math.max(0, start);
+                            end = Math.min(fileLength - 1, end);
+
                             long length = end - start + 1;
 
-                            exchange.getResponseHeaders().set("Content-Type", contentType);
-                            exchange.getResponseHeaders().set("Accept-Ranges", "bytes");
                             exchange.getResponseHeaders().set("Content-Range", "bytes " + start + "-" + end + "/" + fileLength);
                             exchange.sendResponseHeaders(206, length);
 
-                            try (OutputStream os = exchange.getResponseBody();
-                                InputStream is = Files.newInputStream(fullPath)){
-                                is.skip(start);
-                                byte[] buffer = new byte[8192];
-                                long remaining = length;
-                                while (remaining > 0) {
-                                    int read = is.read(buffer, 0, (int) Math.min(buffer.length, remaining));
-                                    if (read == -1) break;
-                                    os.write(buffer, 0, read);
-                                    remaining -= read;
+                            // try (OutputStream os = exchange.getResponseBody();
+                            //     InputStream is = Files.newInputStream(fullPath)){
+                            //     is.skip(start);
+                            //     byte[] buffer = new byte[8192];
+                            //     long remaining = length;
+                            //     while (remaining > 0) {
+                            //         int read = is.read(buffer, 0, (int) Math.min(buffer.length, remaining));
+                            //         if (read == -1) break;
+                            //         os.write(buffer, 0, read);
+                            //         remaining -= read;
+                            //     }
+                            // }
+
+                            try (FileChannel fileChannel = FileChannel.open(fullPath, StandardOpenOption.READ);
+                                OutputStream os = exchange.getResponseBody();
+                                WritableByteChannel outChannel = Channels.newChannel(os)){
+                                    fileChannel.position(start);
+                                    long transferred = 0;
+                                    while (transferred < length) {
+                                        long bytes = fileChannel.transferTo(start + transferred, length - transferred, outChannel);
+                                        if (bytes <= 0) break;
+                                        transferred += bytes;
+                                    }
                                 }
-                            }
+
+                            exchange.close();
                             return;
                         }
                     } else {
@@ -253,6 +282,7 @@ public class Main {
                 OutputStream os = exchange.getResponseBody();
                 os.write(response);
                 os.close();
+                exchange.close();
                 return;
             } else {
                 // Every other case other than the develpment url
@@ -277,6 +307,7 @@ public class Main {
             OutputStream os = exchange.getResponseBody();
             os.write(response);
             os.close();
+            exchange.close();
         }
     }
     

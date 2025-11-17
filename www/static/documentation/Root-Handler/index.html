@@ -4,77 +4,185 @@
   <meta charset="utf-8" />
   <title>RootHandler Flowchart (Dark) - Validated</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <script type="module">
-    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-    mermaid.initialize({
-      startOnLoad: true,
-      theme: 'dark',
-      themeVariables: {
-        background: '#07111a',
-        primaryColor: '#1f2937',
-        primaryTextColor: '#e6eef8',
-        lineColor: '#60a5fa',
-        fontFamily: 'Inter, Roboto, Arial, sans-serif'
-      }
-    });
-  </script>
+  <link rel="stylesheet" href="/css/mermaid.css">
+  <script type="module" src="/js/mermaid.js"></script>
 
-  <style>
-    body {
-      margin: 20px;
-      background: #07111a;
-      color: #e6eef8;
-      font-family: Inter, Roboto, Arial, sans-serif;
-    }
-    h1 { color: #93c5fd; margin-bottom: 8px; }
-    p { color: #9fb6e3; margin-bottom: 14px; }
-    .wrap { background: #07111a; padding: 12px; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); }
-    .mermaid { min-height: 620px; }
-  </style>
 </head>
 <body>
-  <h1>Root Handler Flowchart</h1>
-  <p>The Root Handler validates requests and return web related files.</p>
+  <div class="description">
+    <h1>Root Handler Documentation</h1>
+    <h2>Overview</h2>
+    <p>
+      The RootHandler class is the primary HTTP request handler for the Java HTTP server. 
+      It implements HttpHandler and serves as the main router, responsible for processing all 
+      incoming HTTP requests and serving appropriate content based on the requested path and host.
+    </p>
+    <br>
+    <h2>Core Functionality</h2>
+    <p>This handler performs the following key operations:</p>
+    <br>
+    <h3>1. Virtual Host Resolution</h3>
+    <ul>
+      <li>Extracts the Host header from incoming requests</li>
+      <li>Maps hosts to their respective document roots using DomainsConfig.domainMap</li>
+      <li>Falls back to a default directory (/home/lukas/JavaServerProject/www) if the host is not recognized</li>
+      <li>Serves a custom 404 page for unrecognized hosts</li>
+    </ul>
+    <br>
+    <h3>2. Content Type Routing</h3>
+    <p>The handler intelligently routes requests based on file extensions:</p>
+    <ul>
+      <li>HTML Files (.html): Served directly from the static directory</li>
+      <li>PHP Files (.php): Processed through the runPhp() method for dynamic content generation</li>
+      <li>CSS Files (.css): Served with text/css content type</li>
+      <li>JavaScript Files (.js): Served with application/javascript content type</li>
+      <li>PDF Files (.pdf): Served with application/pdf content type</li>
+      <li>Images: Supported formats defined in IMAGE_EXTENSIONS, served as application/octet-stream</li>
+      <li>Video Files (.mp4): Served with video/mp4 content type, including HTTP range request support for streaming</li>
+    </ul>
+    <br>
+    <h3>3. Path Resolution</h3>
+    <p>The handler implements a sophisticated fallback mechanism:</p>
+    <ul>
+      <li>Attempts to serve the exact requested file</li>
+      <li>Falls back to index.html in the requested directory</li>
+      <li>Falls back to index.php if index.html doesn't exist</li>
+      <li>Serves a 404 page if no valid resource is found</li>
+    </ul>
+    <br>
+    <h3>4. Special Host Handling</h3>
+    <p>
+      Development URLs (dev.norlund-johan-lukas.com and ludwig.norlund-johan-lukas.com) 
+      receive special treatment with direct path mapping.
+    </p>
+    <br>
+    <h3>5. Video Streaming Support</h3>
+    <p>For MP4 files, the handler supports:</p>
+    <ul>
+      <li>Full file delivery (HTTP 200)</li>
+      <li>Partial content delivery via HTTP range requests (HTTP 206)</li>
+      <li>Proper content-range headers for seekable video playback</li>
+    </ul>
+    <br>
+    <p>Response Codes</p>
+    <ul>
+      <li>200 OK: Successfully served content</li>
+      <li>206 Partial Content: Serving partial video content (range requests)</li>
+      <li>404 Not Found: Requested resource doesn't exist or PHP processing failed</li>
+    </ul>
+    <br>
+    <h3>Error Handling</h3>
+    <p>The handler includes comprehensive error handling for:</p>
+    <ul>
+      <li>Missing or invalid paths</li>
+      <li>Failed PHP execution</li>
+      <li>Missing host headers</li>
+      <li>Invalid file types</li>
+    </ul>
+    <p>All error conditions result in serving a custom 404 page from www/static/notfound.html.</p>
+  </div>
+  
 
   <div class="wrap">
     <div class="mermaid">
 flowchart TD
-A(Start) --> B(Get Headers and Host)
-B --> C{Host is null}
-C -->|Yes| D(Set host to unknown)
-C -->|No| E(Get request path and split)
-D --> E
-E --> F(Init htmlFilePath targetFile userPath)
-F --> G{userPath is null}
-G -->|Yes| H(Set default userPath notfound)
-G -->|No| I(Continue)
-H --> I
-I --> J{Path ends with html}
-J -->|Yes| K(Set targetFile)
-J -->|No| L{Path ends with php}
-L -->|Yes| M(Run PHP)
-L -->|No| N(Skip PHP)
-M --> O{PHP result not null}
-O -->|No| P[Collect the 404 file<br>Set headers to 404<br>Return the response]
-O -->|Yes| Q(Set response)
-K --> R(Check Host type)
-Q --> R
-P --> Z(End)
-R --> S{Host is dev or ludwig}
-S -->|Yes| S1(Set htmlFilePath = userPath)
-S -->|No| S2(Check if path not root and not php)
-S1 --> T(Continue)
-S2 --> T
-T --> U(Handle static or irregular path)
-U --> V(Check file exists or fallback)
-V --> W{index.php exists}
-W -->|Yes| X(Run runPhp and send)
-W -->|No| Y(Send 403 or 404)
-X --> Z
-Y --> Z
-V --> AA(Check static extension CSS JS Image or fallback to index.html)
-AA --> AB(Serve or set content type then send)
-AB --> Z
+    A(Start) --> B[Get Headers and Host]
+    B --> C{Host is null?}
+    C -->|Yes| D[Set host = unknown]
+    C -->|No| E[Extract request path and split]
+    D --> E
+    E --> F[Initialize variables:<br/>htmlFilePath, targetFile, userPath]
+    F --> G{userPath from<br/>domainMap is null?}
+    G -->|Yes| H[Set default userPath<br/>Set targetFile = notfound.html]
+    G -->|No| I{Path ends<br/>with .html?}
+    H --> I
+    I -->|Yes| K[Extract targetFile from path]
+    I -->|No| L{Path ends<br/>with .php?}
+    K --> R
+    L -->|Yes| M[Run runPhp method]
+    L -->|No| N[Continue with response = null]
+    M --> O{PHP result<br/>not null?}
+    O -->|No| P[Read notfound.html<br/>Set Content-Type HTML<br/>Send 404 response<br/>Return]
+    O -->|Yes| Q[Set response = requestedPhp]
+    N --> R
+    Q --> R
+    P --> Z(End)
+    
+    R{Host is dev or<br/>ludwig domain?}
+    R -->|Yes| S1[Set htmlFilePath = userPath]
+    R -->|No| S2{Path != / AND<br/>not ends with .php?}
+    S1 --> FINAL
+    S2 -->|Yes| T[Irregular path handling]
+    S2 -->|No| FINAL
+    
+    T --> U[Construct fullPath from userPath/static/requestPath]
+    U --> V{Path is not .html?}
+    V -->|Yes| W[Check if resolvePath exists]
+    V -->|No| CHECK_EXISTS
+    
+    W --> X{resolvePath<br/>exists?}
+    X -->|No| Y[Try resolvePath/index.html]
+    X -->|Yes| STATIC_CHECK
+    
+    Y --> Y1{index.html<br/>exists?}
+    Y1 -->|No| Y2[Try resolvePath/index.php]
+    Y1 -->|Yes| STATIC_CHECK
+    
+    Y2 --> Y3{index.php<br/>exists?}
+    Y3 -->|No| SERVE_404
+    Y3 -->|Yes| PHP_PROCESS[Process PHP via runPhp]
+    
+    PHP_PROCESS --> PHP_CHECK{PHP result<br/>not null?}
+    PHP_CHECK -->|Yes| SEND_PHP[Set Content-Type<br/>Send 200 with PHP response<br/>Return]
+    PHP_CHECK -->|No| SERVE_404
+    
+    STATIC_CHECK{File ends with<br/>.css, .js, or .pdf?}
+    STATIC_CHECK -->|Yes| SET_STATIC[Set fullPath = resolvePath<br/>Set appropriate content type]
+    STATIC_CHECK -->|No| IMG_CHECK
+    
+    IMG_CHECK{File ends with<br/>.mp4 or image ext?}
+    IMG_CHECK -->|Yes| SET_MEDIA[Set fullPath = resolvePath<br/>Set content type]
+    IMG_CHECK -->|No| FALLBACK[Append index.html to fullPath]
+    
+    SET_STATIC --> CHECK_EXISTS
+    SET_MEDIA --> CHECK_EXISTS
+    FALLBACK --> CHECK_EXISTS
+    
+    CHECK_EXISTS{fullPath<br/>exists?}
+    CHECK_EXISTS -->|No| SERVE_404[Read notfound.html<br/>Send 404 response]
+    CHECK_EXISTS -->|Yes| VIDEO_CHECK
+    
+    VIDEO_CHECK{Is .mp4<br/>file?}
+    VIDEO_CHECK -->|Yes| RANGE_CHECK{Range header<br/>present?}
+    VIDEO_CHECK -->|No| SERVE_FILE[Read file into response<br/>Set Content-Type<br/>Send 200 response]
+    
+    RANGE_CHECK -->|No| FULL_VIDEO[Send entire video file<br/>with 200 response]
+    RANGE_CHECK -->|Yes| PARTIAL_VIDEO[Parse range<br/>Send partial content<br/>with 206 response<br/>Return]
+    
+    SERVE_FILE --> WRITE_CLOSE
+    SERVE_404 --> WRITE_CLOSE
+    FULL_VIDEO --> Z
+    PARTIAL_VIDEO --> Z
+    SEND_PHP --> Z
+    
+    WRITE_CLOSE[Write response to OutputStream<br/>Close stream<br/>Return]
+    WRITE_CLOSE --> Z
+    
+    FINAL[Set htmlFilePath = userPath/static/targetFile]
+    FINAL --> FINAL_CHECK{Path ends<br/>with .php?}
+    FINAL_CHECK -->|Yes| FINAL_SEND
+    FINAL_CHECK -->|No| FINAL_EXISTS{htmlFilePath<br/>file exists?}
+    
+    FINAL_EXISTS -->|No| FINAL_404[Set response = notfound.html]
+    FINAL_EXISTS -->|Yes| FINAL_READ[Read htmlFilePath into response]
+    
+    FINAL_404 --> FINAL_SEND
+    FINAL_READ --> FINAL_SEND
+    
+    FINAL_SEND[Set Content-Type HTML<br/>Send 200 response<br/>Write and close stream]
+    FINAL_SEND --> Z
+    
+    Z(End)
     </div>
   </div>
 </body>
