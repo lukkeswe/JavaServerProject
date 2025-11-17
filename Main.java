@@ -6,7 +6,11 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.nio.*;
 import java.nio.channels.Channels;
@@ -23,6 +27,16 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         int port = 80;
+        int poolSize = 16;
+        int queueSize = 50;
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(
+            poolSize,
+            poolSize,
+            60L, TimeUnit.SECONDS,
+            new ArrayBlockingQueue<>(queueSize),
+            new ThreadPoolExecutor.CallerRunsPolicy()
+        );
+
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext("/", new RootHandler());
         server.createContext("/upload", new UploadHandler());
@@ -43,10 +57,13 @@ public class Main {
         server.createContext("/moveIt", new MoveItHandler());
         server.createContext("/create-session", new SessionHandler());
         server.createContext("/check-session", new CheckJavaSession());
-        server.setExecutor(Executors.newFixedThreadPool(50));
+        server.setExecutor(executor);
         server.start();
         System.out.println("Server started on port " + port);
     }
+    // Limit video stream
+    private static final AtomicInteger ACTIVE_STREAMS = new AtomicInteger(0);
+    private static final int MAX_STREAMS = 8;
 
     private static final Set<String> TEXT_EXTENSIONS = Set.of(".html", ".php", ".css", ".js");
 
@@ -218,11 +235,17 @@ public class Main {
                     exchange.sendResponseHeaders(404, response.length);
                 } else {
                     if (fullPath.toString().endsWith(".mp4")) {
+                        if (ACTIVE_STREAMS.incrementAndGet() > MAX_STREAMS) {
+                            exchange.sendResponseHeaders(503, -1);
+                            exchange.close();
+                            return;
+                        }
                         long fileLength = Files.size(fullPath);
                         String range = exchange.getRequestHeaders().getFirst("Range");
 
                         exchange.getResponseHeaders().set("Content-Type", contentType);
                         exchange.getResponseHeaders().set("Accept-Ranges", "bytes");
+                        exchange.getResponseHeaders().set("Connection", "close");
 
                         if (range == null) {
                             // No range request (send whole file)
@@ -230,7 +253,9 @@ public class Main {
                             exchange.sendResponseHeaders(200, fileLength);
                             try (OutputStream os = exchange.getResponseBody()){
                                 Files.copy(fullPath, os);
-                            }                            
+                            } finally {
+                                ACTIVE_STREAMS.decrementAndGet();
+                            }                     
                         } else { 
                             // Parse range header: e.g. "bytes=1000-"
                             String[] parts = range.replace("bytes=", "").split("-");
@@ -255,6 +280,8 @@ public class Main {
                                         if (bytes <= 0) break;
                                         transferred += bytes;
                                     }
+                                } finally {
+                                    ACTIVE_STREAMS.decrementAndGet();
                                 }
 
                             exchange.close();
