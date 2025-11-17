@@ -245,19 +245,6 @@ public class Main {
                             exchange.getResponseHeaders().set("Content-Range", "bytes " + start + "-" + end + "/" + fileLength);
                             exchange.sendResponseHeaders(206, length);
 
-                            // try (OutputStream os = exchange.getResponseBody();
-                            //     InputStream is = Files.newInputStream(fullPath)){
-                            //     is.skip(start);
-                            //     byte[] buffer = new byte[8192];
-                            //     long remaining = length;
-                            //     while (remaining > 0) {
-                            //         int read = is.read(buffer, 0, (int) Math.min(buffer.length, remaining));
-                            //         if (read == -1) break;
-                            //         os.write(buffer, 0, read);
-                            //         remaining -= read;
-                            //     }
-                            // }
-
                             try (FileChannel fileChannel = FileChannel.open(fullPath, StandardOpenOption.READ);
                                 OutputStream os = exchange.getResponseBody();
                                 WritableByteChannel outChannel = Channels.newChannel(os)){
