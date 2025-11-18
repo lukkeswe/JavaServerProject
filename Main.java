@@ -51,7 +51,7 @@ public class Main {
         server.createContext("/moveIt", new MoveItHandler());
         server.createContext("/create-session", new SessionHandler());
         server.createContext("/check-session", new CheckJavaSession());
-        server.createContext("/", new DeligatingHandler(normalExecutor, videoExecutor));
+        server.createContext("/", new DelegatingHandler(normalExecutor, videoExecutor));
         server.setExecutor(Executors.newCachedThreadPool());
         server.start();
         System.out.println("Server started on port " + port);
@@ -81,16 +81,20 @@ public class Main {
         }
     }
 
-    static class DeligatingHandler implements HttpHandler {
+    static class DelegatingHandler implements HttpHandler {
         private final ExecutorService normalExecutor;
         private final ExecutorService videoExecutor;
 
-        DeligatingHandler(ExecutorService normalExecutor, ExecutorService videoExecutor) {
+        private final RootHandler root = new RootHandler();
+
+        DelegatingHandler(ExecutorService normalExecutor, ExecutorService videoExecutor) {
             this.normalExecutor = normalExecutor;
             this.videoExecutor = videoExecutor;
         }
         @Override
         public void handle(HttpExchange exchange) {
+            exchange.setStreams(null, null);
+
             String path = exchange.getRequestURI().getPath();
 
             // Choose executor based on file extension
@@ -100,7 +104,7 @@ public class Main {
 
             exec.execute(() -> {
                 try {
-                    new RootHandler().handle(exchange);
+                    root.handle(exchange);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
