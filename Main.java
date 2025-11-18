@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -27,18 +28,11 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         int port = 80;
-        int poolSize = 16;
-        int queueSize = 50;
-        ThreadPoolExecutor executor = new ThreadPoolExecutor(
-            poolSize,
-            poolSize,
-            60L, TimeUnit.SECONDS,
-            new ArrayBlockingQueue<>(queueSize),
-            new ThreadPoolExecutor.CallerRunsPolicy()
-        );
+
+        ExecutorService normalExecutor = Executors.newFixedThreadPool(20);
+        ExecutorService videoExecutor = Executors.newFixedThreadPool(8);
 
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
-        server.createContext("/", new RootHandler());
         server.createContext("/upload", new UploadHandler());
         server.createContext("/uploadFolder", new UploadFolderHandler());
         server.createContext("/query", new QueryHandler());
@@ -57,7 +51,8 @@ public class Main {
         server.createContext("/moveIt", new MoveItHandler());
         server.createContext("/create-session", new SessionHandler());
         server.createContext("/check-session", new CheckJavaSession());
-        server.setExecutor(executor);
+        server.createContext("/", new DeligatingHandler(normalExecutor, videoExecutor));
+        server.setExecutor(Executors.newCachedThreadPool());
         server.start();
         System.out.println("Server started on port " + port);
     }
@@ -86,6 +81,32 @@ public class Main {
         }
     }
 
+    static class DeligatingHandler implements HttpHandler {
+        private final ExecutorService normalExecutor;
+        private final ExecutorService videoExecutor;
+
+        DeligatingHandler(ExecutorService normalExecutor, ExecutorService videoExecutor) {
+            this.normalExecutor = normalExecutor;
+            this.videoExecutor = videoExecutor;
+        }
+        @Override
+        public void handle(HttpExchange exchange) {
+            String path = exchange.getRequestURI().getPath();
+
+            // Choose executor based on file extension
+            boolean isVideo = path.endsWith(".mp4") || path.endsWith(".mov") || path.endsWith(".avi");
+
+            ExecutorService exec = isVideo ? videoExecutor : normalExecutor;
+
+            exec.execute(() -> {
+                try {
+                    new RootHandler().handle(exchange);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+    }
     static class RootHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
