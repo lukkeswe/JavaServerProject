@@ -56,6 +56,11 @@ public class Main {
         server.start();
         System.out.println("Server started on port " + port);
     }
+    // Admin
+    private static final String ADMIN_HOST = "tekknat_com";
+    private static final String ADMIN_DIR = "/home/lukas/JavaServerProject/www";
+    // User base directory
+    private static final String USER_DIR = "/home/lukas/users/";
     // Limit video stream
     private static final AtomicInteger ACTIVE_STREAMS = new AtomicInteger(0);
     private static final int MAX_STREAMS = 8;
@@ -125,13 +130,13 @@ public class Main {
             String[] requestSplit = requestPath.split("/");
             
             // Define the path to the index file
-            String htmlFilePath = "/home/lukas/JavaServerProject/www/static/index.html";
+            String htmlFilePath = ADMIN_DIR + "/static/index.html";
             // If no html file is specified target the index file
             String targetFile = "index.html";
             // Initial path
             String userPath = DomainsConfig.domainMap.getOrDefault(host, null);
             if (userPath == null) {
-                userPath = "/home/lukas/JavaServerProject/www";
+                userPath = ADMIN_DIR;
                 targetFile = "notfound.html";
             }
             // Initial response
@@ -690,7 +695,7 @@ public class Main {
                         boolean newuser = true;
                         if (newuser){
                             // Create a new directory with folders for the user
-                            String userPath = "/home/lukas/users/" + name;
+                            String userPath = USER_DIR + name;
                             createPath(userPath);
                             createPath(userPath + "/static");
                             createPath(userPath + "/static/html");
@@ -853,8 +858,8 @@ public class Main {
                     return;
                 } else {
                     // Get lists of the files depending on the user
-                    String userPath = "/home/lukas/users/" + user + "/static/";
-                    if (user.equals("norlund_johan_lukas_com")) userPath = "/home/lukas/JavaServerProject/www/static/";
+                    String userPath = USER_DIR + user + "/static/";
+                    if (user.equals(ADMIN_HOST)) userPath = ADMIN_DIR + "/static/";
                     if (!map.get("path").isEmpty() && map.get("path") != null) {
                         userPath = userPath + map.get("path");
                     }
@@ -946,8 +951,8 @@ public class Main {
                     return;
                 } else {
                     System.out.println("Recived path: " + map.get("path"));
-                    String userPath =  "/home/lukas/users/" + user + "/static/";
-                    if (user.equals("norlund_johan_lukas_com")) userPath = "/home/lukas/JavaServerProject/www/static/";
+                    String userPath =  USER_DIR + user + "/static/";
+                    if (user.equals(ADMIN_HOST)) userPath = ADMIN_DIR + "/static/";
                     if (!map.get("path").isEmpty() && map.get("path") != null) userPath += map.get("path");
                     userPath += map.get("filename");
 
@@ -1051,8 +1056,8 @@ public class Main {
                     // Initialize response
                     byte[] response;
                     // Check if file exists
-                    String userPath =  "/home/lukas/users/" + user + "/static/";
-                    if (user.equals("norlund_johan_lukas_com")) userPath = "/home/lukas/JavaServerProject/www/static/";
+                    String userPath =  USER_DIR + user + "/static/";
+                    if (user.equals(ADMIN_HOST)) userPath = ADMIN_DIR + "/static/";
                     if (!map.get("path").isEmpty() && map.get("path") != null) userPath += map.get("path");
                     userPath += map.get("filename");
 
@@ -1097,8 +1102,8 @@ public class Main {
                     Map<String, String> map = parseJsonToMap(body);
                     String content = map.get("content").replace("\r\n", "\n");
                     // Create the file's path
-                    String userPath =  "/home/lukas/users/" + user + "/static/";
-                    if (user.equals("norlund_johan_lukas_com")) userPath = "/home/lukas/JavaServerProject/www/static/";
+                    String userPath =  USER_DIR + user + "/static/";
+                    if (user.equals(ADMIN_HOST)) userPath = ADMIN_DIR + "/static/";
                     if (!map.get("path").isEmpty() && map.get("path") != null) userPath += map.get("path");
                     userPath += map.get("filename");
                     // Save the file
@@ -1169,9 +1174,9 @@ public class Main {
                     return;
                 } else {
                     // Build the new path
-                    String path = "/home/lukas/users/" + user + "/static/" + map.get("path");
-                    if ("norlund_johan_lukas_com".equals(user)) {
-                        path = "/home/lukas/JavaServerProject/www/static/" + map.get("path");
+                    String path = USER_DIR + user + "/static/" + map.get("path");
+                    if (ADMIN_HOST.equals(user)) {
+                        path = ADMIN_DIR + "/static/" + map.get("path");
                     }
                     // Create the new path
                     String msg = "Fail";
@@ -1215,9 +1220,9 @@ public class Main {
                     exchange.getResponseBody().close();
                     return;
                 } else {
-                    String path = "/home/lukas/users/" + user + "/static/" + map.get("path");
-                    if (user.equals("norlund_johan_lukas_com")) {
-                        path = "/home/lukas/JavaServerProject/www/static/" + map.get("path");
+                    String path = USER_DIR + user + "/static/" + map.get("path");
+                    if (user.equals(ADMIN_HOST)) {
+                        path = ADMIN_DIR + "/static/" + map.get("path");
                     }
                     System.out.println("Deleting: " + path.toString());
                     String msg = "Fail";
@@ -1269,9 +1274,9 @@ public class Main {
                     // Move the file or folder
                     String msg = "Fail";
                     int responseCode = 403;
-                    String userPath = "/home/lukas/users/" + user + "/static/";
-                    if (user.equals("norlund_johan_lukas_com")) {
-                        userPath = "/home/lukas/JavaServerProject/www/static/";
+                    String userPath = USER_DIR + user + "/static/";
+                    if (user.equals(ADMIN_HOST)) {
+                        userPath = ADMIN_DIR + "/static/";
                     }
                     if (moveIt(
                         Paths.get(userPath + map.get("source")), 
@@ -1374,15 +1379,15 @@ public class Main {
                 // Process the file with PHP if it is a PHP file
                 String username = PhpConfig.phpMap.getOrDefault(host, null);
                 String phpIniPath;
-                boolean norlundJohanLukas = false;
-                if (host.equals("norlund-johan-lukas.com") || host.equals("norlund-johan-lukas.com")){
-                    phpIniPath = "www/static/lukas.ini"; 
-                    norlundJohanLukas = true;
+                boolean tekknat = false;
+                if (host.equals("tekknat.com")){
+                    phpIniPath = "www/static/tekknat.ini"; 
+                    tekknat = true;
                 } else phpIniPath = "/etc/php/users/" + username + ".ini";
                 // Create the ProcessBuilder with a "-c" flag
                 ProcessBuilder pb = new ProcessBuilder("php-cgi", "-c", phpIniPath);
                 // Set working directory
-                if (norlundJohanLukas) {
+                if (tekknat) {
                     pb.directory(new File("www/static/"));
                 } else pb.directory(new File(userPath + "/static/"));
                 //Copy headers from the request
@@ -1537,7 +1542,7 @@ public class Main {
             }
 
             // User's web root path for open_basedir
-            String userPath = "/home/lukas/users/" + user + "/static/php/";
+            String userPath = USER_DIR + user + "/static/";
 
             // Build contents
             StringBuilder iniContent = new StringBuilder();
@@ -2195,10 +2200,10 @@ public class Main {
 
                 //-----
                 String relativePath = extractFilePath(headers);
-                String fullPath = "/home/lukas/users/" + user + "/static/" + path + relativePath;
+                String fullPath = USER_DIR + user + "/static/" + path + relativePath;
 
-                if (user.equals("norlund_johan_lukas_com")) {
-                    fullPath = "/home/lukas/JavaServerProject/www/static/" + path + relativePath;
+                if (user.equals(ADMIN_HOST)) {
+                    fullPath = ADMIN_DIR + "/static/" + path + relativePath;
                 }
                 
                 System.out.println("Full path: " + fullPath);
@@ -2230,8 +2235,8 @@ public class Main {
     private static void saveFile(String fileName, byte[] data, String path, String user) throws IOException {
         Path uploadDir = Paths.get("/home/lukas/users", user, "static", path);
 
-        if (user.equals("norlund_johan_lukas_com")) {
-            uploadDir = Paths.get("/home/lukas/JavaServerProject/www/static", path);
+        if (user.equals(ADMIN_HOST)) {
+            uploadDir = Paths.get(ADMIN_DIR + "/static", path);
         }
         
         if (!Files.exists(uploadDir)) {
