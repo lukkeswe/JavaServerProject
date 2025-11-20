@@ -3,10 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>tekknat</title>
+    <title>Tekknat</title>
+
+    <!-- Optional: Clean, modern system font stack -->
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f7f9fb;
+            color: #222;
+        }
+
+        header {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 80px auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.4rem;
+            margin-bottom: 10px;
+        }
+
+        p.subtitle {
+            font-size: 1.1rem;
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        .buttons {
+            margin: 30px 0;
+        }
+
+        a.button {
+            display: inline-block;
+            padding: 12px 22px;
+            margin: 8px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: 0.2s;
+        }
+
+        /* Adjust this color to match your theme */
+        .primary {
+            background: #2a73ff;
+            color: white;
+        }
+
+        .primary:hover {
+            background: #1f5ad1;
+        }
+
+        .secondary {
+            background: #e7ebf0;
+            color: #222;
+        }
+
+        .secondary:hover {
+            background: #d8dde5;
+        }
+
+        .features {
+            margin-top: 50px;
+            text-align: left;
+            display: inline-block;
+        }
+
+        .features h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .features ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .features li {
+            margin: 10px 0;
+            font-size: 1rem;
+            padding-left: 20px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%232a73ff" viewBox="0 0 16 16"><path d="M13.485 1.929a1.5 1.5 0 0 1 0 2.121L6.05 11.485 2.515 7.95a1.5 1.5 0 1 1 2.121-2.121L6.05 7.243l5.314-5.314a1.5 1.5 0 0 1 2.121 0z"/></svg>') no-repeat left center;
+        }
+
+        footer {
+            margin-top: 80px;
+            padding: 20px;
+            text-align: center;
+            color: #777;
+            font-size: 0.9rem;
+        }
+    </style>
 </head>
 <body>
-    <a href="/login/">login</a>
-    <a href="/documentation/">documentation</a>
+
+<header>
+    <!-- Optional: You can replace this with a small logo -->
+    <h1>Tekknat</h1>
+</header>
+
+<div class="container">
+
+    <!-- Main Message -->
+    <p class="subtitle">
+        A secure and minimalistic platform for managing files and personal tools.
+    </p>
+
+    <!-- Call-to-action buttons -->
+    <div class="buttons">
+        <!-- If user is NOT logged in -->
+        <a href="/login/" class="button primary">Log In</a>
+
+        <!-- If user *is* logged in (optional logic handled by your server) -->
+        <!-- <a href="/home/" class="button secondary">Go to Dashboard</a> -->
+    </div>
+
+    <!-- Features section -->
+    <div class="features">
+        <h2>Features</h2>
+        <ul>
+            <li>Secure file uploading and management</li>
+            <li>Custom-built Java backend</li>
+            <li>Fast and minimalistic interface</li>
+            <li>Private developer tools and utilities</li>
+        </ul>
+    </div>
+</div>
+
+<footer>
+    © 2025 Tekknat — All rights reserved.
+</footer>
+
 </body>
 </html>
