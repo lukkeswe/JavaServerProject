@@ -2,40 +2,226 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Documentation</title>
+  <title>FetchFileContent Documentation</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="/css/mermaid.css">
   <script type="module" src="/js/mermaid.js"></script>
-
 </head>
 <body>
-  <h1>Fetch File Content Handler Flowchart</h1>
-  <p>The Fetch File Content Handler collects bytes from text files in the user's account.</p>
+  <div class="description">
+    <h1>FetchFileContent Documentation</h1>
+    <h2>Overview</h2>
+    <p>
+      The FetchFileContent class is an HTTP handler that enables authenticated users to retrieve 
+      the complete contents of files from their website's file structure. It provides a secure API 
+      endpoint for reading file contents, typically used by the web-based file editor or viewer 
+      interface.
+    </p>
+    <br>
+    <h2>Purpose</h2>
+    <p>
+      This handler is part of the multi-tenant hosting service's file management system, allowing 
+      users to access and read their files through the web interface. It is commonly used for editing 
+      operations where the client needs to load existing file contents into an editor, or for 
+      previewing file contents before modification.
+    </p>
+    <br>
+    <h2>Core Functionality</h2>
+    <p>This handler performs the following key operations:</p>
+    <br>
+    <h3>1. Request Validation</h3>
+    <ul>
+      <li>Only accepts POST requests</li>
+      <li>Silently ignores non-POST methods (no response sent)</li>
+      <li>Expects JSON payload containing the file path and filename</li>
+    </ul>
+    <br>
+    <h3>2. Authentication & Authorization</h3>
+    <ul>
+      <li>Extracts and validates the session ID from the request via getJavaSessionId()</li>
+      <li>Verifies the session through SessionManager.getUsername()</li>
+      <li>Rejects requests with invalid or expired sessions (HTTP 403)</li>
+      <li>Ensures users can only access files within their own directory space</li>
+    </ul>
+    <br>
+    <h3>3. Path Construction</h3>
+    <p>The handler builds the target file path based on the authenticated user:</p>
+    <ul>
+      <li><strong>Standard users:</strong> {USER_DIR}/{username}/static/{path}{filename}</li>
+      <li><strong>Administrator</strong> (ADMIN_HOST match): {ADMIN_DIR}/static/{path}{filename}</li>
+    </ul>
+    <p>Where:</p>
+    <ul>
+      <li>USER_DIR is the base directory for user accounts (likely /home/lukas/users/)</li>
+      <li>ADMIN_DIR is the special directory for administrative content (likely /home/lukas/JavaServerProject/www)</li>
+      <li>{path} is the optional subdirectory path provided in the JSON request body</li>
+      <li>{filename} is the name of the file to read, provided in the JSON request body</li>
+    </ul>
+    <br>
+    <h3>4. File Existence Verification</h3>
+    <ul>
+      <li>Checks if the target file exists using Files.exists()</li>
+      <li>Returns HTTP 403 if the file does not exist</li>
+      <li>Logs missing file attempts with the full path for debugging</li>
+    </ul>
+    <br>
+    <h3>5. File Content Retrieval</h3>
+    <ul>
+      <li>Reads the entire file into memory using Files.readAllBytes()</li>
+      <li>Returns the raw file contents as-is (binary safe)</li>
+      <li>Suitable for text files, but can also handle binary files</li>
+    </ul>
+    <br>
+    <h3>6. Response Format</h3>
+    <p>Returns the complete file contents with:</p>
+    <ul>
+      <li><strong>Content-Type:</strong> text/plain; charset=UTF-8 (always, regardless of actual file type)</li>
+      <li><strong>Body:</strong> The raw bytes of the file</li>
+    </ul>
+    <br>
+    <h2>Request Format</h2>
+    <p><strong>Method:</strong> POST</p>
+    <p><strong>Content-Type:</strong> application/json</p>
+    <p><strong>Body:</strong></p>
+    <pre>{
+  "path": "relative/directory/path/",
+  "filename": "file.ext"
+}</pre>
+    <p>
+      The <code>path</code> value should be relative to the user's static directory and may be 
+      empty for files in the root. The <code>filename</code> is the name of the file to read 
+      (e.g., "index.html", "script.js", "style.css").
+    </p>
+    <br>
+    <h2>Response Format</h2>
+    <p><strong>Content-Type:</strong> text/plain; charset=UTF-8</p>
+    <p><strong>Body:</strong> Raw file contents (all bytes)</p>
+    <br>
+    <h2>Response Codes</h2>
+    <ul>
+      <li><strong>200 OK:</strong> File was successfully read and returned</li>
+      <li><strong>403 Forbidden:</strong> Invalid session or file does not exist</li>
+      <li><strong>No response:</strong> Non-POST request (handler returns without sending response)</li>
+    </ul>
+    <br>
+    <h2>Security Features</h2>
+    <ul>
+      <li><strong>Session-based authentication:</strong> All requests require valid session credentials</li>
+      <li><strong>User isolation:</strong> Users can only read files within their own directory structure</li>
+      <li><strong>Path scoping:</strong> File paths are always constructed relative to the user's base directory, preventing directory traversal attacks</li>
+      <li><strong>Administrator separation:</strong> Special handling for admin accounts with different base paths</li>
+      <li><strong>Existence verification:</strong> Validates file existence before attempting to read</li>
+    </ul>
+    <br>
+    <h2>Error Handling</h2>
+    <ul>
+      <li><strong>Invalid session:</strong> Returns 403 Forbidden immediately</li>
+      <li><strong>Non-existent file:</strong> Logs the missing path and returns 403 Forbidden</li>
+      <li><strong>Non-POST request:</strong> Handler returns silently without sending any response</li>
+      <li><strong>IOException during read:</strong> Propagates to calling code (may result in 500 error)</li>
+    </ul>
+    <br>
+    <h2>Logging</h2>
+    <p>The handler provides console logging for debugging:</p>
+    <ul>
+      <li>Logs "No file found at: {path}" when attempting to read a non-existent file</li>
+    </ul>
+    <br>
+    <h2>Use Cases</h2>
+    <p>This handler is typically invoked when users:</p>
+    <ul>
+      <li>Open a file in the web-based code editor</li>
+      <li>Preview file contents before making changes</li>
+      <li>Load configuration files for editing</li>
+      <li>View the contents of HTML, CSS, JavaScript, or PHP files</li>
+      <li>Retrieve file data for client-side processing or display</li>
+    </ul>
+    <br>
+    <h2>Dependencies</h2>
+    <p>This handler relies on:</p>
+    <ul>
+      <li><strong>parseJsonToMap():</strong> Converts JSON request body to a key-value map</li>
+      <li><strong>getJavaSessionId():</strong> Extracts session identifier from the HTTP request</li>
+      <li><strong>SessionManager.getUsername():</strong> Validates session and retrieves the authenticated username</li>
+      <li><strong>USER_DIR:</strong> Constant defining the base directory for user accounts</li>
+      <li><strong>ADMIN_DIR:</strong> Constant defining the base directory for administrative content</li>
+      <li><strong>ADMIN_HOST:</strong> Constant identifying the administrator username</li>
+    </ul>
+    <br>
+    <h2>Behavior Notes</h2>
+    <ul>
+      <li>Always returns Content-Type as text/plain, even for binary files or files with other MIME types</li>
+      <li>Reads the <strong>entire file into memory</strong> - may be inefficient for very large files</li>
+      <li>Binary-safe: Can read and return any file type, not just text files</li>
+      <li>Uses 403 Forbidden for both authentication failures and missing files (could be more specific with 404)</li>
+      <li>Non-POST requests are ignored silently without any response, which may cause client timeouts</li>
+      <li>Path parameter can be empty or null for files in the root static directory</li>
+    </ul>
+    <br>
+    <h2>Performance Considerations</h2>
+    <ul>
+      <li><strong>Memory usage:</strong> Files.readAllBytes() loads the entire file into memory. For large files (videos, images, archives), this could cause memory issues</li>
+      <li><strong>No streaming:</strong> The entire file must be read before any response is sent</li>
+      <li><strong>No caching:</strong> File is read from disk on every request</li>
+    </ul>
+    <br>
+    <h2>Potential Improvements</h2>
+    <ul>
+      <li>Return appropriate MIME types based on file extension instead of always using text/plain</li>
+      <li>Use HTTP 404 for missing files instead of 403</li>
+      <li>Send HTTP 405 Method Not Allowed for non-POST requests</li>
+      <li>Implement streaming for large files to reduce memory usage</li>
+      <li>Add file size limits to prevent memory exhaustion</li>
+      <li>Implement caching for frequently accessed files</li>
+    </ul>
+  </div>
 
   <div class="wrap">
     <div class="mermaid">
 flowchart TD
-
-A(Start handle) --> B{Request method == POST?}
-B --> |No| C[Send 405 Method Not Allowed]
-B --> |Yes| D[Get Java session ID]
-C --> T(End)
-D --> E[Get username from SessionManager]
-E --> F{User == null?}
-F --> |Yes| G[Send 403 Forbidden<br>Close response body]
-F --> |No| H[Init userPath]
-G --> T
-H --> I{User == Admin?}
-I --> |Yes| J[Build path to Admin's path]
-I --> |No| K[Build path to user's path]
-J --> L[Append filename to path]
-K --> L
-L --> M{Get path}
-M -->|Invalid path| N[Log: File not found<br>Send 403 forbidden]
-M -->|File exist| O[Collect file's bytes into response]
-N --> T
-O --> P[Send heasers 200 and response bytes]
-P --> T
+    A(["Start handle"]) --> B{"Request method<br/>== POST?"}
+    B -->|No| C["Return silently<br/>(No response sent)"]
+    B -->|Yes| D["Read request body using<br/>InputStreamReader with UTF-8<br/>BufferedReader"]
+    C --> Z(["End"])
+    
+    D --> E["Collect body lines into String"]
+    E --> F["Get sessionId via<br/>getJavaSessionId(exchange)"]
+    F --> G["Get username from<br/>SessionManager.getUsername(sessionId)"]
+    
+    G --> H{"Username<br/>is null?"}
+    H -->|Yes| I["Send 403 Forbidden<br/>Close response body"]
+    H -->|No| J["Parse JSON body<br/>using parseJsonToMap"]
+    I --> Z
+    
+    J --> K["Initialize response byte array"]
+    K --> L["Build base userPath:<br/>USER_DIR + user + /static/"]
+    L --> M{"Username ==<br/>ADMIN_HOST?"}
+    
+    M -->|Yes| N["Override userPath:<br/>ADMIN_DIR + /static/"]
+    M -->|No| O["Keep user base path"]
+    
+    N --> P
+    O --> P
+    P{"map.get(path) not<br/>empty and not null?"}
+    P -->|Yes| Q["Append path to userPath"]
+    P -->|No| R["Keep userPath as is"]
+    
+    Q --> S["Append filename:<br/>userPath += map.get(filename)"]
+    R --> S
+    S --> T["Create Path object:<br/>path = Paths.get(userPath)"]
+    
+    T --> U{"Files.exists(path)?"}
+    U -->|No| V["Log: 'No file found at: {path.toString()}'"]
+    U -->|Yes| W["Read file contents:<br/>response = Files.readAllBytes(path)"]
+    
+    V --> X["Send 403 Forbidden<br/>Close response body"]
+    X --> Z
+    
+    W --> Y["Set Content-Type header:<br/>text/plain; charset=UTF-8"]
+    Y --> AA["Send 200 response<br/>with response.length"]
+    AA --> AB["Write response bytes<br/>to OutputStream"]
+    AB --> AC["Close OutputStream"]
+    AC --> Z
     </div>
   </div>
 </body>

@@ -2,38 +2,211 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Documentation</title>
+  <title>DeleteFolderHandler Documentation</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="/css/mermaid.css">
   <script type="module" src="/js/mermaid.js"></script>
-
 </head>
 <body>
-  <h1>Delete Folder Handler Flowchart</h1>
-  <p>The Delete Folder Handler removes a folder/directory and all it's contents from the user's account.</p>
+  <div class="description">
+    <h1>DeleteFolderHandler Documentation</h1>
+    <h2>Overview</h2>
+    <p>
+      The DeleteFolderHandler class is an HTTP handler that enables authenticated users to delete 
+      directories (folders) from their website's file structure. It provides a secure API endpoint 
+      for recursive folder deletion operations initiated from the web-based file management interface.
+    </p>
+    <br>
+    <h2>Purpose</h2>
+    <p>
+      This handler is part of the multi-tenant hosting service's file management system, allowing 
+      users to remove entire directories and their contents from their allocated storage space. 
+      It ensures that only authenticated users can delete folders and that they can only do so 
+      within their own account boundaries.
+    </p>
+    <br>
+    <h2>Core Functionality</h2>
+    <p>This handler performs the following key operations:</p>
+    <br>
+    <h3>1. Request Validation</h3>
+    <ul>
+      <li>Only accepts POST requests</li>
+      <li>Returns HTTP 403 (Forbidden) for non-POST methods</li>
+      <li>Expects JSON payload containing the target folder path</li>
+      <li>Validates that the path parameter is not empty</li>
+    </ul>
+    <br>
+    <h3>2. Authentication & Authorization</h3>
+    <ul>
+      <li>Extracts and validates the session ID from the request via getJavaSessionId()</li>
+      <li>Verifies the session through SessionManager.getUsername()</li>
+      <li>Rejects requests with invalid or expired sessions (HTTP 403)</li>
+      <li>Rejects requests with empty path parameters (HTTP 403)</li>
+      <li>Ensures users can only delete folders within their own directory space</li>
+    </ul>
+    <br>
+    <h3>3. Path Construction</h3>
+    <p>The handler builds the target directory path based on the authenticated user:</p>
+    <ul>
+      <li><strong>Standard users:</strong> {USER_DIR}/{username}/static/{path}</li>
+      <li><strong>Administrator</strong> (ADMIN_HOST match): {ADMIN_DIR}/static/{path}</li>
+    </ul>
+    <p>Where:</p>
+    <ul>
+      <li>USER_DIR is the base directory for user accounts (likely /home/lukas/users/)</li>
+      <li>ADMIN_DIR is the special directory for administrative content (likely /home/lukas/JavaServerProject/www)</li>
+      <li>{path} is the folder path provided in the JSON request body</li>
+    </ul>
+    <br>
+    <h3>4. Recursive Folder Deletion</h3>
+    <ul>
+      <li>Calls the deleteFolder() helper method with the target path</li>
+      <li>Performs recursive deletion, removing all files and subdirectories</li>
+      <li>Returns boolean indicating success or failure of the operation</li>
+    </ul>
+    <br>
+    <h3>5. Response Messages</h3>
+    <p>Returns a plain text response indicating the operation result:</p>
+    <ul>
+      <li><strong>"Success":</strong> Folder and all its contents were successfully deleted</li>
+      <li><strong>"Fail":</strong> Folder deletion failed (could be due to permissions, non-existent path, or I/O errors)</li>
+    </ul>
+    <br>
+    <h2>Request Format</h2>
+    <p><strong>Method:</strong> POST</p>
+    <p><strong>Content-Type:</strong> application/json</p>
+    <p><strong>Body:</strong></p>
+    <pre>{
+  "path": "relative/folder/path"
+}</pre>
+    <p>
+      The <code>path</code> value must not be empty and should be relative to the user's static 
+      directory (e.g., "images/thumbnails" or "old-content").
+    </p>
+    <br>
+    <h2>Response Format</h2>
+    <p><strong>Content-Type:</strong> text/plain; charset=UTF-8</p>
+    <p><strong>Body:</strong> Either "Success" or "Fail"</p>
+    <br>
+    <h2>Response Codes</h2>
+    <ul>
+      <li><strong>200 OK:</strong> Request was processed (check response body for success/failure)</li>
+      <li><strong>403 Forbidden:</strong> Invalid session, non-POST request, or empty path parameter</li>
+    </ul>
+    <br>
+    <h2>Security Features</h2>
+    <ul>
+      <li><strong>Session-based authentication:</strong> All requests require valid session credentials</li>
+      <li><strong>User isolation:</strong> Users can only delete folders within their own directory structure</li>
+      <li><strong>Path scoping:</strong> Folder paths are always constructed relative to the user's base directory, preventing directory traversal attacks</li>
+      <li><strong>Administrator separation:</strong> Special handling for admin accounts with different base paths</li>
+      <li><strong>Empty path protection:</strong> Explicitly rejects requests with empty paths to prevent accidental deletion of the entire static directory</li>
+    </ul>
+    <br>
+    <h2>Error Handling</h2>
+    <ul>
+      <li><strong>Empty path:</strong> Logs "Rejected: Empty path" and returns 403 Forbidden</li>
+      <li><strong>Invalid session:</strong> Logs "Rejected: session not valid" and returns 403 Forbidden</li>
+      <li><strong>Non-POST request:</strong> Returns 403 Forbidden immediately</li>
+      <li><strong>Deletion failure:</strong> Returns "Fail" message with 200 status (handled by deleteFolder() method)</li>
+    </ul>
+    <br>
+    <h2>Logging</h2>
+    <p>The handler provides console logging for debugging:</p>
+    <ul>
+      <li>Logs "Rejected: Empty path" when path parameter is empty</li>
+      <li>Logs "Rejected: session not valid" when session validation fails</li>
+      <li>Logs "Deleting: {path}" before attempting deletion</li>
+    </ul>
+    <br>
+    <h2>Use Cases</h2>
+    <p>This handler is typically invoked when users:</p>
+    <ul>
+      <li>Remove entire directories of outdated content</li>
+      <li>Clean up temporary or test directory structures</li>
+      <li>Delete project folders that are no longer needed</li>
+      <li>Remove entire sections of their website</li>
+      <li>Reorganize content by removing old directory structures</li>
+    </ul>
+    <br>
+    <h2>Dependencies</h2>
+    <p>This handler relies on:</p>
+    <ul>
+      <li><strong>parseJsonToMap():</strong> Converts JSON request body to a key-value map</li>
+      <li><strong>getJavaSessionId():</strong> Extracts session identifier from the HTTP request</li>
+      <li><strong>SessionManager.getUsername():</strong> Validates session and retrieves the authenticated username</li>
+      <li><strong>deleteFolder():</strong> Helper method that performs recursive directory deletion</li>
+      <li><strong>USER_DIR:</strong> Constant defining the base directory for user accounts</li>
+      <li><strong>ADMIN_DIR:</strong> Constant defining the base directory for administrative content</li>
+      <li><strong>ADMIN_HOST:</strong> Constant identifying the administrator username</li>
+    </ul>
+    <br>
+    <h2>Behavior Notes</h2>
+    <ul>
+      <li>Always returns HTTP 200 for valid authenticated requests with non-empty paths, regardless of deletion success (check response body for actual status)</li>
+      <li>Performs <strong>recursive deletion</strong> - all files and subdirectories within the target folder are removed</li>
+      <li>The response handling code is duplicated for both success and failure cases (both branches execute identical response logic)</li>
+      <li>Empty path check prevents accidental deletion of the user's entire static directory</li>
+      <li>Non-POST requests receive 403 Forbidden rather than 405 Method Not Allowed</li>
+    </ul>
+    <br>
+    <h2>Safety Considerations</h2>
+    <p><strong>⚠️ Warning:</strong> This handler performs recursive deletion, which is a destructive operation. 
+    The empty path validation is critical to prevent catastrophic data loss. Consider implementing additional 
+    safety measures such as:</p>
+    <ul>
+      <li>Confirmation dialogs in the client interface</li>
+      <li>Audit logging of deletion operations</li>
+      <li>Backup systems or soft-delete mechanisms</li>
+      <li>Rate limiting to prevent abuse</li>
+    </ul>
+  </div>
 
   <div class="wrap">
     <div class="mermaid">
 flowchart TD
-
-A(Start handle) --> B{Request method == POST?}
-B --> |No| C[Send 405 Method Not Allowed]
-B --> |Yes| D[Get Java session ID]
-C --> T(End)
-D --> E[Get username from SessionManager]
-E --> F{User == null?}
-F --> |Yes| G[Send 403 Forbidden<br>Close response body]
-F --> |No| H[Init userPath]
-G --> T
-H --> I{User == Admin?}
-I --> |Yes| J[Build path to Admin's path]
-I --> |No| K[Build path to user's path]
-J --> M{Remove targeted path/directory using deleteFolder helper method}
-K --> M
-M -->|Fail| N[Send headers 200 and response Fail]
-M -->|Success| O[Send headers 200 and response Success]
-O --> T
-N --> T
+    A(["Start handle"]) --> B{"Request method<br/>== POST?"}
+    B -->|No| C["Send 403 Forbidden<br/>Close response body"]
+    B -->|Yes| D["Read request body<br/>with UTF-8 encoding"]
+    C --> Z(["End"])
+    
+    D --> E["Parse JSON body<br/>using parseJsonToMap"]
+    E --> F["Get sessionId via<br/>getJavaSessionId(exchange)"]
+    F --> G["Get username from<br/>SessionManager.getUsername(sessionId)"]
+    
+    G --> H{"Username is null<br/>OR path is empty?"}
+    H -->|Yes| I{"Path is empty?"}
+    H -->|No| J["Build path:<br/>USER_DIR + user + /static/ + map.get(path)"]
+    
+    I -->|Yes| K["Log: 'Rejected: Empty path'"]
+    I -->|No| L["Log: 'Rejected: session not valid'"]
+    
+    K --> M["Send 403 Forbidden<br/>Close response body"]
+    L --> M
+    M --> Z
+    
+    J --> N{"Username ==<br/>ADMIN_HOST?"}
+    N -->|Yes| O["Override path:<br/>ADMIN_DIR + /static/ + map.get(path)"]
+    N -->|No| P["Keep user path"]
+    
+    O --> Q["Log: 'Deleting: {path.toString()}'"]
+    P --> Q
+    
+    Q --> R["Initialize msg = 'Fail'"]
+    R --> S["Call deleteFolder(Paths.get(path))"]
+    S --> T{"deleteFolder<br/>returned true?"}
+    
+    T -->|Yes| U["Set msg = 'Success'"]
+    T -->|No| V["msg remains 'Fail'"]
+    
+    U --> W["Convert msg to bytes"]
+    V --> W
+    
+    W --> X["Set Content-Type header:<br/>text/plain; charset=UTF-8"]
+    X --> Y["Send 200 response<br/>with response.length"]
+    Y --> AA["Write response bytes<br/>to OutputStream"]
+    AA --> AB["Close OutputStream"]
+    AB --> Z
     </div>
   </div>
 </body>

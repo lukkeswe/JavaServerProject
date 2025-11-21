@@ -9,32 +9,178 @@
 
 </head>
 <body>
-  <h1>Create Folder Handler Flowchart</h1>
-  <p>The Create Folder Handler creates a new folder/directory in the user's account.</p>
+  <div class="description">
+    <h1>CreateFolderHandler Documentation</h1>
+    <h2>Overview</h2>
+    <p>
+      The CreateFolderHandler class is an HTTP handler that enables authenticated users to create 
+      new directories within their website's file structure. It provides a secure API endpoint for 
+      folder creation operations initiated from the web-based file management interface.
+    </p>
+    <br>
+    <h2>Purpose</h2>
+    <p>
+      This handler is part of the multi-tenant hosting service's file management system, allowing 
+      users to organize their content by creating new folders within their allocated storage space. 
+      It ensures that only authenticated users can create directories and that they can only do so 
+      within their own account boundaries.
+    </p>
+    <br>
+    <h2>Core Functionality</h2>
+    <p>This handler performs the following key operations:</p>
+    <br>
+    <h3>1. Request Validation</h3>
+    <ul>
+      <li>Only accepts POST requests</li>
+      <li>Returns HTTP 403 (Forbidden) for non-POST methods</li>
+      <li>Expects JSON payload containing the target folder path</li>
+    </ul>
+    <br>
+    <h3>2. Authentication & Authorization</h3>
+    <ul>
+      <li>Extracts and validates the session ID from the request via getJavaSessionId()</li>
+      <li>Verifies the session through SessionManager.getUsername()</li>
+      <li>Rejects requests with invalid or expired sessions (HTTP 403)</li>
+      <li>Ensures users can only create folders within their own directory space</li>
+    </ul>
+    <br>
+    <h3>3. Path Construction</h3>
+    <p>The handler builds the target directory path based on the authenticated user:</p>
+    <ul>
+      <li><strong>Standard users:</strong> {USER_DIR}/{username}/static/{requested_path}</li>
+      <li><strong>Administrator</strong> (ADMIN_HOST match): {ADMIN_DIR}/static/{requested_path}</li>
+    </ul>
+    <p>Where:</p>
+    <ul>
+      <li>USER_DIR is the base directory for user accounts (likely /home/lukas/users/)</li>
+      <li>ADMIN_DIR is the special directory for administrative content (likely /home/lukas/JavaServerProject/www)</li>
+      <li>{requested_path} is provided in the JSON request body</li>
+    </ul>
+    <br>
+    <h3>4. Directory Creation</h3>
+    <ul>
+      <li>Attempts to create the directory using Files.createDirectory()</li>
+      <li>Creates only a single directory (not recursive - parent directories must exist)</li>
+      <li>Handles collision gracefully when directory already exists</li>
+    </ul>
+    <br>
+    <h3>5. Response Handling</h3>
+    <p>Returns a plain text response indicating the operation result:</p>
+    <ul>
+      <li><strong>"Success":</strong> Directory was created successfully</li>
+      <li><strong>"Fail":</strong> Directory creation failed (typically due to I/O errors or missing parent directories)</li>
+    </ul>
+    <p>
+      <em>Note:</em> If the directory already exists, the handler logs this condition but still 
+      returns "Fail" to the client.
+    </p>
+    <br>
+    <h2>Request Format</h2>
+    <p><strong>Method:</strong> POST</p>
+    <p><strong>Content-Type:</strong> application/json</p>
+    <p><strong>Body:</strong></p>
+    <pre>{
+  "path": "relative/folder/path"
+}</pre>
+    <p>
+      The <code>path</code> value should be relative to the user's static directory 
+      (e.g., "images/thumbnails" or "assets/css").
+    </p>
+    <br>
+    <h2>Response Format</h2>
+    <p><strong>Content-Type:</strong> text/plain; charset=UTF-8</p>
+    <p><strong>Body:</strong> Either "Success" or "Fail"</p>
+    <br>
+    <h2>Response Codes</h2>
+    <ul>
+      <li><strong>200 OK:</strong> Request was processed (check response body for success/failure)</li>
+      <li><strong>403 Forbidden:</strong> Invalid session or non-POST request method</li>
+    </ul>
+    <br>
+    <h2>Security Features</h2>
+    <ul>
+      <li><strong>Session-based authentication:</strong> All requests require valid session credentials</li>
+      <li><strong>User isolation:</strong> Users can only create folders within their own directory structure</li>
+      <li><strong>Path scoping:</strong> Requested paths are always appended to the user's base directory, preventing directory traversal attacks</li>
+      <li><strong>Administrator separation:</strong> Special handling for admin accounts with different base paths</li>
+    </ul>
+    <br>
+    <h2>Error Handling</h2>
+    <ul>
+      <li><strong>FileAlreadyExistsException:</strong> Caught and logged when attempting to create an existing directory; returns "Fail" to client</li>
+      <li><strong>Other IOException:</strong> Implicitly caught by the handler signature; results in "Fail" response</li>
+      <li><strong>Missing parent directories:</strong> Will cause creation to fail since createDirectory() is non-recursive</li>
+    </ul>
+    <br>
+    <h2>Limitations</h2>
+    <ul>
+      <li><strong>Non-recursive creation:</strong> Only creates a single directory level. Parent directories must already exist</li>
+      <li><strong>No detailed error messages:</strong> Returns generic "Fail" message without specifying the reason (existing directory, missing parent, permissions, etc.)</li>
+      <li><strong>Success on any exception:</strong> The msg variable defaults to "Fail" and is only set to "Success" after successful creation</li>
+    </ul>
+    <br>
+    <h2>Use Cases</h2>
+    <p>This handler is typically invoked when users:</p>
+    <ul>
+      <li>Create new folders for organizing website content (images, scripts, stylesheets)</li>
+      <li>Set up directory structures for new website sections</li>
+      <li>Organize uploaded files into categorical folders</li>
+      <li>Prepare directories before file upload operations</li>
+    </ul>
+    <br>
+    <h2>Dependencies</h2>
+    <p>This handler relies on:</p>
+    <ul>
+      <li><strong>parseJsonToMap():</strong> Converts JSON request body to a key-value map</li>
+      <li><strong>getJavaSessionId():</strong> Extracts session identifier from the HTTP request</li>
+      <li><strong>SessionManager.getUsername():</strong> Validates session and retrieves the authenticated username</li>
+      <li><strong>USER_DIR:</strong> Constant defining the base directory for user accounts</li>
+      <li><strong>ADMIN_DIR:</strong> Constant defining the base directory for administrative content</li>
+      <li><strong>ADMIN_HOST:</strong> Constant identifying the administrator username</li>
+    </ul>
+  </div>
 
   <div class="wrap">
     <div class="mermaid">
 flowchart TD
-
-A(Start handle) --> B{Request method == POST?}
-B --> |No| C[Send 405 Method Not Allowed]
-B --> |Yes| D[Get Java session ID]
-C --> T(End)
-D --> E[Get username from SessionManager]
-E --> F{User == null?}
-F --> |Yes| G[Send 403 Forbidden<br>Close response body]
-F --> |No| H[Init userPath]
-G --> T
-H --> I{User == Admin?}
-I --> |Yes| J[Build path to Admin's path]
-I --> |No| K[Build path to user's path]
-J --> M{Make directory from targeted path}
-K --> M
-M -->|Fail| N[response = Fail]
-M -->|Success| O[response = Success]
-O --> P[Send heasers 200 and response bytes]
-N --> P
-P --> T
+    A(["Start handle"]) --> B{"Request method<br/>== POST?"}
+    B -->|No| C["Send 403 Forbidden<br/>Close response body"]
+    B -->|Yes| D["Read request body<br/>into String with UTF-8"]
+    C --> T(["End"])
+    
+    D --> E["Parse JSON body<br/>using parseJsonToMap"]
+    E --> F["Get sessionId via<br/>getJavaSessionId(exchange)"]
+    F --> G["Get username from<br/>SessionManager.getUsername(sessionId)"]
+    G --> H{"Username<br/>is null?"}
+    
+    H -->|Yes| I["Log: 'Rejected: session not valid'<br/>Send 403 Forbidden<br/>Close response body"]
+    H -->|No| J["Build base path:<br/>USER_DIR + user + /static/ + map.get(path)"]
+    I --> T
+    
+    J --> K{"Username ==<br/>ADMIN_HOST?"}
+    K -->|Yes| L["Override path:<br/>ADMIN_DIR + /static/ + map.get(path)"]
+    K -->|No| M["Keep user path"]
+    
+    L --> N["Initialize msg = 'Fail'<br/>Create Path object: newPath = Paths.get(path)"]
+    M --> N
+    
+    N --> O["TRY: Files.createDirectory(newPath)"]
+    O --> P{"Directory creation<br/>successful?"}
+    
+    P -->|Success| Q["Set msg = 'Success'"]
+    P -->|FileAlreadyExistsException| R["CATCH: Log 'Directory already exist: {path}'<br/>msg remains 'Fail'"]
+    P -->|Other Exception| S["msg remains 'Fail'"]
+    
+    Q --> U
+    R --> U
+    S --> U
+    
+    U["Convert msg to bytes:<br/>response = msg.getBytes()"]
+    U --> V["Set Content-Type header:<br/>text/plain; charset=UTF-8"]
+    V --> W["Send 200 response<br/>with response.length"]
+    W --> X["Write response bytes<br/>to OutputStream"]
+    X --> Y["Close OutputStream"]
+    Y --> T
     </div>
   </div>
 </body>

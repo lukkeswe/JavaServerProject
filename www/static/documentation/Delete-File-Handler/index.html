@@ -2,43 +2,215 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Documentation</title>
+  <title>DeleteFileHandler Documentation</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="/css/mermaid.css">
   <script type="module" src="/js/mermaid.js"></script>
-
 </head>
 <body>
-  <h1>Delete File Handler Flowchart</h1>
-  <p>The Delete File Handler removes a targeted file from the user's account.</p>
+  <div class="description">
+    <h1>DeleteFileHandler Documentation</h1>
+    <h2>Overview</h2>
+    <p>
+      The DeleteFileHandler class is an HTTP handler that enables authenticated users to delete 
+      files from their website's file structure. It provides a secure API endpoint for file 
+      deletion operations initiated from the web-based file management interface.
+    </p>
+    <br>
+    <h2>Purpose</h2>
+    <p>
+      This handler is part of the multi-tenant hosting service's file management system, allowing 
+      users to remove unwanted or outdated files from their allocated storage space. It ensures 
+      that only authenticated users can delete files and that they can only do so within their 
+      own account boundaries.
+    </p>
+    <br>
+    <h2>Core Functionality</h2>
+    <p>This handler performs the following key operations:</p>
+    <br>
+    <h3>1. Request Validation</h3>
+    <ul>
+      <li>Only accepts POST requests</li>
+      <li>Returns HTTP 405 (Method Not Allowed) for non-POST methods</li>
+      <li>Expects JSON payload containing the file path and filename</li>
+    </ul>
+    <br>
+    <h3>2. Authentication & Authorization</h3>
+    <ul>
+      <li>Extracts and validates the session ID from the request via getJavaSessionId()</li>
+      <li>Verifies the session through SessionManager.getUsername()</li>
+      <li>Rejects requests with invalid or expired sessions (HTTP 403)</li>
+      <li>Ensures users can only delete files within their own directory space</li>
+    </ul>
+    <br>
+    <h3>3. Path Construction</h3>
+    <p>The handler builds the target file path based on the authenticated user:</p>
+    <ul>
+      <li><strong>Standard users:</strong> {USER_DIR}/{username}/static/{path}{filename}</li>
+      <li><strong>Administrator</strong> (ADMIN_HOST match): {ADMIN_DIR}/static/{path}{filename}</li>
+    </ul>
+    <p>Where:</p>
+    <ul>
+      <li>USER_DIR is the base directory for user accounts (likely /home/lukas/users/)</li>
+      <li>ADMIN_DIR is the special directory for administrative content (likely /home/lukas/JavaServerProject/www)</li>
+      <li>{path} is the optional subdirectory path provided in the JSON request body</li>
+      <li>{filename} is the name of the file to delete, provided in the JSON request body</li>
+    </ul>
+    <br>
+    <h3>4. File Existence Verification</h3>
+    <ul>
+      <li>Checks if the target file exists using Files.exists()</li>
+      <li>Prevents errors by validating file existence before attempting deletion</li>
+      <li>Provides specific feedback when files don't exist</li>
+    </ul>
+    <br>
+    <h3>5. File Deletion</h3>
+    <ul>
+      <li>Attempts to delete the file using Files.delete()</li>
+      <li>Wraps deletion in try-catch to handle I/O errors gracefully</li>
+      <li>Logs errors to the console for debugging purposes</li>
+    </ul>
+    <br>
+    <h3>6. Response Messages</h3>
+    <p>Returns a plain text response indicating the operation result:</p>
+    <ul>
+      <li><strong>"The file was deleted successfully":</strong> File was successfully removed</li>
+      <li><strong>"The file does not exist":</strong> Target file was not found at the specified path</li>
+      <li><strong>"An error occured deleting the file":</strong> IOException occurred during deletion (default error message)</li>
+    </ul>
+    <br>
+    <h2>Request Format</h2>
+    <p><strong>Method:</strong> POST</p>
+    <p><strong>Content-Type:</strong> application/json</p>
+    <p><strong>Body:</strong></p>
+    <pre>{
+  "path": "relative/directory/path/",
+  "filename": "file.ext"
+}</pre>
+    <p>
+      The <code>path</code> value should be relative to the user's static directory and may be 
+      empty for files in the root. The <code>filename</code> is the name of the file to delete 
+      (e.g., "image.png", "style.css").
+    </p>
+    <br>
+    <h2>Response Format</h2>
+    <p><strong>Content-Type:</strong> text/plain (implicit)</p>
+    <p><strong>Body:</strong> One of the three response messages described above</p>
+    <br>
+    <h2>Response Codes</h2>
+    <ul>
+      <li><strong>200 OK:</strong> Request was processed (check response body for success/failure details)</li>
+      <li><strong>403 Forbidden:</strong> Invalid or expired session</li>
+      <li><strong>405 Method Not Allowed:</strong> Non-POST request method used</li>
+    </ul>
+    <br>
+    <h2>Security Features</h2>
+    <ul>
+      <li><strong>Session-based authentication:</strong> All requests require valid session credentials</li>
+      <li><strong>User isolation:</strong> Users can only delete files within their own directory structure</li>
+      <li><strong>Path scoping:</strong> File paths are always constructed relative to the user's base directory, preventing directory traversal attacks</li>
+      <li><strong>Administrator separation:</strong> Special handling for admin accounts with different base paths</li>
+      <li><strong>Existence verification:</strong> Checks file existence before attempting deletion</li>
+    </ul>
+    <br>
+    <h2>Error Handling</h2>
+    <ul>
+      <li><strong>Non-existent files:</strong> Returns specific message without attempting deletion</li>
+      <li><strong>IOException during deletion:</strong> Caught and logged; returns error message to client</li>
+      <li><strong>Invalid session:</strong> Returns 403 Forbidden before processing request</li>
+      <li><strong>Invalid request method:</strong> Returns 405 Method Not Allowed</li>
+    </ul>
+    <br>
+    <h2>Logging</h2>
+    <p>The handler provides console logging for debugging:</p>
+    <ul>
+      <li>Logs when parsing the request body</li>
+      <li>Logs the received path from the request</li>
+      <li>Logs the complete deletion target path</li>
+      <li>Logs any IOException errors with detailed messages</li>
+    </ul>
+    <br>
+    <h2>Use Cases</h2>
+    <p>This handler is typically invoked when users:</p>
+    <ul>
+      <li>Remove outdated or unwanted files from their website</li>
+      <li>Clean up temporary or test files</li>
+      <li>Delete uploaded files that are no longer needed</li>
+      <li>Manage storage space by removing unnecessary content</li>
+      <li>Remove files before replacing them with updated versions</li>
+    </ul>
+    <br>
+    <h2>Dependencies</h2>
+    <p>This handler relies on:</p>
+    <ul>
+      <li><strong>parseJsonToMap():</strong> Converts JSON request body to a key-value map</li>
+      <li><strong>getJavaSessionId():</strong> Extracts session identifier from the HTTP request</li>
+      <li><strong>SessionManager.getUsername():</strong> Validates session and retrieves the authenticated username</li>
+      <li><strong>USER_DIR:</strong> Constant defining the base directory for user accounts</li>
+      <li><strong>ADMIN_DIR:</strong> Constant defining the base directory for administrative content</li>
+      <li><strong>ADMIN_HOST:</strong> Constant identifying the administrator username</li>
+    </ul>
+    <br>
+    <h2>Behavior Notes</h2>
+    <ul>
+      <li>Always returns HTTP 200 for authenticated requests, regardless of success or failure (check response body for actual status)</li>
+      <li>Can delete both files and directories (Files.delete() works for both)</li>
+      <li>Does not perform recursive deletion - directories must be empty to be deleted</li>
+      <li>Path parameter can be empty or null for files in the root static directory</li>
+    </ul>
+  </div>
 
   <div class="wrap">
     <div class="mermaid">
 flowchart TD
-
-A(Start handle) --> B{Request method == POST?}
-B --> |No| C[Send 405 Method Not Allowed]
-B --> |Yes| D[Get Java session ID]
-C --> T(End)
-D --> E[Get username from SessionManager]
-E --> F{User == null?}
-F --> |Yes| G[Send 403 Forbidden<br>Close response body]
-F --> |No| H[Init userPath]
-G --> T
-H --> I{User == Admin?}
-I --> |Yes| J[Build path to Admin's path]
-I --> |No| K[Build path to user's path]
-J --> L[Append filename to path]
-K --> L
-L --> M{Get targeted file}
-M -->|Fail| N[Send 403 forbidden]
-M -->|Exist| O{Remove file}
-N --> T
-O -->|Success| P[Send heasers 200 and Success msg]
-O -->|Fail| Q[Log: error]
-P --> T
-Q --> T
-
+    A(["Start handle"]) --> B{"Request method<br/>== POST?"}
+    B -->|No| C["Send 405 Method Not Allowed"]
+    B -->|Yes| D["Read request body using<br/>InputStreamReader with UTF-8<br/>BufferedReader"]
+    C --> Z(["End"])
+    
+    D --> E["Collect body lines into String"]
+    E --> F["Log: 'Parsing body...'<br/>Parse JSON using parseJsonToMap"]
+    F --> G["Initialize response =<br/>'An error occured deleting the file'"]
+    G --> H["Get sessionId via<br/>getJavaSessionId(exchange)"]
+    H --> I["Get username from<br/>SessionManager.getUsername(sessionId)"]
+    
+    I --> J{"Username<br/>is null?"}
+    J -->|Yes| K["Send 403 Forbidden<br/>Close response body"]
+    J -->|No| L["Log: 'Recived path: {map.get(path)}'"]
+    K --> Z
+    
+    L --> M["Build base userPath:<br/>USER_DIR + user + /static/"]
+    M --> N{"Username ==<br/>ADMIN_HOST?"}
+    N -->|Yes| O["Override userPath:<br/>ADMIN_DIR + /static/"]
+    N -->|No| P["Keep user base path"]
+    
+    O --> Q
+    P --> Q
+    Q{"map.get(path) not<br/>empty and not null?"}
+    Q -->|Yes| R["Append path to userPath"]
+    Q -->|No| S["Keep userPath as is"]
+    
+    R --> T["Append filename:<br/>userPath += map.get(filename)"]
+    S --> T
+    T --> U["Create Path object:<br/>path = Paths.get(userPath)"]
+    U --> V["Log: 'Delete target: {path.toString()}'"]
+    
+    V --> W{"Files.exists(path)?"}
+    W -->|No| X["Set response =<br/>'The file does not exist'"]
+    W -->|Yes| Y["TRY: Files.delete(path)"]
+    
+    Y --> AA{"Deletion<br/>successful?"}
+    AA -->|Success| AB["Set response =<br/>'The file was deleted successfully'"]
+    AA -->|IOException| AC["CATCH: Log error message<br/>response remains default error"]
+    
+    AB --> AD
+    AC --> AD
+    X --> AD
+    
+    AD["Send 200 response<br/>with response.length()"]
+    AD --> AE["Write response bytes<br/>to OutputStream"]
+    AE --> AF["Close OutputStream"]
+    AF --> Z
     </div>
   </div>
 </body>
