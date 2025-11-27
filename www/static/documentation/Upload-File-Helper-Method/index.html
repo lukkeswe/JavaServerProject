@@ -2,49 +2,280 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Documentation</title>
+  <title>Upload File Helper Method Documentation</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="/css/mermaid.css">
   <script type="module" src="/js/mermaid.js"></script>
-
 </head>
 <body>
-  <h1>Delete Folder Handler Flowchart</h1>
-  <p>The Delete Folder Handler removes a folder/directory and all it's contents from the user's account.</p>
+  <div class="description">
+    <h1>Upload File Helper Method Documentation</h1>
+    <h2>Overview</h2>
+    <p>
+      The handleMultipartFormData method is a private helper method that parses multipart/form-data 
+      encoded HTTP request bodies and extracts uploaded files along with associated metadata. It 
+      performs low-level byte array manipulation to parse the multipart structure, validate file 
+      types, and save allowed files to the appropriate user directory.
+    </p>
+    <br>
+    <h2>Purpose</h2>
+    <p>
+      This method handles the complex task of parsing multipart form data without relying on external 
+      libraries. It extracts file content and metadata (filename, path) from the raw byte array, 
+      validates file types against allowed extensions, and delegates file saving to the saveFile() 
+      method. It provides Japanese-language success/error messages for user feedback.
+    </p>
+    <br>
+    <h2>Method Signature</h2>
+    <pre>private static String handleMultipartFormData(
+    byte[] body, 
+    String contentType, 
+    String user
+) throws IOException</pre>
+    <br>
+    <h2>Parameters</h2>
+    <ul>
+      <li><strong>body:</strong> The raw byte array containing the complete multipart form data</li>
+      <li><strong>contentType:</strong> The Content-Type header value (e.g., "multipart/form-data; boundary=----WebKitFormBoundary...")</li>
+      <li><strong>user:</strong> The authenticated username, used to determine the target save directory</li>
+    </ul>
+    <br>
+    <h2>Return Value</h2>
+    <p>
+      Returns a Japanese-language status message:
+    </p>
+    <ul>
+      <li><strong>"アップロードが成功しました。"</strong> (Upload succeeded) - File was found and validated</li>
+      <li><strong>"アップロードのエラー！"</strong> (Upload error) - No valid file was found or processed</li>
+    </ul>
+    <p>
+      <em>Note:</em> The success message indicates file validation passed, but doesn't guarantee 
+      the file was saved successfully (that happens after the return).
+    </p>
+    <br>
+    <h2>Core Functionality</h2>
+    <p>This method performs the following key operations:</p>
+    <br>
+    <h3>1. Boundary Extraction</h3>
+    <ul>
+      <li>Extracts the boundary marker from the Content-Type header by splitting on "boundary="</li>
+      <li>Constructs boundary bytes with "--" prefix for normal boundaries</li>
+      <li>Constructs closing boundary bytes with "--" prefix and "--" suffix</li>
+    </ul>
+    <br>
+    <h3>2. Multipart Part Iteration</h3>
+    <ul>
+      <li>Iterates through the body searching for boundary markers</li>
+      <li>Extracts each part between boundaries</li>
+      <li>Stops when the closing boundary is found or no more boundaries exist</li>
+    </ul>
+    <br>
+    <h3>3. Header and Content Separation</h3>
+    <p>For each part:</p>
+    <ul>
+      <li>Searches for the "\r\n\r\n" sequence that separates headers from content</li>
+      <li>Extracts headers as a UTF-8 string</li>
+      <li>Extracts content as a byte array (preserving binary data)</li>
+      <li>Trims trailing newlines from parts</li>
+    </ul>
+    <br>
+    <h3>4. Part Type Identification</h3>
+    <p>Identifies two types of form parts:</p>
+    <ul>
+      <li><strong>File parts:</strong> Headers contain 'filename="..."' - contains uploaded file data</li>
+      <li><strong>Text fields:</strong> Headers contain 'name="path"' - contains the target directory path</li>
+    </ul>
+    <br>
+    <h3>5. File Extension Validation</h3>
+    <p>When a file is found:</p>
+    <ul>
+      <li>Extracts the filename using extractFileName() helper method</li>
+      <li>Converts filename to lowercase for case-insensitive comparison</li>
+      <li>Checks against three extension lists: TEXT_EXTENSIONS, IMAGE_EXTENSIONS, VIDEO_EXTENSIONS</li>
+      <li>Sets allowed flag to true if the file extension matches any allowed type</li>
+    </ul>
+    <br>
+    <h3>6. File Saving</h3>
+    <ul>
+      <li>After processing all parts, checks if valid file data was found and allowed flag is true</li>
+      <li>Calls saveFile() with filename, file data bytes, path, and username</li>
+      <li>saveFile() handles the actual disk write operation</li>
+    </ul>
+    <br>
+    <h2>Processing Flow</h2>
+    <ol>
+      <li>Extract boundary marker from Content-Type header</li>
+      <li>Initialize tracking variables (data, allowed, fileName, path, msg)</li>
+      <li>Loop through body searching for boundaries:
+        <ul>
+          <li>Find next boundary marker</li>
+          <li>Check if it's the closing boundary (exit if so)</li>
+          <li>Extract part between current and next boundary</li>
+          <li>Trim trailing newlines from part</li>
+          <li>Log preview of first 200 bytes</li>
+          <li>Split part into headers and content</li>
+          <li>If headers contain filename: extract filename, store file data, validate extension</li>
+          <li>If headers contain name="path": extract path value</li>
+          <li>Move to next boundary</li>
+        </ul>
+      </li>
+      <li>After loop: if data exists and is allowed, call saveFile()</li>
+      <li>Return success or error message</li>
+    </ol>
+    <br>
+    <h2>Allowed File Extensions</h2>
+    <p>The method validates files against three extension sets:</p>
+    <ul>
+      <li><strong>TEXT_EXTENSIONS:</strong> Text-based files (likely .html, .css, .js, .txt, .php, etc.)</li>
+      <li><strong>IMAGE_EXTENSIONS:</strong> Image files (likely .jpg, .png, .gif, .svg, etc.)</li>
+      <li><strong>VIDEO_EXTENSIONS:</strong> Video files (likely .mp4, .webm, .mov, etc.)</li>
+    </ul>
+    <p>Files with extensions not in any of these lists are rejected (allowed remains false).</p>
+    <br>
+    <h2>Helper Methods</h2>
+    <p>This method relies on several utility methods:</p>
+    <ul>
+      <li><strong>indexOf(byte[] array, byte[] target, int start):</strong> Finds the index of a byte sequence in an array</li>
+      <li><strong>startsWith(byte[] array, int offset, byte[] prefix):</strong> Checks if array starts with prefix at given offset</li>
+      <li><strong>extractFileName(String headers):</strong> Parses the filename from Content-Disposition header</li>
+      <li><strong>saveFile(String fileName, byte[] data, String path, String user):</strong> Writes file data to disk</li>
+    </ul>
+    <br>
+    <h2>Error Handling</h2>
+    <ul>
+      <li><strong>Missing header separator:</strong> Logs error and skips the part (continues processing)</li>
+      <li><strong>No boundary found:</strong> Breaks loop and returns current message state</li>
+      <li><strong>Invalid file extension:</strong> File data is collected but not saved (allowed remains false)</li>
+      <li><strong>IOException:</strong> Thrown to caller if file operations fail</li>
+    </ul>
+    <br>
+    <h2>Logging</h2>
+    <p>The method provides extensive console logging:</p>
+    <ul>
+      <li>Logs preview of first 200 bytes of each part</li>
+      <li>Logs extracted filename when found</li>
+      <li>Logs received path value when found</li>
+      <li>Logs error when header/content separator not found</li>
+    </ul>
+    <br>
+    <h2>Security Features</h2>
+    <ul>
+      <li><strong>Extension whitelist:</strong> Only allows files with approved extensions</li>
+      <li><strong>Case-insensitive matching:</strong> Prevents bypass via uppercase extensions</li>
+      <li><strong>User-scoped saving:</strong> Files saved to user-specific directories</li>
+      <li><strong>Binary-safe processing:</strong> Handles file content as raw bytes until validation</li>
+      <li><strong>Path validation:</strong> Path parameter is passed to saveFile() for scoping</li>
+    </ul>
+    <br>
+    <h2>Behavior Notes</h2>
+    <ul>
+      <li>Default message is error (Japanese: "アップロードのエラー！"), changed to success only when valid file found</li>
+      <li>Success message indicates file was <em>found and validated</em>, not necessarily saved successfully</li>
+      <li>Only saves the <strong>last valid file</strong> found if multiple files are in the upload (data is overwritten in loop)</li>
+      <li>Path field can be empty - defaults to root of user's static directory</li>
+      <li>Continues processing even if one part fails to parse (logs error and continues)</li>
+      <li>Trailing newlines are stripped from all parts before processing</li>
+      <li>Preview logging shows first 200 bytes of each part in UTF-8 (may show garbled text for binary files)</li>
+    </ul>
+    <br>
+    <h2>Performance Considerations</h2>
+    <ul>
+      <li><strong>Memory usage:</strong> Creates multiple byte array copies during processing</li>
+      <li><strong>Linear search:</strong> Uses indexOf() which scans byte arrays linearly</li>
+      <li><strong>No streaming:</strong> Entire body must be in memory before processing</li>
+      <li><strong>Multiple iterations:</strong> Extension validation loops through multiple sets</li>
+    </ul>
+    <br>
+    <h2>Limitations</h2>
+    <ul>
+      <li>Only processes the last file if multiple files are uploaded</li>
+      <li>Success message doesn't confirm actual file save (saveFile() called after return)</li>
+      <li>No size limits enforced within this method</li>
+      <li>Error messages in Japanese may not be suitable for all user bases</li>
+      <li>No validation of filename for path traversal characters</li>
+      <li>Cannot handle malformed multipart data gracefully (may throw exceptions)</li>
+    </ul>
+    <br>
+    <h2>Potential Improvements</h2>
+    <ul>
+      <li>Support multiple file uploads (store all files, not just last one)</li>
+      <li>Return more specific error codes (invalid extension, parse error, etc.)</li>
+      <li>Add filename sanitization to prevent path traversal</li>
+      <li>Make success/error messages configurable or internationalized</li>
+      <li>Validate file content matches extension (magic number checking)</li>
+      <li>Add file size validation</li>
+      <li>Improve error recovery for malformed parts</li>
+      <li>Return success based on actual saveFile() result</li>
+      <li>Use more efficient byte searching algorithms</li>
+    </ul>
+  </div>
 
   <div class="wrap">
     <div class="mermaid">
 flowchart TD
-
-A(Start) --> B[Define boundery]
-B --> C{Next boundery not null}
-C -->|Yes| G[Collect headers]
-C -->|No| J{Data not null and allowed format}
-G --> H{Headers contains filename}
-H -->|Yes| HA[Extract filename using extractFileName method]
-H -->|No| I{Headers contains path}
-I -->|Yes| M[Target path = path]
-I -->|No| C
-J -->|Yes| K[Write data to new file at targeted path using saveFile method]
-J -->|No| O[msg = error]
-K --> L(Return msg<br>End)
-M --> N[Collect data]
-N --> C
-O --> L
-
-HA --> HB{Detirmine file type}
-HB -->|HTML| HC[fileType = html]
-HB -->|CSS| HD[fileType = css]
-HB -->|JS| HE[fileType = js]
-HB -->|else| HF{Image file?}
-HF -->|Yes| HH[fileType = img]
-HF -->|No| HG[msg = error]
-HG --> C
-HC --> N
-HD --> N
-HE --> N
-HH --> N
-
+    A(["Start handleMultipartFormData"]) --> B["Extract boundary from contentType<br/>Split on boundary="]
+    B --> C["Construct boundary bytes:<br/>boundaryBytes = -- + boundary<br/>closingBoundaryBytes = -- + boundary + --"]
+    C --> D["Initialize variables:<br/>msg = Upload error<br/>pos = 0, data = null<br/>allowed = false, fileName, path = empty"]
+    
+    D --> E["Start infinite loop"]
+    E --> F["Find next boundary:<br/>boundaryIndex = indexOf body boundaryBytes pos"]
+    F --> G{"boundaryIndex<br/>== -1?"}
+    
+    G -->|Yes| SAVE["AFTER LOOP"]
+    G -->|No| H{"Is closing<br/>boundary?"}
+    
+    H -->|Yes| SAVE
+    H -->|No| I["Move pos after boundary + CRLF"]
+    
+    I --> J["Find next boundary:<br/>nextBoundary = indexOf body boundaryBytes pos"]
+    J --> K{"nextBoundary<br/>== -1?"}
+    K -->|Yes| SAVE
+    K -->|No| L["Extract part:<br/>part = body pos:nextBoundary"]
+    
+    L --> M["Trim trailing newlines from part"]
+    M --> N["Log first 200 bytes preview"]
+    N --> O["Find header/content separator:<br/>headerEnd = indexOf part CRLF CRLF 0"]
+    
+    O --> P{"headerEnd<br/>== -1?"}
+    P -->|Yes| Q["Log error: Failed to find separator<br/>Continue to next iteration"]
+    P -->|No| R["Split part:<br/>headers = part 0:headerEnd<br/>fileContent = part headerEnd+4:end"]
+    
+    Q --> S["Set pos = nextBoundary"]
+    S --> E
+    
+    R --> T{"Headers contain<br/>filename=?"}
+    T -->|Yes| U["Extract fileName using extractFileName<br/>Log: File name: fileName"]
+    T -->|No| V{"Headers contain<br/>name=path?"}
+    
+    U --> W["Store file data:<br/>data = fileContent"]
+    W --> X["Set msg = Upload succeeded"]
+    X --> Y["Convert fileName to lowercase"]
+    
+    Y --> Z["Initialize allowed = false"]
+    Z --> AA["Create extension list:<br/>TEXT IMAGE VIDEO extensions"]
+    AA --> AB["Loop through extension sets"]
+    
+    AB --> AC["Loop through extensions in set"]
+    AC --> AD{"fileName ends with<br/>extension case-insensitive?"}
+    AD -->|Yes| AE["Set allowed = true<br/>Break inner loop"]
+    AD -->|No| AF["Continue to next extension"]
+    
+    AE --> AG{"allowed<br/>is true?"}
+    AF --> AC
+    AG -->|Yes| AH["Break outer loop"]
+    AG -->|No| AB
+    
+    AH --> S
+    
+    V -->|Yes| AI["Extract path from fileContent:<br/>path = new String fileContent trim<br/>Log: Recived path: path"]
+    V -->|No| S
+    AI --> S
+    
+    SAVE{"data != null<br/>AND allowed == true?"}
+    SAVE -->|Yes| CALL["Call saveFile fileName data path user"]
+    SAVE -->|No| RETURN
+    CALL --> RETURN["Return msg"]
+    RETURN --> ZZ(["End"])
     </div>
   </div>
 </body>

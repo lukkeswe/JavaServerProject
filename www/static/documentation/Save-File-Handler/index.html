@@ -2,40 +2,252 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Documentation</title>
+  <title>SaveFileHandler Documentation</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="/css/mermaid.css">
   <script type="module" src="/js/mermaid.js"></script>
-
 </head>
 <body>
-  <h1>Save File Handler Flowchart</h1>
-  <p>The Save File Handler parse recived text content and writes it in correct format to the user's account.</p>
+  <div class="description">
+    <h1>SaveFileHandler Documentation</h1>
+    <h2>Overview</h2>
+    <p>
+      The SaveFileHandler class is an HTTP handler that enables authenticated users to save or 
+      update file contents in their website's file structure. It provides a secure API endpoint 
+      for writing text-based file content, typically used by the web-based code editor to persist 
+      changes made to HTML, CSS, JavaScript, PHP, and other text files.
+    </p>
+    <br>
+    <h2>Purpose</h2>
+    <p>
+      This handler is part of the multi-tenant hosting service's file management system, allowing 
+      users to edit and save files through the web interface. It handles both creating new files 
+      and updating existing ones, making it a critical component of the online editing workflow.
+    </p>
+    <br>
+    <h2>Core Functionality</h2>
+    <p>This handler performs the following key operations:</p>
+    <br>
+    <h3>1. Request Validation</h3>
+    <ul>
+      <li>Only accepts POST requests</li>
+      <li>Silently ignores non-POST methods (no response sent)</li>
+      <li>Expects JSON payload containing file path, filename, and content</li>
+    </ul>
+    <br>
+    <h3>2. Authentication & Authorization</h3>
+    <ul>
+      <li>Extracts and validates the session ID from the request via getJavaSessionId()</li>
+      <li>Verifies the session through SessionManager.getUsername()</li>
+      <li>Rejects requests with invalid or expired sessions (HTTP 403)</li>
+      <li>Ensures users can only save files within their own directory space</li>
+    </ul>
+    <br>
+    <h3>3. Content Normalization</h3>
+    <ul>
+      <li>Extracts the file content from the JSON payload</li>
+      <li>Normalizes line endings by converting Windows-style CRLF (\r\n) to Unix-style LF (\n)</li>
+      <li>Ensures consistent line ending format across different operating systems</li>
+    </ul>
+    <br>
+    <h3>4. Path Construction</h3>
+    <p>The handler builds the target file path based on the authenticated user:</p>
+    <ul>
+      <li><strong>Standard users:</strong> {USER_DIR}/{username}/static/{path}{filename}</li>
+      <li><strong>Administrator</strong> (ADMIN_HOST match): {ADMIN_DIR}/static/{path}{filename}</li>
+    </ul>
+    <p>Where:</p>
+    <ul>
+      <li>USER_DIR is the base directory for user accounts (likely /home/lukas/users/)</li>
+      <li>ADMIN_DIR is the special directory for administrative content (likely /home/lukas/JavaServerProject/www)</li>
+      <li>{path} is the optional subdirectory path provided in the JSON request body</li>
+      <li>{filename} is the name of the file to save, provided in the JSON request body</li>
+    </ul>
+    <br>
+    <h3>5. File Writing</h3>
+    <ul>
+      <li>Delegates file writing to the writeFile() helper method</li>
+      <li>writeFile() returns a boolean indicating success or failure</li>
+      <li>Creates or overwrites the file at the specified path with the provided content</li>
+    </ul>
+    <br>
+    <h3>6. Response Messages</h3>
+    <p>Returns different responses based on the operation result:</p>
+    <ul>
+      <li><strong>"Success" (200):</strong> File was successfully written to disk</li>
+      <li><strong>403 Forbidden:</strong> File write operation failed or session is invalid</li>
+    </ul>
+    <br>
+    <h2>Request Format</h2>
+    <p><strong>Method:</strong> POST</p>
+    <p><strong>Content-Type:</strong> application/json</p>
+    <p><strong>Body:</strong></p>
+    <pre>{
+  "path": "relative/directory/path/",
+  "filename": "file.ext",
+  "content": "The complete file content as a string"
+}</pre>
+    <p>
+      The <code>path</code> value should be relative to the user's static directory and may be 
+      empty for files in the root. The <code>filename</code> is the name of the file to save. 
+      The <code>content</code> is the complete text content to write to the file.
+    </p>
+    <br>
+    <h2>Response Format</h2>
+    <p><strong>Success Response:</strong></p>
+    <ul>
+      <li><strong>Status:</strong> 200 OK</li>
+      <li><strong>Content-Type:</strong> text/plain; charset=UTF-8</li>
+      <li><strong>Body:</strong> "Success"</li>
+    </ul>
+    <p><strong>Error Response:</strong></p>
+    <ul>
+      <li><strong>Status:</strong> 403 Forbidden</li>
+      <li><strong>Body:</strong> Empty (response body closed immediately)</li>
+    </ul>
+    <br>
+    <h2>Response Codes</h2>
+    <ul>
+      <li><strong>200 OK:</strong> File was successfully saved</li>
+      <li><strong>403 Forbidden:</strong> Invalid session or file write failed</li>
+      <li><strong>No response:</strong> Non-POST request (handler returns without sending response)</li>
+    </ul>
+    <br>
+    <h2>Security Features</h2>
+    <ul>
+      <li><strong>Session-based authentication:</strong> All requests require valid session credentials</li>
+      <li><strong>User isolation:</strong> Users can only save files within their own directory structure</li>
+      <li><strong>Path scoping:</strong> File paths are always constructed relative to the user's base directory, preventing directory traversal attacks</li>
+      <li><strong>Administrator separation:</strong> Special handling for admin accounts with different base paths</li>
+      <li><strong>Content validation:</strong> Line ending normalization prevents potential issues with different OS formats</li>
+    </ul>
+    <br>
+    <h2>Error Handling</h2>
+    <ul>
+      <li><strong>Invalid session:</strong> Logs "Rejected: session not valid" and returns 403 Forbidden</li>
+      <li><strong>Write failure:</strong> Returns 403 Forbidden if writeFile() returns false</li>
+      <li><strong>Non-POST request:</strong> Handler returns silently without sending any response</li>
+      <li><strong>IOException:</strong> Propagates to calling code (may result in 500 error)</li>
+    </ul>
+    <br>
+    <h2>Logging</h2>
+    <p>The handler provides console logging for debugging:</p>
+    <ul>
+      <li>Logs "Rejected: session not valid" when authentication fails</li>
+    </ul>
+    <br>
+    <h2>Use Cases</h2>
+    <p>This handler is typically invoked when users:</p>
+    <ul>
+      <li>Save changes made in the web-based code editor</li>
+      <li>Create new HTML, CSS, JavaScript, or PHP files</li>
+      <li>Update configuration files or data files</li>
+      <li>Modify existing website content through the editor</li>
+      <li>Write or update text-based files of any type</li>
+    </ul>
+    <br>
+    <h2>Dependencies</h2>
+    <p>This handler relies on:</p>
+    <ul>
+      <li><strong>parseJsonToMap():</strong> Converts JSON request body to a key-value map</li>
+      <li><strong>getJavaSessionId():</strong> Extracts session identifier from the HTTP request</li>
+      <li><strong>SessionManager.getUsername():</strong> Validates session and retrieves the authenticated username</li>
+      <li><strong>writeFile():</strong> Helper method that performs the actual file writing operation</li>
+      <li><strong>USER_DIR:</strong> Constant defining the base directory for user accounts</li>
+      <li><strong>ADMIN_DIR:</strong> Constant defining the base directory for administrative content</li>
+      <li><strong>ADMIN_HOST:</strong> Constant identifying the administrator username</li>
+    </ul>
+    <br>
+    <h2>Behavior Notes</h2>
+    <ul>
+      <li>Always normalizes line endings from CRLF (\r\n) to LF (\n) before saving</li>
+      <li>Creates new files or completely overwrites existing files (no append mode)</li>
+      <li>Uses 403 Forbidden for write failures instead of more specific error codes</li>
+      <li>Non-POST requests are ignored silently without any response, which may cause client timeouts</li>
+      <li>Path parameter can be empty or null for files in the root static directory</li>
+      <li>The entire file content must be sent in a single request (no streaming or chunking)</li>
+    </ul>
+    <br>
+    <h2>Line Ending Normalization</h2>
+    <p>
+      The handler automatically converts Windows-style line endings (CRLF: \r\n) to Unix-style 
+      line endings (LF: \n). This ensures:
+    </p>
+    <ul>
+      <li>Consistent file format regardless of client operating system</li>
+      <li>Better compatibility with Unix/Linux server environments</li>
+      <li>Smaller file sizes (fewer bytes per line ending)</li>
+      <li>Consistent behavior when files are edited from different platforms</li>
+    </ul>
+    <br>
+    <h2>Performance Considerations</h2>
+    <ul>
+      <li><strong>Memory usage:</strong> The entire file content is loaded into memory as a string</li>
+      <li><strong>No streaming:</strong> Large files must be sent and processed in their entirety</li>
+      <li><strong>String operations:</strong> Line ending replacement operates on the complete content string</li>
+      <li><strong>No compression:</strong> Content is transmitted as plain text without compression</li>
+    </ul>
+    <br>
+    <h2>Potential Improvements</h2>
+    <ul>
+      <li>Return more specific error codes (404 for path not found, 500 for I/O errors)</li>
+      <li>Send HTTP 405 Method Not Allowed for non-POST requests instead of silent failure</li>
+      <li>Add file size limits to prevent memory issues with very large files</li>
+      <li>Implement automatic backup before overwriting existing files</li>
+      <li>Add validation for file types and extensions</li>
+      <li>Provide more detailed error messages about why writes fail</li>
+      <li>Support streaming for large file writes</li>
+      <li>Add transaction support or atomic writes for reliability</li>
+      <li>Implement version control or file history</li>
+      <li>Add optional line ending preservation (don't always normalize)</li>
+    </ul>
+  </div>
 
   <div class="wrap">
     <div class="mermaid">
 flowchart TD
-
-A(Start handle) --> B{Request method == POST?}
-B --> |No| C[Send 405 Method Not Allowed]
-B --> |Yes| D[Get Java session ID]
-C --> T(End)
-D --> E[Get username from SessionManager]
-E --> F{User == null?}
-F --> |Yes| G[Send 403 Forbidden<br>Close response body]
-F --> |No| H[Init userPath]
-G --> T
-H --> I{User == Admin?}
-I --> |Yes| J[Build path to Admin's path]
-I --> |No| K[Build path to user's path]
-J --> L[Append filename to path]
-K --> L
-L --> M{Write file to path}
-M -->|Fail| N[Send 403 forbidden]
-M -->|Success| O[response = Success]
-N --> T
-O --> P[Send heasers 200 and response bytes]
-P --> T
+    A(["Start handle"]) --> B{"Request method<br/>== POST?"}
+    B -->|No| C["Return silently<br/>(No response sent)"]
+    B -->|Yes| D["Read request body<br/>with UTF-8 encoding"]
+    C --> Z(["End"])
+    
+    D --> E["Get sessionId via<br/>getJavaSessionId(exchange)"]
+    E --> F["Get username from<br/>SessionManager.getUsername(sessionId)"]
+    
+    F --> G{"Username<br/>is null?"}
+    G -->|Yes| H["Log: 'Rejected: session not valid'<br/>Send 403 Forbidden<br/>Close response body"]
+    G -->|No| I["Parse JSON body<br/>using parseJsonToMap"]
+    H --> Z
+    
+    I --> J["Extract content from map<br/>Normalize line endings:<br/>content = map.get('content').replace('\\r\\n', '\\n')"]
+    J --> K["Build base userPath:<br/>USER_DIR + user + /static/"]
+    
+    K --> L{"Username ==<br/>ADMIN_HOST?"}
+    L -->|Yes| M["Override userPath:<br/>ADMIN_DIR + /static/"]
+    L -->|No| N["Keep user base path"]
+    
+    M --> O
+    N --> O
+    O{"map.get(path) not<br/>empty and not null?"}
+    O -->|Yes| P["Append path to userPath"]
+    O -->|No| Q["Keep userPath as is"]
+    
+    P --> R["Append filename:<br/>userPath += map.get('filename')"]
+    Q --> R
+    
+    R --> S["Call writeFile(userPath, content)"]
+    S --> T{"writeFile returned<br/>true (success)?"}
+    
+    T -->|Yes| U["Set msg = 'Success'<br/>Convert to bytes"]
+    T -->|No| V["Send 403 Forbidden<br/>Close response body"]
+    
+    V --> Z
+    
+    U --> W["Set Content-Type header:<br/>text/plain; charset=UTF-8"]
+    W --> X["Send 200 response<br/>with response.length"]
+    X --> Y1["Write response bytes<br/>to OutputStream"]
+    Y1 --> Y2["Close OutputStream"]
+    Y2 --> Z
     </div>
   </div>
 </body>

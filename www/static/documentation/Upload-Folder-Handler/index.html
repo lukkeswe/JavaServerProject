@@ -2,45 +2,240 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Documentation</title>
+  <title>UploadFolderHandler Documentation</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="/css/mermaid.css">
   <script type="module" src="/js/mermaid.js"></script>
-
 </head>
 <body>
-  <h1>Upload Folder Handler Flowchart</h1>
-  <p>The Upload Folder Handler uploads folders with web relted files to the user's accounts</p>
+  <div class="description">
+    <h1>UploadFolderHandler Documentation</h1>
+    <h2>Overview</h2>
+    <p>
+      The UploadFolderHandler class is an HTTP handler that enables authenticated users to upload 
+      entire folders (directories with multiple files) to their website's file structure. It 
+      provides a secure API endpoint for handling bulk file uploads via multipart form data, 
+      typically used by the web-based file management interface for uploading complete directory 
+      structures.
+    </p>
+    <br>
+    <h2>Purpose</h2>
+    <p>
+      This handler is part of the multi-tenant hosting service's file management system, allowing 
+      users to upload entire folder hierarchies in a single operation. It handles the complex 
+      process of parsing multipart form data containing multiple files and potentially nested 
+      directory structures, then saving them to the appropriate user directory while preserving 
+      the folder organization.
+    </p>
+    <br>
+    <h2>Core Functionality</h2>
+    <p>This handler performs the following key operations:</p>
+    <br>
+    <h3>1. Request Validation</h3>
+    <ul>
+      <li>Only accepts POST requests (case-insensitive)</li>
+      <li>Returns HTTP 405 (Method Not Allowed) for non-POST methods</li>
+      <li>Expects multipart/form-data content type with multiple files</li>
+    </ul>
+    <br>
+    <h3>2. Authentication & Authorization</h3>
+    <ul>
+      <li>Extracts and validates the session ID from the request via getJavaSessionId()</li>
+      <li>Verifies the session through SessionManager.getUsername()</li>
+      <li>Rejects requests with invalid or expired sessions (HTTP 403)</li>
+      <li>Ensures users can only upload folders to their own directory space</li>
+    </ul>
+    <br>
+    <h3>3. Multipart Form Data Processing</h3>
+    <p>The handler performs sophisticated multipart form parsing for folder uploads:</p>
+    <ul>
+      <li>Extracts the Content-Type header from the request to identify the boundary marker</li>
+      <li>Converts the entire request body input stream to a byte array using inputStreamToBytes()</li>
+      <li>Delegates processing to handleMultipartFormDataFolder() helper method</li>
+      <li>This method likely handles multiple files with relative paths to preserve directory structure</li>
+    </ul>
+    <br>
+    <h3>4. Folder Structure Preservation</h3>
+    <ul>
+      <li>Processes multiple files within the multipart form data</li>
+      <li>Maintains folder hierarchy by preserving relative paths from the upload</li>
+      <li>Creates necessary subdirectories as needed</li>
+      <li>Saves all files to user-specific directories based on the authenticated username</li>
+    </ul>
+    <br>
+    <h3>5. Response Handling</h3>
+    <p>The handler returns different responses based on the outcome:</p>
+    <ul>
+      <li><strong>Success (200):</strong> Returns the success message from handleMultipartFormDataFolder()</li>
+      <li><strong>Failure (500):</strong> Returns "Upload failed: {error message}" if an exception occurs</li>
+      <li><strong>Forbidden (403):</strong> Returns if session validation fails</li>
+      <li><strong>Method Not Allowed (405):</strong> Returns for non-POST requests</li>
+    </ul>
+    <br>
+    <h2>Request Format</h2>
+    <p><strong>Method:</strong> POST</p>
+    <p><strong>Content-Type:</strong> multipart/form-data; boundary={boundary}</p>
+    <p><strong>Body:</strong> Multipart form data containing multiple files with relative paths</p>
+    <p>
+      The request body follows the standard multipart/form-data format with multiple parts, each 
+      representing a file. Each part should contain:
+    </p>
+    <ul>
+      <li>Content-Disposition header with filename (may include relative path)</li>
+      <li>Content-Type header indicating the file's MIME type</li>
+      <li>The file content as binary data</li>
+    </ul>
+    <br>
+    <h2>Response Format</h2>
+    <p><strong>Success Response:</strong></p>
+    <ul>
+      <li><strong>Status:</strong> 200 OK</li>
+      <li><strong>Content-Type:</strong> text/plain (implicit)</li>
+      <li><strong>Body:</strong> Success message from handleMultipartFormDataFolder()</li>
+    </ul>
+    <p><strong>Error Response:</strong></p>
+    <ul>
+      <li><strong>Status:</strong> 500 Internal Server Error</li>
+      <li><strong>Content-Type:</strong> text/plain (implicit)</li>
+      <li><strong>Body:</strong> "Upload failed: {exception message}"</li>
+    </ul>
+    <br>
+    <h2>Response Codes</h2>
+    <ul>
+      <li><strong>200 OK:</strong> Folder and all files were successfully uploaded and saved</li>
+      <li><strong>403 Forbidden:</strong> Invalid or expired session</li>
+      <li><strong>405 Method Not Allowed:</strong> Non-POST request method used</li>
+      <li><strong>500 Internal Server Error:</strong> Exception occurred during upload processing</li>
+    </ul>
+    <br>
+    <h2>Security Features</h2>
+    <ul>
+      <li><strong>Session-based authentication:</strong> All requests require valid session credentials</li>
+      <li><strong>User isolation:</strong> Users can only upload folders to their own directory structure</li>
+      <li><strong>Path validation:</strong> File destinations are determined server-side based on authenticated username</li>
+      <li><strong>Content-type extraction:</strong> Validates and processes the multipart boundary correctly</li>
+      <li><strong>Exception handling:</strong> Catches and reports errors without exposing sensitive system information</li>
+      <li><strong>Directory traversal protection:</strong> Likely implemented in handleMultipartFormDataFolder() to prevent malicious path manipulation</li>
+    </ul>
+    <br>
+    <h2>Error Handling</h2>
+    <ul>
+      <li><strong>Invalid session:</strong> Returns 403 Forbidden immediately</li>
+      <li><strong>Non-POST request:</strong> Returns 405 Method Not Allowed</li>
+      <li><strong>Parsing exceptions:</strong> Caught and returned as 500 with error message</li>
+      <li><strong>I/O exceptions:</strong> Caught and returned as 500 with error message</li>
+      <li><strong>Directory creation errors:</strong> Handled by helper method, reported as 500 error</li>
+      <li><strong>Any other exceptions:</strong> Caught by general Exception handler, logged via printStackTrace()</li>
+    </ul>
+    <br>
+    <h2>Logging</h2>
+    <p>The handler provides console logging for debugging:</p>
+    <ul>
+      <li>Logs "Reciving upload..." when processing begins</li>
+      <li>Prints full stack traces for any exceptions that occur during processing</li>
+      <li>Additional logging likely provided by handleMultipartFormDataFolder() method</li>
+    </ul>
+    <br>
+    <h2>Use Cases</h2>
+    <p>This handler is typically invoked when users:</p>
+    <ul>
+      <li>Upload entire website templates or themes</li>
+      <li>Upload project directories with multiple subdirectories</li>
+      <li>Migrate existing website structures to the hosting platform</li>
+      <li>Upload asset libraries (images, scripts, stylesheets) with organized folder structure</li>
+      <li>Deploy web applications with complex directory hierarchies</li>
+      <li>Bulk upload multiple files while maintaining their folder organization</li>
+    </ul>
+    <br>
+    <h2>Dependencies</h2>
+    <p>This handler relies on several helper methods and components:</p>
+    <ul>
+      <li><strong>getJavaSessionId():</strong> Extracts session identifier from the HTTP request</li>
+      <li><strong>SessionManager.getUsername():</strong> Validates session and retrieves the authenticated username</li>
+      <li><strong>inputStreamToBytes():</strong> Converts the InputStream to a byte array for processing</li>
+      <li><strong>handleMultipartFormDataFolder():</strong> Core method that processes multipart data for folder uploads and saves all files</li>
+    </ul>
+    <br>
+    <h2>Behavior Notes</h2>
+    <ul>
+      <li>Uses case-insensitive comparison for POST method check (equalsIgnoreCase)</li>
+      <li>Loads the <strong>entire request body into memory</strong> as a byte array - may be problematic for very large folder uploads</li>
+      <li>All exceptions are caught and returned as 500 errors with the exception message exposed to the client</li>
+      <li>Response is converted to bytes twice (once for length calculation, once for writing)</li>
+      <li>No explicit file size or file count limits are enforced at this level</li>
+      <li>Nearly identical to UploadHandler except uses handleMultipartFormDataFolder() instead of handleMultipartFormData()</li>
+    </ul>
+    <br>
+    <h2>Differences from UploadHandler</h2>
+    <p>Key differences between UploadFolderHandler and the standard UploadHandler:</p>
+    <ul>
+      <li><strong>Multiple files:</strong> Designed to handle many files in a single request</li>
+      <li><strong>Directory structure:</strong> Preserves folder hierarchy rather than uploading to a single location</li>
+      <li><strong>Helper method:</strong> Uses handleMultipartFormDataFolder() instead of handleMultipartFormData()</li>
+      <li><strong>Use case:</strong> Optimized for bulk operations and maintaining folder organization</li>
+    </ul>
+    <br>
+    <h2>Performance Considerations</h2>
+    <ul>
+      <li><strong>Memory usage:</strong> The entire upload (potentially many files) is buffered into memory before processing</li>
+      <li><strong>No streaming:</strong> Files are not streamed directly to disk, increasing memory pressure significantly</li>
+      <li><strong>No chunking:</strong> Large folder uploads must complete in a single request</li>
+      <li><strong>Blocking I/O:</strong> The handler blocks while reading the entire request body</li>
+      <li><strong>Directory operations:</strong> May involve creating multiple directories, which can be I/O intensive</li>
+      <li><strong>Transaction risk:</strong> No atomic operation - partial uploads may occur if errors happen mid-process</li>
+    </ul>
+    <br>
+    <h2>Potential Improvements</h2>
+    <ul>
+      <li>Implement streaming uploads to reduce memory usage for large folder structures</li>
+      <li>Add total upload size limits to prevent memory exhaustion or abuse</li>
+      <li>Add file count limits to prevent processing too many files at once</li>
+      <li>Validate file types and extensions for security</li>
+      <li>Implement virus scanning for uploaded files</li>
+      <li>Add rate limiting to prevent upload abuse</li>
+      <li>Sanitize exception messages before sending to client</li>
+      <li>Fix the double byte conversion in response handling</li>
+      <li>Add progress reporting for large uploads</li>
+      <li>Implement transactional uploads (all or nothing) with rollback capability</li>
+      <li>Add Content-Type header to responses explicitly</li>
+      <li>Support resumable folder uploads</li>
+      <li>Validate and sanitize folder paths to prevent directory traversal attacks</li>
+    </ul>
+  </div>
 
   <div class="wrap">
     <div class="mermaid">
 flowchart TD
-
-A[Start handle] --> B{Request method is POST}
-B -->|No| C[Send 405 Method Not Allowed]
-B -->|Yes| D[Get Java session ID]
-D --> E[Get username from SessionManager]
-E --> F{User is null}
-F -->|Yes| G[Send 403 Forbidden]
-F -->|No| H{Try block}
-H --> I[Print Reciving upload]
-I --> J[Get request headers]
-J --> K[Get content type]
-K --> L[Read request body bytes]
-L --> M[Call handleMultipartFormDataFolder]
-M --> N[Prepare response bytes]
-N --> O[Send 200 OK]
-O --> P[Write response to output stream]
-P --> Q[Close output stream]
-H -->|Exception| R[Print stack trace]
-R --> S[Prepare error message Upload failed]
-S --> T[Send 500 Internal Server Error]
-T --> U[Write error response]
-U --> V[Close output stream]
-C --> W[End]
-G --> W
-Q --> W
-V --> W
+    A(["Start handle"]) --> B{"Request method<br/>== POST?<br/>case-insensitive"}
+    B -->|No| C["Send 405 Method Not Allowed"]
+    B -->|Yes| D["Get sessionId via<br/>getJavaSessionId exchange"]
+    C --> Z(["End"])
+    
+    D --> E["Get username from<br/>SessionManager.getUsername sessionId"]
+    E --> F{"Username<br/>is null?"}
+    
+    F -->|Yes| G["Send 403 Forbidden<br/>Close response body"]
+    F -->|No| H["TRY: Begin folder upload processing"]
+    G --> Z
+    
+    H --> I["Log: Reciving upload..."]
+    I --> J["Get request headers"]
+    J --> K["Extract Content-Type header<br/>requestContentType = headers.getFirst Content-Type"]
+    
+    K --> L["Convert request body to bytes:<br/>body = inputStreamToBytes exchange.getRequestBody"]
+    L --> M["Process multipart folder data:<br/>response = handleMultipartFormDataFolder body requestContentType user"]
+    M --> N["Convert response to bytes:<br/>responseBytes = response.getBytes UTF-8"]
+    N --> O["Send 200 response<br/>with responseBytes.length"]
+    O --> P["Write response.getBytes<br/>to OutputStream"]
+    P --> Q["Close OutputStream"]
+    Q --> Z
+    
+    H --> R["CATCH: Any Exception"]
+    R --> S["Print stack trace:<br/>e.printStackTrace"]
+    S --> T["Create error response:<br/>Upload failed: + e.getMessage"]
+    T --> U["Send 500 Internal Server Error<br/>with response.length"]
+    U --> V["Write response bytes<br/>to OutputStream<br/>Close stream"]
+    V --> Z
     </div>
   </div>
 </body>

@@ -2,49 +2,223 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Documentation</title>
+  <title>UploadHandler Documentation</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="/css/mermaid.css">
   <script type="module" src="/js/mermaid.js"></script>
-
 </head>
 <body>
-  <h1>Upload File Handler Flowchart</h1>
-  <p>The Upload File Handler uploads files to user's accounts.</p>
+  <div class="description">
+    <h1>UploadHandler Documentation</h1>
+    <h2>Overview</h2>
+    <p>
+      The UploadHandler class is an HTTP handler that enables authenticated users to upload files 
+      to their website's file structure. It provides a secure API endpoint for handling multipart 
+      form data uploads, typically used by the web-based file management interface for adding new 
+      files to a user's account.
+    </p>
+    <br>
+    <h2>Purpose</h2>
+    <p>
+      This handler is part of the multi-tenant hosting service's file management system, allowing 
+      users to upload various file types (images, documents, scripts, stylesheets, etc.) to their 
+      allocated storage space. It handles the complex process of parsing multipart form data and 
+      saving uploaded files to the appropriate user directory.
+    </p>
+    <br>
+    <h2>Core Functionality</h2>
+    <p>This handler performs the following key operations:</p>
+    <br>
+    <h3>1. Request Validation</h3>
+    <ul>
+      <li>Only accepts POST requests (case-insensitive)</li>
+      <li>Returns HTTP 405 (Method Not Allowed) for non-POST methods</li>
+      <li>Expects multipart/form-data content type</li>
+    </ul>
+    <br>
+    <h3>2. Authentication & Authorization</h3>
+    <ul>
+      <li>Extracts and validates the session ID from the request via getJavaSessionId()</li>
+      <li>Verifies the session through SessionManager.getUsername()</li>
+      <li>Rejects requests with invalid or expired sessions (HTTP 403)</li>
+      <li>Ensures users can only upload files to their own directory space</li>
+    </ul>
+    <br>
+    <h3>3. Multipart Form Data Processing</h3>
+    <p>The handler performs sophisticated multipart form parsing:</p>
+    <ul>
+      <li>Extracts the Content-Type header from the request to identify the boundary marker</li>
+      <li>Converts the entire request body input stream to a byte array using inputStreamToBytes()</li>
+      <li>Parses the multipart structure to extract headers using extractHeaders()</li>
+      <li>Determines the uploaded file's content type using extractContentType()</li>
+      <li>Delegates actual file saving to handleMultipartFormData() helper method</li>
+    </ul>
+    <br>
+    <h3>4. File Storage</h3>
+    <ul>
+      <li>Passes the parsed body, content type, and username to handleMultipartFormData()</li>
+      <li>Files are saved to user-specific directories based on the authenticated username</li>
+      <li>Returns a success or failure message indicating the upload result</li>
+    </ul>
+    <br>
+    <h3>5. Response Handling</h3>
+    <p>The handler returns different responses based on the outcome:</p>
+    <ul>
+      <li><strong>Success (200):</strong> Returns the success message from handleMultipartFormData()</li>
+      <li><strong>Failure (500):</strong> Returns "Upload failed: {error message}" if an exception occurs</li>
+      <li><strong>Forbidden (403):</strong> Returns if session validation fails</li>
+      <li><strong>Method Not Allowed (405):</strong> Returns for non-POST requests</li>
+    </ul>
+    <br>
+    <h2>Request Format</h2>
+    <p><strong>Method:</strong> POST</p>
+    <p><strong>Content-Type:</strong> multipart/form-data; boundary={boundary}</p>
+    <p><strong>Body:</strong> Multipart form data containing the file(s) to upload</p>
+    <p>
+      The request body follows the standard multipart/form-data format with parts separated by 
+      boundary markers. Each part contains headers (Content-Disposition, Content-Type) followed 
+      by the file content.
+    </p>
+    <br>
+    <h2>Response Format</h2>
+    <p><strong>Success Response:</strong></p>
+    <ul>
+      <li><strong>Status:</strong> 200 OK</li>
+      <li><strong>Content-Type:</strong> text/plain (implicit)</li>
+      <li><strong>Body:</strong> Success message from handleMultipartFormData()</li>
+    </ul>
+    <p><strong>Error Response:</strong></p>
+    <ul>
+      <li><strong>Status:</strong> 500 Internal Server Error</li>
+      <li><strong>Content-Type:</strong> text/plain (implicit)</li>
+      <li><strong>Body:</strong> "Upload failed: {exception message}"</li>
+    </ul>
+    <br>
+    <h2>Response Codes</h2>
+    <ul>
+      <li><strong>200 OK:</strong> File was successfully uploaded and saved</li>
+      <li><strong>403 Forbidden:</strong> Invalid or expired session</li>
+      <li><strong>405 Method Not Allowed:</strong> Non-POST request method used</li>
+      <li><strong>500 Internal Server Error:</strong> Exception occurred during upload processing</li>
+    </ul>
+    <br>
+    <h2>Security Features</h2>
+    <ul>
+      <li><strong>Session-based authentication:</strong> All requests require valid session credentials</li>
+      <li><strong>User isolation:</strong> Users can only upload files to their own directory structure</li>
+      <li><strong>Path validation:</strong> File destinations are determined server-side based on authenticated username</li>
+      <li><strong>Content-type extraction:</strong> Validates and processes the multipart boundary correctly</li>
+      <li><strong>Exception handling:</strong> Catches and reports errors without exposing sensitive system information</li>
+    </ul>
+    <br>
+    <h2>Error Handling</h2>
+    <ul>
+      <li><strong>Invalid session:</strong> Returns 403 Forbidden immediately</li>
+      <li><strong>Non-POST request:</strong> Returns 405 Method Not Allowed</li>
+      <li><strong>Parsing exceptions:</strong> Caught and returned as 500 with error message</li>
+      <li><strong>I/O exceptions:</strong> Caught and returned as 500 with error message</li>
+      <li><strong>Any other exceptions:</strong> Caught by general Exception handler, logged via printStackTrace()</li>
+    </ul>
+    <br>
+    <h2>Logging</h2>
+    <p>The handler provides console logging for debugging:</p>
+    <ul>
+      <li>Logs "Reciving upload..." when processing begins</li>
+      <li>Logs "bodyContentType: {content-type}" after extracting the uploaded file's content type</li>
+      <li>Prints full stack traces for any exceptions that occur during processing</li>
+    </ul>
+    <br>
+    <h2>Use Cases</h2>
+    <p>This handler is typically invoked when users:</p>
+    <ul>
+      <li>Upload images for their website (logos, photos, graphics)</li>
+      <li>Upload stylesheets (CSS files) or scripts (JavaScript files)</li>
+      <li>Upload HTML pages or PHP scripts</li>
+      <li>Upload documents (PDFs, text files)</li>
+      <li>Upload any other file type to their web hosting space</li>
+    </ul>
+    <br>
+    <h2>Dependencies</h2>
+    <p>This handler relies on several helper methods and components:</p>
+    <ul>
+      <li><strong>getJavaSessionId():</strong> Extracts session identifier from the HTTP request</li>
+      <li><strong>SessionManager.getUsername():</strong> Validates session and retrieves the authenticated username</li>
+      <li><strong>inputStreamToBytes():</strong> Converts the InputStream to a byte array for processing</li>
+      <li><strong>extractHeaders():</strong> Parses multipart headers from the request body</li>
+      <li><strong>extractContentType():</strong> Extracts the Content-Type from multipart headers</li>
+      <li><strong>handleMultipartFormData():</strong> Core method that processes the multipart data and saves the file</li>
+    </ul>
+    <br>
+    <h2>Behavior Notes</h2>
+    <ul>
+      <li>Uses case-insensitive comparison for POST method check (equalsIgnoreCase)</li>
+      <li>Loads the <strong>entire request body into memory</strong> as a byte array - may be problematic for very large files</li>
+      <li>Extracts content type information twice (from request headers and from body headers)</li>
+      <li>All exceptions are caught and returned as 500 errors with the exception message exposed to the client</li>
+      <li>Response is converted to bytes twice (once for length calculation, once for writing)</li>
+      <li>No explicit file size limits are enforced at this level</li>
+    </ul>
+    <br>
+    <h2>Performance Considerations</h2>
+    <ul>
+      <li><strong>Memory usage:</strong> The entire upload is buffered into memory before processing, which could cause issues with large files</li>
+      <li><strong>No streaming:</strong> Files are not streamed directly to disk, increasing memory pressure</li>
+      <li><strong>No chunking:</strong> Large uploads must complete in a single request</li>
+      <li><strong>Blocking I/O:</strong> The handler blocks while reading the entire request body</li>
+    </ul>
+    <br>
+    <h2>Potential Improvements</h2>
+    <ul>
+      <li>Implement streaming uploads to reduce memory usage for large files</li>
+      <li>Add file size limits to prevent memory exhaustion or abuse</li>
+      <li>Validate file types and extensions for security</li>
+      <li>Implement virus scanning for uploaded files</li>
+      <li>Add rate limiting to prevent upload abuse</li>
+      <li>Sanitize exception messages before sending to client</li>
+      <li>Fix the double byte conversion in response handling</li>
+      <li>Add progress reporting for large uploads</li>
+      <li>Implement resumable upload support</li>
+      <li>Add Content-Type header to responses explicitly</li>
+    </ul>
+  </div>
 
   <div class="wrap">
     <div class="mermaid">
 flowchart TD
-
-A[Start handle] --> B{Request method == POST?}
-B --> |No| C[Send 405 Method Not Allowed]
-B --> |Yes| D[Get Java session ID]
-C --> T[End]
-D --> E[Get username from SessionManager]
-E --> F{User == null?}
-F --> |Yes| G[Send 403 Forbidden<br>Close response body]
-F --> |No| H{Try block}
-G --> T
-H --> I[Log Receiving upload...]
-I --> J[Get request headers]
-J --> K[Get Content-Type from headers]
-K --> L[Read request body as bytes]
-L --> M[Extract headers from body]
-M --> N[Extract body content type]
-N --> O[Log bodyContentType]
-O --> P[Call handleMultipartFormData...]
-P --> Q[Convert response to bytes]
-Q --> R[Send 200 OK <br>Write response to OutputStream]
-R --> S[Close OutputStream]
-S --> T
-
-H -->|Exception| U[Catch Exception]
-U --> V[Log stack trace]
-V --> W[Create response: Upload failed:  + e.getMessage]
-W --> X[Send 500 Internal Server Error]
-X --> Y[Write response to OutputStream]
-Y --> Z[Close OutputStream]
-Z --> T
+    A(["Start handle"]) --> B{"Request method<br/>== POST?<br/>(case-insensitive)"}
+    B -->|No| C["Send 405 Method Not Allowed"]
+    B -->|Yes| D["Get sessionId via<br/>getJavaSessionId(exchange)"]
+    C --> Z(["End"])
+    
+    D --> E["Get username from<br/>SessionManager.getUsername(sessionId)"]
+    E --> F{"Username<br/>is null?"}
+    
+    F -->|Yes| G["Send 403 Forbidden<br/>Close response body"]
+    F -->|No| H["TRY: Begin upload processing"]
+    G --> Z
+    
+    H --> I["Log: 'Reciving upload...'"]
+    I --> J["Get request headers"]
+    J --> K["Extract Content-Type header<br/>requestContentType = headers.getFirst('Content-Type')"]
+    
+    K --> L["Convert request body to bytes:<br/>body = inputStreamToBytes(exchange.getRequestBody())"]
+    L --> M["Extract headers from body:<br/>bodyHeaders = extractHeaders(body, requestContentType)"]
+    M --> N["Extract content type from body:<br/>bodyContentType = extractContentType(bodyHeaders)"]
+    N --> O["Log: 'bodyContentType: {bodyContentType}'"]
+    
+    O --> P["Process multipart data:<br/>response = handleMultipartFormData(body, requestContentType, user)"]
+    P --> Q["Convert response to bytes:<br/>responseBytes = response.getBytes(UTF-8)"]
+    Q --> R["Send 200 response<br/>with responseBytes.length"]
+    R --> S["Write response.getBytes()<br/>to OutputStream"]
+    S --> T["Close OutputStream"]
+    T --> Z
+    
+    H --> U["CATCH: Any Exception"]
+    U --> V["Print stack trace:<br/>e.printStackTrace()"]
+    V --> W["Create error response:<br/>'Upload failed: ' + e.getMessage()"]
+    W --> X["Send 500 Internal Server Error<br/>with response.length()"]
+    X --> Y["Write response bytes<br/>to OutputStream<br/>Close stream"]
+    Y --> Z
     </div>
   </div>
 </body>
