@@ -171,6 +171,7 @@ body {
 
 #droppedFiles {
   display: block;
+  box-shadow: var(--shadow-subtle) inset;
 }
 
 /* --- Header / Title --- */

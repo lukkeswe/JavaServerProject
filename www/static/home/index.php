@@ -139,6 +139,7 @@ if (isset($_COOKIE["javasession"])){
             </div>
             <div id="droppedFiles"></div>
             <input type="file" id="uploadInputFile" style="display:none;">
+            <input type="file" id="bufferInput" style="display: none;">
             <progress id="uploadProgress" value="0" max="100" style="width: 100%; display: none;"></progress>
             <button id="uploadBtn" class="btn">✅</button>
             <button class="btn" id="cancelUpload">❌</button>
@@ -188,6 +189,9 @@ if (isset($_COOKIE["javasession"])){
 
         sessionStorage.setItem("domain", "<?php echo $db->domain;?>");
         const dm = new DM();
+
+        const uploadInputFile = document.getElementById("uploadInputFile");
+        const bufferInput = document.getElementById("bufferInput");
         
         dm.flexContainer();
         dm.fileBurgerMenu();
@@ -198,7 +202,7 @@ if (isset($_COOKIE["javasession"])){
         });
         document.getElementById("cancelUpload").addEventListener("click", () => {
             document.getElementById("droppedFiles").innerHTML = "";
-            document.getElementById("uploadInputFile").value = null;
+            uploadInputFile.value = null;
             document.getElementById("uploadContainer").style.display = "none";
             document.getElementById("grayScreen").style.display = "none";
         });
@@ -211,18 +215,46 @@ if (isset($_COOKIE["javasession"])){
             if (currentPath) path = currentPath.textContent;
             else path = "";
 
-            const folder = await UpManager.uploadFile(document.getElementById("uploadInputFile"), path);
+            const folder = await UpManager.uploadFile(uploadInputFile, path);
             if (currentPath) {
                 dm.getFiles(currentPath.textContent);
                 console.log("Sending: ", currentPath.textContent);
             }
             else dm.getFiles();
             document.getElementById("droppedFiles").innerHTML = "";
-            document.getElementById("uploadInputFile").value = null;
+            uploadInputFile.value = null;
             document.getElementById("uploadContainer").style.display = "none";
             document.getElementById("grayScreen").style.display = "none";
         });
-        // !!!
+        document.getElementById("dropzone").addEventListener("click", () =>{
+            document.getElementById("bufferInput").click();
+        });
+        bufferInput.addEventListener("change", () => {
+            const combinedFiles = Array.from(
+                uploadInputFile.files
+            ).concat(
+                Array.from(bufferInput.files)
+            );
+            const final = new DataTransfer();
+            for (const file of combinedFiles) final.items.add(file);
+            uploadInputFile.files = final.files;
+            droppedFiles.innerHTML = "";
+            for (let file of combinedFiles) {
+                const p = document.createElement("p");
+                p.innerHTML = file.name;
+                droppedFiles.append(p);
+            }
+        });
+        uploadInputFile.addEventListener("change", () => {
+            const files = Array.from(uploadInputFile.files);
+            const droppedFiles = document.getElementById("droppedFiles");
+            droppedFiles.innerHTML = "";
+            for (let file of files) {
+                const p = document.createElement("p");
+                p.innerHTML = file.name;
+                droppedFiles.append(p);
+            }
+        });
         // Put this in place of your current drop handler
         document.getElementById('dropzone').addEventListener('drop', async (e) => {
             e.preventDefault();
@@ -266,24 +298,19 @@ if (isset($_COOKIE["javasession"])){
             }
 
             console.log('Dropped files:', files); // should be File[] like input.files
-            for (let file of files) {
-                const p = document.createElement("p");
-                p.innerHTML = file.name;
-                document.getElementById("droppedFiles").append(p);
-            }
+            
 
             // 4) Turn files[] into a FileList and assign to your hidden file input
             if (files.length) {
-                const inputElement = document.getElementById('uploadInputFile');
-                let existingFiles = Array.from(inputElement.files);
+                let existingFiles = Array.from(uploadInputFile.files);
                 let combinedFiles = existingFiles.concat(files);
 
                 const final = new DataTransfer();
                 for (const f of combinedFiles) final.items.add(f);
 
-                inputElement.files = final.files;
+                uploadInputFile.files = final.files;
 
-                console.log("Current files: ", inputElement.files);
+                console.log("Current files: ", uploadInputFile.files);
 
                 // Call your existing upload function that expects an input element:
                 //uploadFiles(document.getElementById('uploadInputFolder').files);
@@ -329,9 +356,6 @@ if (isset($_COOKIE["javasession"])){
                 }
             });
         }
-
-
-
         document.getElementById('dropzone').addEventListener('dragover', e => e.preventDefault());
         // !!!
         document.getElementById("cancel").addEventListener("click", ()=> {
