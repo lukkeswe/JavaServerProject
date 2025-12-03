@@ -34,7 +34,6 @@ public class Main {
 
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext("/upload", new UploadHandler());
-        server.createContext("/uploadFolder", new UploadFolderHandler());
         server.createContext("/query", new QueryHandler());
         server.createContext("/deleteRows", new DeleteHandler());
         server.createContext("/invite", new CheckInvite());
@@ -565,53 +564,7 @@ public class Main {
                             String requestContentType = requestHeaders.getFirst("Content-Type");
                             // Get the body in bytes
                             byte[] body = inputStreamToBytes(exchange.getRequestBody());
-                            // Extract the headers from the body
-                            String bodyHeaders = extractHeaders(body, requestContentType);
-                            // Extract the body's content type
-                            String bodyContentType = extractContentType(bodyHeaders);
-                            System.out.println("bodyContentType: " + bodyContentType);
                             String response = handleMultipartFormData(body, requestContentType, user);
-                            byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
-
-                            exchange.sendResponseHeaders(200, responseBytes.length);
-                            OutputStream os = exchange.getResponseBody();
-                            os.write(response.getBytes());
-                            os.close();
-                        } catch (Exception e){
-                            e.printStackTrace();
-                            String response = "Upload failed: " + e.getMessage();
-                            exchange.sendResponseHeaders(500, response.length());
-                            OutputStream os = exchange.getResponseBody();
-                            os.write(response.getBytes());
-                            os.close();
-                        }
-                }
-            } else {
-                exchange.sendResponseHeaders(405, -1);
-            }
-        }
-    }
-    static class UploadFolderHandler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-                // Verify the user
-                String sessionId = getJavaSessionId(exchange);
-                String user = SessionManager.getUsername(sessionId);
-                if (user == null) {
-                    exchange.sendResponseHeaders(403, -1);
-                    exchange.getResponseBody().close();
-                    return;
-                } else {
-                    try {
-                            System.out.println("Reciving upload...");
-                            // Get the request headers
-                            Headers requestHeaders = exchange.getRequestHeaders();
-                            // Get the request content type
-                            String requestContentType = requestHeaders.getFirst("Content-Type");
-                            // Get the body in bytes
-                            byte[] body = inputStreamToBytes(exchange.getRequestBody());
-                            String response = handleMultipartFormDataFolder(body, requestContentType, user);
                             byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
 
                             exchange.sendResponseHeaders(200, responseBytes.length);
@@ -2059,6 +2012,7 @@ public class Main {
         }
         return buffer.toByteArray();
     }
+    
     private static String handleMultipartFormData(byte[] body, String contentType, String user) throws IOException {
         String boundary = contentType.split("boundary=")[1];
         byte[] boundaryBytes = ("--" + boundary).getBytes(StandardCharsets.UTF_8);
@@ -2068,8 +2022,6 @@ public class Main {
         
         int pos = 0;
         byte[] data = null;
-        boolean allowed = false;
-        String fileName = "placeholder.jpg";
         String path = "";
 
         while (true) {
@@ -2105,100 +2057,15 @@ public class Main {
             int headerEnd = indexOf(part, "\r\n\r\n".getBytes(StandardCharsets.UTF_8), 0);
             if (headerEnd == -1) {
                 System.err.println("Failed to find header/content separator in part.");
-                continue; // Skip this part to avoid crashing
-            }
-
-            String headers = new String(part, 0, headerEnd, StandardCharsets.UTF_8);
-            byte[] fileContent = Arrays.copyOfRange(part, headerEnd + 4, part.length);
-
-
-            if (headers.contains("filename=\"")) {
-                fileName = extractFileName(headers);
-                System.out.println("File name: " + fileName);
-                data = fileContent;
-
-                msg = "アップロードが成功しました。";
-                
-                String fileNameLower = fileName.toLowerCase();
-                List<Set<String>> extensions = List.of(TEXT_EXTENSIONS, IMAGE_EXTENSIONS, VIDEO_EXTENSIONS);
-                for (Set<String> extList : extensions){
-                    for (String extention : extList) {
-                        if (fileNameLower.endsWith(extention.toLowerCase())){
-                            allowed = true;
-                            break;
-                        }
-                    }
-                    if (allowed) break;
-                }
-                
+                pos = nextBoundary;  // IMPORTANT: Still advance pos
                 continue;
             }
 
-            if (headers.contains("name=\"path\"")){
-                path = new String(fileContent, StandardCharsets.UTF_8).trim();
-                System.out.println("Recived path: " + path);
-            }
-            pos = nextBoundary;
-        }
-        if (data != null && allowed) {
-            saveFile(fileName, data, path, user);
-        }
-        return msg;
-    }
-    private static String handleMultipartFormDataFolder(byte[] body, String contentType, String user) throws IOException {
-        String boundary = contentType.split("boundary=")[1];
-        byte[] boundaryBytes = ("--" + boundary).getBytes(StandardCharsets.UTF_8);
-        byte[] closingBoundaryBytes = ("--" + boundary + "--").getBytes(StandardCharsets.UTF_8);
-
-        String msg = "アップロードのエラー！";
-        
-        int pos = 0;
-        byte[] data = null;
-        String path = "";
-
-        while (true) {
-            // Find next boundary
-            int boundaryIndex = indexOf(body, boundaryBytes, pos);
-            if (boundaryIndex == -1) break;
-
-            // Check if it's the closing boundary
-            if (startsWith(body, boundaryIndex, closingBoundaryBytes)) {
-                break; // Done
-            }
-
-            // Move to content after boundary and CRLF
-            pos = boundaryIndex + boundaryBytes.length;
-            if (pos + 1 < body.length && body[pos] == '\r' && body[pos + 1] == '\n') {
-                pos += 2;
-            }
-
-            // Find the start of the next boundary (i.e., end of this part)
-            int nextBoundary = indexOf(body, boundaryBytes, pos);
-            if (nextBoundary == -1) break;
-
-            byte[] part = Arrays.copyOfRange(body, pos, nextBoundary);
-
-            // Trim trailing newlines
-            while (part.length > 0 && (part[part.length - 1] == '\n' || part[part.length - 1] == '\r')) {
-                part = Arrays.copyOf(part, part.length - 1);
-            }
-
-            String preview = new String(part, 0, Math.min(part.length, 200), StandardCharsets.UTF_8);
-            System.out.println("Part preview:\n" + preview);
-
-            int headerEnd = indexOf(part, "\r\n\r\n".getBytes(StandardCharsets.UTF_8), 0);
-            if (headerEnd == -1) {
-                System.err.println("Failed to find header/content separator in part.");
-                continue; // Skip this part to avoid crashing
-            }
-
             String headers = new String(part, 0, headerEnd, StandardCharsets.UTF_8);
             byte[] fileContent = Arrays.copyOfRange(part, headerEnd + 4, part.length);
 
 
             if (headers.contains("filename=\"")) {
-
-                //-----
                 String relativePath = extractFilePath(headers);
                 String fullPath = USER_DIR + user + "/static/" + path + relativePath;
 
@@ -2219,15 +2086,16 @@ public class Main {
                         fos.write(data);
                     }
                     msg = "アップロードが成功しました。";
-                    continue;
                 }
-                //-----
+                // REMOVED continue here
             }
 
             if (headers.contains("name=\"path\"")){
                 path = new String(fileContent, StandardCharsets.UTF_8).trim();
                 System.out.println("Recived path: " + path);
             }
+            
+            // MOVED pos update here - now it happens for EVERY part
             pos = nextBoundary;
         }
         return msg;

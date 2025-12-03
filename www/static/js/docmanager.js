@@ -1029,6 +1029,8 @@ export default class DocumentManager {
         saveAs.addEventListener("click", ()=> {
             // Show the explorer
             document.getElementById("grayScreen").style.display = "block";
+            document.getElementById("miniExplorer").style.display = "block";
+            if(document.getElementById("miniExplorer")) console.log("found it");
             // Get the current path
             let currentPath = document.getElementById("path");
             // Get the files

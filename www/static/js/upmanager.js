@@ -1,5 +1,5 @@
-export async function uploadFile(path = "") {
-    const files = document.getElementById('fileInput').files;
+export async function uploadFile(input, path = "") {
+    const files = input.files;
     const progress = document.getElementById("uploadProgress");
     const formData = new FormData();
     let htmlFiles = sessionStorage.getItem("htmlList");
@@ -8,6 +8,8 @@ export async function uploadFile(path = "") {
     let imgFiles = sessionStorage.getItem("imgList");
     let fileName;
     let isValidFile = false;
+
+    formData.append("path", path);
 
     for (let file of files) {
         if (
@@ -22,12 +24,11 @@ export async function uploadFile(path = "") {
             alert(`「${file.name}」をファイル名として出来ません。`);
             continue;
         }
-        formData.append("files", file);
+        formData.append("files", file, file.relativePath);
         fileName = file.name;
         isValidFile = true;
     }
     if (isValidFile) {
-        formData.append("path", path);
         console.log("Uploading file...");
 
         progress.style.display = "block";
@@ -52,7 +53,6 @@ export async function uploadFile(path = "") {
 
             xhr.onerror = () => {
                 progress.style.display = "none";
-                alert("アップロード中にエラーが発生しました。");
                 reject(new Error("Upload failed"));
             };
 
@@ -61,72 +61,33 @@ export async function uploadFile(path = "") {
     }
 }
 
-export async function uploadFolder(path = ""){
-    const input = document.getElementById("folderInput");
-    const files = input.files;
-    const progress = document.getElementById("uploadProgress");
-
-    if (files.lenght === 0){
-        alert("フォルダが選択していません！")
-        return;
-    }
-
-    const formData = new FormData();
-
-    formData.append("path", path);
-
-    let htmlFiles = sessionStorage.getItem("htmlList");
-    let fileName;
-    let isValidFile = false;
-    let parentFolder;
-
-    for (const file of files){
-        if (!isValidPath(file.webkitRelativePath)) {
-            alert(`「${file.webkitRelativePath}」は無効なフォルダ/ファイル名です。`);
-            isValidFile = false;
-            break;
+export async function getFilesFromItems(items){
+    let files = [];
+    for (const item in items) {
+        if (item.kind === "file") {
+            const file = item.getAsFile();
+            if (file) files.push(file);
         }
-
-        const parts = file.webkitRelativePath.split("/");
-        parentFolder = parts[0] + "/";
-        
-        formData.append("files[]", file, file.webkitRelativePath);
-        fileName = file.name;
-        isValidFile = true;
     }
-    if (htmlFiles.includes(parentFolder)) {
-        const replace = confirm(`「${parentFolder}」 のフォルダが存在しています。上書きますか？`);
-        if (!replace) isValidFile = false;
-    }
-    if (isValidFile){
-        progress.style.display = "block";
-        progress.value = 0;        
-        return new Promise ((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open("POST", "/uploadFolder");
+    return files;
+}
 
-            xhr.upload.addEventListener("progress", (e) => {
-                if (e.lengthComputable) {
-                    progress.value = (e.loaded / e.total) * 100;
+function readEntry(entry){
+    return new Promise(resolve => {
+        if (entry.isFile){
+            entry.file(file => resolve([file]));
+        } else if(entry.isDirectory) {
+            const dirReader = entry.createReader();
+            dirReader.readEntries(async entries => {
+                let results = [];
+                for (const e of entries) {
+                    const r = await readEntry(e);
+                    results.push(...r);
                 }
+                resolve(results);
             });
-
-            xhr.onload = () => {
-                progress.style.display = "none";
-                alert(xhr.responseText);
-                resolve();
-            };
-
-            xhr.onerror = () => {
-                progress.style.display = "none";
-                alert("アップロード中にエラーが発生しました。");
-                reject(new Error("Upload failed"));
-            };
-
-            xhr.send(formData);
-        });
-    }
-    
+        }
+    });
 }
 
 export async function saveContentToFile(path ="", type, file, content) {

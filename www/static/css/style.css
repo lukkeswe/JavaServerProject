@@ -93,9 +93,8 @@ body {
 }
 
 #miniExplorer {
-  display: block;
   position: relative;
-  z-index: 1001;
+  z-index:1001;
   width: 400px;
   margin: 0 auto;
   background-color: white;
@@ -156,6 +155,22 @@ body {
     display: flex;
     justify-content: space-between;
     margin-top: 8px;
+}
+
+#uploadContainer {
+  display: none;
+  z-index:1001;
+  position: relative;
+  width: 400px;
+  margin: 0 auto;
+  background-color: white;
+  color: black;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+#droppedFiles {
+  display: block;
 }
 
 /* --- Header / Title --- */

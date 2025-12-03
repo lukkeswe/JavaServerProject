@@ -116,7 +116,7 @@ if (isset($_COOKIE["javasession"])){
 </head>
 <body>
     <div id="grayScreen">
-        <div id="miniExplorer">
+        <div id="miniExplorer" style="display:none;">
             <button class="createBtn" id="createFolderBtnMini">📁</button>
             <input id="filename" type="text" value="index" style="width: 150px;"><span id="extention"></span><br>
             <input id="newFolder" type="hidden" style="width: 150px;">
@@ -133,6 +133,16 @@ if (isset($_COOKIE["javasession"])){
                 <button class="btn" id="cancel">❌</button>
             </div>
         </div>
+        <div id="uploadContainer">
+            <div id="dropzone" style="border:2px dashed #333; padding:20px;">
+            Drag files or folders here
+            </div>
+            <div id="droppedFiles"></div>
+            <input type="file" id="uploadInputFile" style="display:none;">
+            <progress id="uploadProgress" value="0" max="100" style="width: 100%; display: none;"></progress>
+            <button id="uploadBtn" class="btn">✅</button>
+            <button class="btn" id="cancelUpload">❌</button>
+        </div>
     </div>
     <header><h1>ファイル管理</h1></header>
     <div id="container">
@@ -142,20 +152,6 @@ if (isset($_COOKIE["javasession"])){
                     <button class="createBtn" id="createFileBtn">📄</button>
                     <button class="createBtn" id="createFolderBtn">📁</button>
                     <button class="createBtn" id="uploadSomeBtn">📤</button>
-                </div>
-                <button id="uploadBackBtn" class="btn" style="display: none;">❌</button>
-                <div id="fileUploadContainer" style="display: none;">
-                    <input type="file" id="fileInput" style="border: solid black 1px;">
-                    <button id="uploadBtn" class="btn">✅</button>
-                </div>
-                <div id="folderUploadContainer" style="display: none;">
-                    <input type="file" id="folderInput" webkitdirectory multiple style="border: solid black 1px;">
-                    <button id="uploadFolderBtn" class="btn">✅</button>
-                </div>
-                <div id="uploadBtnsContainer" style="display: none;">
-                    <button id="fileBtn" class="btn">📎</button>
-                    <button id="folderBtn" class="btn">📂</button>
-                    <button id="cancelUpload" class="btn">❌</button>
                 </div>
                 <div id="newFileOptions" class="newOptions" style="display: none;">
                     <input type="text" id="newFilename" class="textInput" value="filename">
@@ -173,7 +169,6 @@ if (isset($_COOKIE["javasession"])){
                     <button id="createNewFolder" class="btn">✅</button>
                 </div>
                 <div id="optionsContainer"></div>
-                <progress id="uploadProgress" value="0" max="100" style="width: 100%; display: none;"></progress>
                 <div id="displayContainer"></div>
             </div>
             <div id="explorer">
@@ -198,19 +193,14 @@ if (isset($_COOKIE["javasession"])){
         dm.fileBurgerMenu();
         dm.getFiles();
         document.getElementById("uploadSomeBtn").addEventListener("click", () => {
-            dm.toggleShowUploadBtn();
+            document.getElementById("grayScreen").style.display = "block";
+            document.getElementById("uploadContainer").style.display = "block";
         });
         document.getElementById("cancelUpload").addEventListener("click", () => {
-            dm.toggleShowUploadBtn();
-        });
-        document.getElementById("fileBtn").addEventListener("click", () => {
-            dm.showFileUpload();
-        });
-        document.getElementById("folderBtn").addEventListener("click", () => {
-            dm.showFolderUpload();
-        });
-        document.getElementById("uploadBackBtn").addEventListener("click", () => {
-            dm.uploadBack();
+            document.getElementById("droppedFiles").innerHTML = "";
+            document.getElementById("uploadInputFile").value = null;
+            document.getElementById("uploadContainer").style.display = "none";
+            document.getElementById("grayScreen").style.display = "none";
         });
         document.getElementById("uploadBtn").addEventListener("click", async () => {
             const files = document.getElementById("filesContainer");
@@ -221,51 +211,129 @@ if (isset($_COOKIE["javasession"])){
             if (currentPath) path = currentPath.textContent;
             else path = "";
 
-            const loadImage = document.createElement("img");
-            loadImage.src = "/img/muppet-load.gif";
-            files.append(loadImage);
-            const file = await UpManager.uploadFile(path);
+            const folder = await UpManager.uploadFile(document.getElementById("uploadInputFile"), path);
             if (currentPath) {
                 dm.getFiles(currentPath.textContent);
                 console.log("Sending: ", currentPath.textContent);
             }
             else dm.getFiles();
-            dm.uploadBack();
-            dm.toggleShowUploadBtn();
-            dm.emptyDisplayContainer();
-            dm.showInfo(file);
-            if (
-                file.endsWith(".jpg")   ||
-                file.endsWith(".jpeg")  ||
-                file.endsWith(".png")   || 
-                file.endsWith(".JPG")   ||
-                file.endsWith(".gif")   ||
-                file.endsWith(".webp")
-            ){
-                dm.showImage(file, "https://" + sessionStorage["domain"] + "/");
+            document.getElementById("droppedFiles").innerHTML = "";
+            document.getElementById("uploadInputFile").value = null;
+            document.getElementById("uploadContainer").style.display = "none";
+            document.getElementById("grayScreen").style.display = "none";
+        });
+        // !!!
+        // Put this in place of your current drop handler
+        document.getElementById('dropzone').addEventListener('drop', async (e) => {
+            e.preventDefault();
+
+            // 1) Prefer FileList (most direct, same as input.files)
+            const dt = e.dataTransfer;
+            let files = [];
+
+            if (dt && dt.items && dt.items.length) {
+                // Snapshot items immediately (do not use the live list later)
+                const items = Array.from(dt.items);
+
+                for (const item of items) {
+                    // 2) Universal: try getAsFile() first (works in most cases)
+                    if (typeof item.webkitGetAsEntry === 'function') {
+                        const entry = item.webkitGetAsEntry();
+                        if (entry){
+                            if (entry.isDirectory) {
+                                // It's a folder - read it recursively
+                                const entryFiles = await readEntriesRecursively(entry);
+                                files.push(...entryFiles);
+                            } else if (entry.isFile) {
+                                // It's a file - wrap in Promise
+                                const file = await new Promise((resolve, reject) => {
+                                    entry.file(resolve, reject);
+                                });
+                                files.push(file);
+                            }
+                            continue;
+                        }
+                    }
+                    if (typeof item.getAsFile === 'function') {
+                        const f = item.getAsFile();
+                        if (f) {
+                            files.push(f);
+                        }
+                    }
+                }
+            } else if (dt && dt.files && dt.files.length) {
+                files = Array.from(dt.files).filter(f => f.size > 0 || f.type);
+            }
+
+            console.log('Dropped files:', files); // should be File[] like input.files
+            for (let file of files) {
+                const p = document.createElement("p");
+                p.innerHTML = file.name;
+                document.getElementById("droppedFiles").append(p);
+            }
+
+            // 4) Turn files[] into a FileList and assign to your hidden file input
+            if (files.length) {
+                const inputElement = document.getElementById('uploadInputFile');
+                let existingFiles = Array.from(inputElement.files);
+                let combinedFiles = existingFiles.concat(files);
+
+                const final = new DataTransfer();
+                for (const f of combinedFiles) final.items.add(f);
+
+                inputElement.files = final.files;
+
+                console.log("Current files: ", inputElement.files);
+
+                // Call your existing upload function that expects an input element:
+                //uploadFiles(document.getElementById('uploadInputFolder').files);
+            } else {
+                console.log('No files found in drop (source might be URL/text).');
             }
         });
-        document.getElementById("uploadFolderBtn").addEventListener("click", async () => {
-            const files = document.getElementById("filesContainer");
-            files.innerHTML = "";
 
-            const currentPath = document.getElementById("path");
-            let path;
-            if (currentPath) path = currentPath.textContent;
-            else path = "";
+        // Helper: recursively read DirectoryEntry/FileEntry (Chrome)
+        function readEntriesRecursively(entry) {
+            return new Promise((resolve, reject) => {
+                if (entry.isFile) {
+                entry.file(file => {
+                    // set relativePath if you want folder structure (entry.fullPath)
+                    file.relativePath = (entry.fullPath || entry.name).replace(/^\//,'');
+                    resolve([file]);
+                }, reject);
+                } else if (entry.isDirectory) {
+                const reader = entry.createReader();
+                const files = [];
+                const readBatch = () => {
+                    reader.readEntries(async (entries) => {
+                    if (!entries || entries.length === 0) {
+                        resolve(files);
+                        return;
+                    }
+                    // process entries sequentially to preserve memory
+                    for (const ent of entries) {
+                        // await recursive call to preserve order
+                        // but we wrap in Promise since readEntries uses callback
+                        // use synchronous push via await
+                        // this code uses recursion; adapt if you want parallelism
+                        // NB: entry may be FileEntry or DirectoryEntry
+                        const subFiles = await readEntriesRecursively(ent);
+                        files.push(...subFiles);
+                    }
+                    readBatch();
+                    }, reject);
+                };
+                readBatch();
+                } else {
+                resolve([]);
+                }
+            });
+        }
 
-            const loadImage = document.createElement("img");
-            loadImage.src = "/img/muppet-load.gif";
-            files.append(loadImage);
-            const folder = await UpManager.uploadFolder(path);
-            if (currentPath) {
-                dm.getFiles(currentPath.textContent);
-                console.log("Sending: ", currentPath.textContent);
-            }
-            else dm.getFiles();
-            dm.emptyDisplayContainer();
-            dm.showInfo();
-        });
+
+
+        document.getElementById('dropzone').addEventListener('dragover', e => e.preventDefault());
+        // !!!
         document.getElementById("cancel").addEventListener("click", ()=> {
             document.getElementById("uploadBtnMini").remove();
             document.getElementById("grayScreen").style.display = "none";
