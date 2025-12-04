@@ -134,15 +134,17 @@ if (isset($_COOKIE["javasession"])){
             </div>
         </div>
         <div id="uploadContainer">
-            <div id="dropzone" style="border:2px dashed #333; padding:20px;">
+            <div id="dropzone">
             Drag files or folders here
             </div>
             <div id="droppedFiles"></div>
             <input type="file" id="uploadInputFile" style="display:none;">
             <input type="file" id="bufferInput" style="display: none;">
             <progress id="uploadProgress" value="0" max="100" style="width: 100%; display: none;"></progress>
-            <button id="uploadBtn" class="btn">✅</button>
-            <button class="btn" id="cancelUpload">❌</button>
+            <div class="spaceBetween">
+                <button id="uploadBtn" class="btn">✅</button>
+                <button class="btn" id="cancelUpload">❌</button>
+            </div>
         </div>
     </div>
     <header><h1>ファイル管理</h1></header>
@@ -238,18 +240,9 @@ if (isset($_COOKIE["javasession"])){
             const final = new DataTransfer();
             for (const file of combinedFiles) final.items.add(file);
             uploadInputFile.files = final.files;
+            console.log("Current files: ", uploadInputFile.files);
             droppedFiles.innerHTML = "";
             for (let file of combinedFiles) {
-                const p = document.createElement("p");
-                p.innerHTML = file.name;
-                droppedFiles.append(p);
-            }
-        });
-        uploadInputFile.addEventListener("change", () => {
-            const files = Array.from(uploadInputFile.files);
-            const droppedFiles = document.getElementById("droppedFiles");
-            droppedFiles.innerHTML = "";
-            for (let file of files) {
                 const p = document.createElement("p");
                 p.innerHTML = file.name;
                 droppedFiles.append(p);
@@ -311,6 +304,13 @@ if (isset($_COOKIE["javasession"])){
                 uploadInputFile.files = final.files;
 
                 console.log("Current files: ", uploadInputFile.files);
+
+                droppedFiles.innerHTML = "";
+            for (let file of uploadInputFile.files) {
+                const p = document.createElement("p");
+                p.innerHTML = file.name;
+                droppedFiles.append(p);
+            }
 
                 // Call your existing upload function that expects an input element:
                 //uploadFiles(document.getElementById('uploadInputFolder').files);

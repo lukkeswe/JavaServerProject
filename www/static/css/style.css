@@ -163,15 +163,37 @@ body {
   position: relative;
   width: 400px;
   margin: 0 auto;
+  margin-top: 200px;
   background-color: white;
   color: black;
   padding: 16px;
   border-radius: 8px;
 }
 
+#dropzone {
+  border:2px dashed #333; 
+  border-radius: 5px;
+  box-shadow: var(--shadow-subtle) inset;
+  padding: 100px 20px;
+  background-color: #fff;
+  text-align: center;
+}
+
+#dropzone:hover {
+  background-color: gainsboro;
+  cursor: pointer;
+}
+
 #droppedFiles {
   display: block;
-  box-shadow: var(--shadow-subtle) inset;
+  padding: 10px 5px;
+  margin: 5px 0;
+  border-radius: 3px;
+}
+
+.spaceBetween {
+  display: flex;
+  justify-content: space-between;
 }
 
 /* --- Header / Title --- */
