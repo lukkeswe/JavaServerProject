@@ -1,9 +1,9 @@
 :root {
-  --bg: #0b0b0d;
-  --panel: #111214;
-  --muted: #9aa0a6;
-  --accent: #6ee7b7;
-  --card: #131316;
+  --bg: #f7f7f8;
+  --panel: #ffffff;
+  --muted: #555555;
+  --accent: #2563eb;
+  --card: #ffffff;
 }
 html,
 body {
@@ -13,8 +13,8 @@ body {
     "Helvetica Neue", Arial;
 }
 body {
-  background: linear-gradient(180deg, #070708 0%, #0f0f10 100%);
-  color: #e6eef3;
+  background: linear-gradient(180deg, #ffffff 0%, #f2f2f2 100%);
+  color: #222222;
 }
 
 header {
@@ -53,7 +53,7 @@ input[type="range"] {
 }
 button:hover {
   border-color: rgba(255, 255, 255, 0.12);
-  color: #fff;
+  color: #111;
 }
 
 main {
@@ -88,6 +88,7 @@ main {
 /* overlay toolbar placed on top of the block */
 .block .overlay {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   align-items: center;
   z-index: 20;

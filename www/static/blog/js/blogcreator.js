@@ -29,7 +29,7 @@ function createBlock(type, initial){
         t.className = 'text-content medium';
         t.contentEditable = true;
         t.spellcheck = false;
-        t.innerHTML = initial || '<h1>タイトルを書いてください</h1>\n\t\t<p>ここに文章を入力してください...</p>';
+        t.innerHTML = initial || '<p>ここに文章を入力してください...</p>';
         t.style.fontFamily = 'Sans';
         block.appendChild(t);
 
@@ -63,6 +63,19 @@ function createBlock(type, initial){
           };
           hiddenFile.click();
         });
+      } else if (type === "title"){
+        const t = document.createElement('div');
+        t.className = 'text-content large';
+        t.contentEditable = true;
+        t.spellcheck = false;
+        t.innerHTML = initial || '<h1>Text here...</h1>';
+        t.style.fontFamily = 'Sans';
+        block.appendChild(t);
+
+        fontSelect.addEventListener('change', ()=> { t.style.fontFamily = fontSelect.value; });
+        sizeInput.addEventListener('input', () => { t.style.fontSize = sizeInput.value + 'px'; });
+        boldBtn.addEventListener('click', ()=> { t.style.fontWeight = (t.style.fontWeight === '700' ? '400' : '700'); });
+        italicBtn.addEventListener('click', ()=> { t.style.fontStyle = (t.style.fontStyle === 'italic' ? 'normal' : 'italic'); });
       }
 
       delBtn.addEventListener('click',()=>{ if(confirm('このブロックを削除しますか？')) block.remove(); });

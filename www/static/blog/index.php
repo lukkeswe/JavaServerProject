@@ -62,18 +62,21 @@ if (isset($_COOKIE["javasession"])){
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Blog creater tool</title>
+  <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="css/style.css">
   <script src="../js/upmanager.js"></script>
   <script src="../js/docmanager.js"></script>
+  <style>footer{background: none;border: none;}</style>
 </head>
 <body>
   <div id="grayScreen">
     <div id="miniExplorer">
       <input id="filename" type="text" value="index" style="width: 150px;"><span>.html</span>
-      <div id="pathContainerMini"></div>
+      <div id="pathContainerMini"><p id="pathMini"></p></div>
       <div id="optionsContainerMini"></div>
       <div id="displayContainerMini" style="display: none;"></div>
       <div id="filesContainerMini"></div>
+      <progress id="uploadProgress" value="0" max="100" style="width: 100%; display: none;"></progress>
       <div id="uploadBtnContainerMini"></div>
       <button id="cancel">Cancel</button>
     </div>
@@ -83,6 +86,7 @@ if (isset($_COOKIE["javasession"])){
       <div class="title">Blog creater tool — ブログ作成ツール</div>
       <div class="muted" style="margin-left:12px">簡単にブログを作ってHTMLをダウンロード</div>
       <div class="controls">
+        <button id="addTitle">＋タイトル追加</button>
         <button id="addText">＋ 文章を追加</button>
         <button id="addImage">＋ 画像を追加</button>
         <label><input type="checkbox" id="toggleBase64" checked> Base64画像</label>
@@ -98,11 +102,12 @@ if (isset($_COOKIE["javasession"])){
     <div class="muted" style="margin-top:8px">各ブロックにマウスを合わせると、ブロックの上に編集ボタン（オーバーレイ）が表示されます。</div>
   </main>
 
-  <footer>Background: dark UI • ブロック上のボタンでフォントスタイルやサイズを変更できます</footer>
+  <footer>Norlund J. Lukas</footer>
 
   <script src="js/blogcreator.js"></script>
-  <script>
+  <script type="module">
     const canvas = document.getElementById('canvas');
+    const addTitleBtn = document.getElementById('addTitle');
     const addTextBtn = document.getElementById('addText');
     const addImageBtn = document.getElementById('addImage');
     const hiddenFile = document.getElementById('hiddenFile');
@@ -110,10 +115,18 @@ if (isset($_COOKIE["javasession"])){
     const toggleBase64 = document.getElementById('toggleBase64');
     const saveBtn = document.getElementById('save');
 
-    const dm = new DocumentManager("<?php echo $db->username; ?>");
-    sessionStorage.setItem("user", "<?php echo $db->username; ?>");
-    sessionStorage.setItem("domain", "<?php echo $db->domain;?>");
+    import DM from '../js/docmanager.js';
+    import * as UpManager from "../js/upmanager.js";
 
+    sessionStorage.setItem("domain", "<?php echo $db->domain;?>");
+    const dm = new DM();
+
+    addTitleBtn.addEventListener('click', ()=> {
+      const b = createBlock('title');
+      canvas.appendChild(b);
+      setTimeout(()=>{ b.querySelector('[contenteditable]').focus(); }, 100);
+    });
+    
     addTextBtn.addEventListener('click', ()=>{
       const b = createBlock('text');
       canvas.appendChild(b);
@@ -158,7 +171,7 @@ if (isset($_COOKIE["javasession"])){
         }
       });
 
-      const template = `<!doctype html>\n<html lang=\"ja\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<title>My Blog</title>\n<style>body{background:#111;color:#fff;font-family:system-ui,Arial;line-height:1.6;padding:28px;max-width:750px;margin:0 auto}</style>\n</head>\n<body>\n${bodyInner}\n</body>\n</html>`;
+      const template = `<!doctype html>\n<html lang=\"ja\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<title>My Blog</title>\n<style>body{background:#fff;color:#111;font-family:system-ui,Arial;line-height:1.6;padding:28px;max-width:750px;margin:0 auto;margin-top:50px;box-shadow: 0 6px 20px rgba(2, 6, 10, 0.6);border-radius: 12px;}</style>\n</head>\n<body>\n${bodyInner}\n</body>\n</html>`;
 
       const blob = new Blob([template], {type:'text/html'});
       const url = URL.createObjectURL(blob);
@@ -184,19 +197,18 @@ if (isset($_COOKIE["javasession"])){
         }
       });
 
-      const template = `<!doctype html>\n<html lang=\"ja\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<title>My Blog</title>\n<style>body{background:#111;color:#fff;font-family:system-ui,Arial;line-height:1.6;padding:28px;max-width:750px;margin:0 auto}</style>\n</head>\n<body>\n${bodyInner}\n</body>\n</html>`;
+      const template = `<!doctype html>\n<html lang=\"ja\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<title>My Blog</title>\n<style>body{background:#fff;color:#111;font-family:system-ui,Arial;line-height:1.6;padding:28px;max-width:750px;margin:0 auto;margin-top:50px;box-shadow: 0 6px 20px rgba(2, 6, 10, 0.6);border-radius: 12px;}</style>\n</head>\n<body>\n${bodyInner}\n</body>\n</html>`;
 
       const blob = new Blob([template], {type:'text/html'});
 
-      const user = "<?php echo $db->username; ?>";
-      let path = "test/";
+      let path = "";
       // Show the explorer
       document.getElementById("grayScreen").style.display = "block";
       // Get the current path
       let currentPath = document.getElementById("pathMini");
       // Get the files
-      if (currentPath) dm.getFilesMini("<?php echo $db->username; ?>", currentPath.textContent);
-      else dm.getFilesMini("<?php echo $db->username; ?>", "");
+      if (currentPath) dm.getFilesMini(currentPath.textContent);
+      else dm.getFilesMini("");
       // Create an upload button
       const uploadBtnContainer = document.getElementById("uploadBtnContainerMini");
       const uploadBtn = document.createElement("button");
@@ -224,7 +236,7 @@ if (isset($_COOKIE["javasession"])){
           path = currentPath.textContent;
         }
         // Upload the file to the server
-        await uploadFile(user, path);
+        await UpManager.uploadFile(fileInput, path);
         // Remove temporary elements
         document.body.removeChild(fileInput);
         uploadBtn.remove();
@@ -242,7 +254,7 @@ if (isset($_COOKIE["javasession"])){
       document.getElementById("grayScreen").style.display = "none";
     });
 
-    canvas.appendChild(createBlock('text', '<h1>タイトルを書いてください</h1>\n\t\t<p>イントロダクション...</p>'));
+    canvas.appendChild(createBlock('text', '<p>イントロダクション...</p>'));
   </script>
 </body>
 </html>
