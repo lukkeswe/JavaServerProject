@@ -61,6 +61,58 @@ export async function uploadFile(input, path = "") {
     }
 }
 
+export async function uploadTempFile(input) {
+    const files = input.files;
+    const progress = document.getElementById("uploadProgress");
+    const formData = new FormData();
+    let fileName;
+    let isValidFile = false;
+
+    formData.append("path", "temp/");
+
+    for (let file of files) {
+        if (!isValidFileName(file.name)){
+            alert(`「${file.name}」をファイル名として出来ません。`);
+            continue;
+        }
+        formData.append("files", file, file.relativePath);
+        fileName = file.name;
+        isValidFile = true;
+    }
+    if (isValidFile) {
+        console.log("Uploading file...");
+
+        progress.style.display = "block";
+        progress.value = 0;
+
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/upload");
+
+            xhr.upload.addEventListener("progress", (e) => {
+                if (e.lengthComputable) {
+                    const percent = (e.loaded / e.total) * 100;
+                    progress.value = percent;
+                }
+            });
+            
+            xhr.onload = () => {
+                progress.style.display = "none";
+                alert(xhr.responseText);
+                resolve(fileName);
+            };
+
+            xhr.onerror = () => {
+                progress.style.display = "none";
+                reject(new Error("Upload failed"));
+            };
+
+            xhr.send(formData);
+        });
+    }
+}
+
+
 export async function getFilesFromItems(items){
     let files = [];
     for (const item in items) {

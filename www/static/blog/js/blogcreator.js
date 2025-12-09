@@ -38,6 +38,7 @@ function createBlock(type, initial){
         boldBtn.addEventListener('click',()=>{ t.style.fontWeight = (t.style.fontWeight === '700' ? '400' : '700'); });
         italicBtn.addEventListener('click',()=>{ t.style.fontStyle = (t.style.fontStyle === 'italic' ? 'normal' : 'italic'); });
       } else if(type==='image'){
+        // TODO
         const wrap = document.createElement('div'); wrap.className='img-wrap';
         const img = document.createElement('img'); img.alt = 'uploaded image';
         if(initial) img.src = initial;
@@ -48,21 +49,6 @@ function createBlock(type, initial){
         sizeInput.style.display='none';
         boldBtn.style.display='none';
         italicBtn.style.display='none';
-
-        overlay.addEventListener('click',async ()=>{
-          hiddenFile.onchange = async e=>{
-            const f = e.target.files[0]; if(!f) return;
-            if(toggleBase64.checked){
-              const r = new FileReader(); r.onload = ev=>{ img.src = ev.target.result; }; r.readAsDataURL(f);
-            } else {
-              const path = f.name;
-              const uploadedPath = await uploadFile("<?php echo $db->username; ?>", path);
-              img.src = uploadedPath;
-            }
-            hiddenFile.value = '';
-          };
-          hiddenFile.click();
-        });
       } else if (type === "title"){
         const t = document.createElement('div');
         t.className = 'text-content large';

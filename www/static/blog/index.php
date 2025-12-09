@@ -70,7 +70,11 @@ if (isset($_COOKIE["javasession"])){
 </head>
 <body>
   <div id="grayScreen">
-    <div id="miniExplorer">
+    <div id="loadImage" style="width: 50%;margin:0 auto;">
+      <img src="../img/muppet-load.gif" alt="muppet load image">
+      <progress id="uploadProgress" value="0" max="100" style="width: 100%; display: none;"></progress>
+    </div>
+    <div id="miniExplorer" style="display: none;">
       <input id="filename" type="text" value="index" style="width: 150px;"><span>.html</span>
       <div id="pathContainerMini"><p id="pathMini"></p></div>
       <div id="optionsContainerMini"></div>
@@ -82,7 +86,7 @@ if (isset($_COOKIE["javasession"])){
     </div>
   </div>
   <header>
-    <div class="toolbar">
+    <div id="toolbar" class="toolbar">
       <div class="title">Blog creater tool — ブログ作成ツール</div>
       <div class="muted" style="margin-left:12px">簡単にブログを作ってHTMLをダウンロード</div>
       <div class="controls">
@@ -106,6 +110,10 @@ if (isset($_COOKIE["javasession"])){
 
   <script src="js/blogcreator.js"></script>
   <script type="module">
+    const grayScreen = document.getElementById('grayScreen');
+    const miniExplorer = document.getElementById('miniExplorer');
+    const loadImage = document.getElementById("loadImage");
+    const toolbar = document.getElementById('toolbar');
     const canvas = document.getElementById('canvas');
     const addTitleBtn = document.getElementById('addTitle');
     const addTextBtn = document.getElementById('addText');
@@ -143,8 +151,12 @@ if (isset($_COOKIE["javasession"])){
           }; r.readAsDataURL(f);
         } else {
           const path = f.name;
-          const uploadedPath = await uploadFile("<?php echo $db->username; ?>", path);
-          const b = createBlock('image', uploadedPath);
+          grayScreen.style.display = "block";
+          loadImage.style.display = "block";
+          const uploadedPath = await UpManager.uploadTempFile(hiddenFile);
+          grayScreen.style.display = "none";
+          loadImage.style.display = "none";
+          const b = createBlock('image', "https://<?php echo $db->domain;?>/temp/" + path);
           canvas.appendChild(b);
         }
         hiddenFile.value = '';
@@ -203,7 +215,8 @@ if (isset($_COOKIE["javasession"])){
 
       let path = "";
       // Show the explorer
-      document.getElementById("grayScreen").style.display = "block";
+      grayScreen.style.display = "block";
+      miniExplorer.style.display = "block";
       // Get the current path
       let currentPath = document.getElementById("pathMini");
       // Get the files
@@ -243,7 +256,8 @@ if (isset($_COOKIE["javasession"])){
         // Alert the user
         alert("Blog saved to: " + path);
         // Close the explorer
-        document.getElementById("grayScreen").style.display = "none";
+        miniExplorer.style.display = "none";
+        grayScreen.style.display = "none";
       });
       // Append the upload button
       uploadBtnContainer.append(uploadBtn);
@@ -251,7 +265,8 @@ if (isset($_COOKIE["javasession"])){
 
     document.getElementById("cancel").addEventListener("click", ()=> {
       document.getElementById("uploadBtn").remove();
-      document.getElementById("grayScreen").style.display = "none";
+      miniExplorer.style.display = "none";
+      grayScreen.style.display = "none";
     });
 
     canvas.appendChild(createBlock('text', '<p>イントロダクション...</p>'));
