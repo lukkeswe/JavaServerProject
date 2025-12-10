@@ -884,12 +884,30 @@ export default class DocumentManager {
                                 optionsContainer.append(backBtn);
                             });
                         } else if (type == "blog") {
-                            // If the file is a css or JavaScript file
-                            // Add event listener
-                            name.addEventListener("click", () => {
-                                this.emptyDisplayContainer();
-
-                                this.showInfo(fileName);
+                            // Create hyper-link
+                            const a = document.createElement("a");
+                            // Add a url
+                            if (currentPath != null && currentPath.textContent.endsWith("/")) {
+                                a.href = "https://" + sessionStorage["domain"] + "/" + currentPath.textContent + fileName;
+                            } else {
+                                a.href = "https://" + sessionStorage["domain"] + "/" + fileName;
+                            }
+                            // Add setting
+                            a.target = "_blank";
+                            // Add an icon to the hyper-link
+                            a.innerHTML = "🌍";
+                            // Add a classname
+                            a.className = "btn";
+                            // Add an ecentlistener
+                            name.addEventListener("click", ()=> {
+                                optionsContainer.innerHTML = "";
+                                optionsContainer.append(a);
+                                optionsContainer.append(backBtn);
+                            });
+                            // Add a double click eventlistener
+                            name.addEventListener("dblclick", ()=> {
+                                // Redirect the user
+                                window.open(a.href, "_blank");
                             });
                         }
 
