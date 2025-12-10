@@ -196,16 +196,40 @@ if (isset($_COOKIE["javasession"])){
       blocks.forEach(b=>{
         if(b.querySelector('.text-content')){
           const t = b.querySelector('.text-content');
+          // Clean HTML
           let html = t.innerHTML.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '');
+          // Read metadata from the block itself
+          const type = b.dataset.block || 'text';
+          const font = b.dataset.font || t.style.fontFamily || '';
+          const size = b.dataset.size || t.style.fontSize || '';
+          const bold = b.dataset.bold || t.style.fontWeight || '';
+          const italic = b.dataset.italic || t.style.fontStyle || '';
+
           const style = [];
-          if(t.style.fontFamily) style.push('font-family:' + t.style.fontFamily);
-          if(t.style.fontSize) style.push('font-size:' + t.style.fontSize);
-          if(t.style.fontWeight) style.push('font-weight:' + t.style.fontWeight);
-          if(t.style.fontStyle) style.push('font-style:' + t.style.fontStyle);
-          bodyInner += `\t<div style="${style.join(';')};margin:18px 0;">\n\t\t${html}\n\t</div>\n`;
+          if (font) style.push('font-family:' + font);
+          if (size) style.push('font-size:' + size);
+          if (bold) style.push('font-weight:' + bold);
+          if (italic) style.push('font-style:' + italic);
+          bodyInner += `\t<div 
+    data-block="${type}"
+    data-font="${font}"
+    data-size="${size}"
+    data-bold="${bold}"
+    data-italic="${italic}"
+    style="${style.join(';')};margin:18px 0;">
+        ${html}
+    </div>\n`;
+
         } else if(b.querySelector('img')){
           const img = b.querySelector('img');
-          bodyInner += `\t<div style=\"margin:18px 0;text-align:center;\">\n\t\t<img src=\"${img.src}\" alt=\"image\" style=\"max-width:100%;height:auto;border-radius:6px;\"/>\n\t</div>`;
+          //Image metadata
+          const type = b.dataset.block || 'image';
+
+          bodyInner += `\t<div 
+    data-block="${type}"
+    style="margin:18px 0;text-align:center;">
+        <img src="${img.src}" alt="image" style="max-width:100%;height:auto;border-radius:6px;"/>
+    </div>\n`;
         }
       });
 
@@ -233,26 +257,14 @@ if (isset($_COOKIE["javasession"])){
         const filename = document.getElementById("filename").value;
         // Create a file
         const file = new File([blob], filename + ".html", {type: "text/html"});
-        // Create a temporary file input element
-        const fileInput = document.createElement("input");
-        fileInput.type = "file";
-        // Tranfer the data from the "blob" to the input element
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(file);
-        fileInput.files = dataTransfer.files;
-        // Append the input element to the document (so it can be used by the upload function)
-        fileInput.id = "fileInput";
-        document.body.appendChild(fileInput);
         // Get the current path
         currentPath = document.getElementById("pathMini");
         if (currentPath && currentPath.innerHTML != ""){
           path = currentPath.textContent;
         }
         // Upload the file to the server
-        //await UpManager.uploadFile(fileInput, path);
         await UpManager.saveBlog(blob, path, filename + ".html");
         // Remove temporary elements
-        document.body.removeChild(fileInput);
         uploadBtn.remove();
         // Alert the user
         alert("Blog saved to: " + path);
@@ -270,7 +282,21 @@ if (isset($_COOKIE["javasession"])){
       grayScreen.style.display = "none";
     });
 
-    canvas.appendChild(createBlock('text', '<p>イントロダクション...</p>'));
+    const params = new URLSearchParams(window.location.search);
+
+    const filename = params.get("filename");
+    const path = params.get("path");
+
+    if (filename){
+      const content = await UpManager.fetchBlogContent(filename, path);
+      if (content) {
+        console.log("Content");
+        console.log(content);
+        importHTML(content, canvas);
+      } else console.error("Error: importHTML");
+    } else {
+      canvas.appendChild(createBlock('text', '<p>Text here...</p>'));
+    }
   </script>
 </body>
 </html>

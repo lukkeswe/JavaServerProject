@@ -884,6 +884,20 @@ export default class DocumentManager {
                                 optionsContainer.append(backBtn);
                             });
                         } else if (type == "blog") {
+                            // Create a link to edit the blog
+                            const editBlog = document.createElement("a");
+                            // Add url
+                            if (currentPath != null && currentPath.textContent.endsWith("/")) {
+                                editBlog.href = `https://tekknat.com/blog/?filename=${fileName.replace(".blog", ".html")}&path=${currentPath.textContent}`;
+                            } else {
+                                editBlog.href = `https://tekknat.com/blog/?filename=${fileName.replace(".blog", ".html")}&path=`;
+                            }
+                            // Add setting
+                            editBlog.target = "_blank";
+                            // Add an icon 
+                            editBlog.innerHTML = "📝";
+                            // Add a classname
+                            editBlog.className = "btn";
                             // Create hyper-link
                             const a = document.createElement("a");
                             // Add a url
@@ -898,9 +912,10 @@ export default class DocumentManager {
                             a.innerHTML = "🌍";
                             // Add a classname
                             a.className = "btn";
-                            // Add an ecentlistener
+                            // Add an eventlistener
                             name.addEventListener("click", ()=> {
                                 optionsContainer.innerHTML = "";
+                                optionsContainer.append(editBlog);
                                 optionsContainer.append(a);
                                 optionsContainer.append(backBtn);
                             });

@@ -46,6 +46,7 @@ public class Main {
         server.createContext("/deleteFile", new DeleteFileHandler());
         server.createContext("/getFileContent", new FetchFileContent());
         server.createContext("/saveFile", new SaveFileHandler());
+        server.createContext("/getBlogContent", new FetchBlogContentHandler());
         server.createContext("/saveBlog", new SaveBlogHandler());
         server.createContext("/createFolder", new CreateFolderHandler());
         server.createContext("/deleteFolder", new DeleteFolderHandler());
@@ -1328,6 +1329,48 @@ public class Main {
                     os.close();
                     exchange.close();
                     return;
+                }
+            } else {
+                exchange.sendResponseHeaders(405, -1);
+                exchange.close();
+                return;
+            }
+        }
+    }
+    static class FetchBlogContentHandler implements HttpHandler{
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if ("POST".equals(exchange.getRequestMethod())){
+                // Get the requestbody
+                String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+                // Parse the body into Map
+                Map<String, String> map = parseJsonToMap(body);
+                // Verify the user
+                String sessionId = getJavaSessionId(exchange);
+                String user = SessionManager.getUsername(sessionId);
+                if (user == null) {
+                    exchange.sendResponseHeaders(403, -1);
+                    exchange.close();
+                    return;
+                } else {
+                    System.out.println("-- Fetching blog content --");
+                    Path path = Paths.get(USER_DIR, user, "blog", map.get("path").toString(), map.get("filename").toString());
+                    System.out.println("-- Path: " + path.toString() + " -- ");
+                    if (Files.exists(path)){
+                        System.out.println("-- File exists --");
+                        byte[] response = Files.readAllBytes(path);
+                        exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
+                        exchange.sendResponseHeaders(200, response.length);
+                        OutputStream os = exchange.getResponseBody();
+                        os.write(response);
+                        os.close();
+                        exchange.close();
+                        return;
+                    } else {
+                        exchange.sendResponseHeaders(403, -1);
+                        exchange.close();
+                        return;
+                    }
                 }
             } else {
                 exchange.sendResponseHeaders(405, -1);

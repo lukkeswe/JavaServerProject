@@ -131,6 +131,27 @@ export async function saveBlog(blob, path = "", filename){
     console.log("Response:", msg);
 }
 
+export async function fetchBlogContent(file, path = ""){
+    let requestObject = {
+        "filename"  : file,
+        "path"      : path
+    };
+
+    console.log(`Fetching ${path + file}'s content...`);
+    let response = await fetch("/getBlogContent", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(requestObject)
+    });
+
+    if(!response.ok) {
+        throw new Error(`Server responded with ${response.status}`);
+    }
+
+    const content = await response.text();
+    return content;
+}
+
 export async function getFilesFromItems(items){
     let files = [];
     for (const item in items) {
