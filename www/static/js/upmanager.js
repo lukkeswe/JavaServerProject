@@ -112,6 +112,24 @@ export async function uploadTempFile(input) {
     }
 }
 
+export async function saveBlog(blob, path = "", filename){
+    const content = await blob.text();
+    let requestObject = {
+        "path"      : path,
+        "filename"  : filename,
+        "data"      : content
+    };
+    console.log("Saving blog...");
+
+    const response = await fetch("/saveBlog", {
+        method:"POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(requestObject)
+    });
+
+    let msg = await response.text();
+    console.log("Response:", msg);
+}
 
 export async function getFilesFromItems(items){
     let files = [];
@@ -157,7 +175,7 @@ export async function saveContentToFile(path ="", type, file, content) {
         body: JSON.stringify(requestObject)
     });
 
-    let msg = await response.text()
+    let msg = await response.text();
 
     console.log(msg);
 

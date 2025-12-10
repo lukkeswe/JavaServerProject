@@ -471,6 +471,11 @@ header h1 {
   color: #111;
 }
 
+#blogList li span {
+  background: linear-gradient(180deg,#f67ecc,#da54a7);
+  color: #111;
+}
+
 /* Hover shade for the colored spans to feel tactile */
 #filesContainer li span:hover {
   filter: brightness(0.95);

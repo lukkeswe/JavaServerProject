@@ -608,7 +608,7 @@ export default class DocumentManager {
             filesContainer.style.padding = "18px";
             filesContainer.innerHTML = "";
             // List of supported file types
-            const fileTypes = ["folder", "html", "php", "css", "img", "js", "video"];
+            const fileTypes = ["folder", "html", "php", "css", "img", "js", "video", "blog"];
             for (let type of fileTypes){
                 const ul    = document.createElement("ul");
                 ul.id       = type + "List";
@@ -883,7 +883,16 @@ export default class DocumentManager {
                                 optionsContainer.append(erase);
                                 optionsContainer.append(backBtn);
                             });
+                        } else if (type == "blog") {
+                            // If the file is a css or JavaScript file
+                            // Add event listener
+                            name.addEventListener("click", () => {
+                                this.emptyDisplayContainer();
+
+                                this.showInfo(fileName);
+                            });
                         }
+
                     }
                     ul.append(fileObject);
                     list.push(fileName);
@@ -945,7 +954,7 @@ export default class DocumentManager {
             const filesContainer    = document.getElementById("filesContainerMini");
             filesContainer.innerHTML = "";
             // List of supported file types
-            const fileTypes = ["folder", "html", "php", "css", "img", "js", "video"];
+            const fileTypes = ["folder", "html", "php", "css", "img", "js", "video", "blog"];
             for (let type of fileTypes){
                 const ul    = document.createElement("ul");
                 ul.id       = type + "List";

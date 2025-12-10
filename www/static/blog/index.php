@@ -70,12 +70,12 @@ if (isset($_COOKIE["javasession"])){
 </head>
 <body>
   <div id="grayScreen">
-    <div id="loadImage" style="width: 50%;margin:0 auto;">
+    <div id="loadImage" style="width: 50%;margin:0 auto;display:none;">
       <img src="../img/muppet-load.gif" alt="muppet load image">
       <progress id="uploadProgress" value="0" max="100" style="width: 100%; display: none;"></progress>
     </div>
     <div id="miniExplorer" style="display: none;">
-      <input id="filename" type="text" value="index" style="width: 150px;"><span>.html</span>
+      <input id="filename" type="text" value="index" style="width: 150px;"><span>.blog</span>
       <div id="pathContainerMini"><p id="pathMini"></p></div>
       <div id="optionsContainerMini"></div>
       <div id="displayContainerMini" style="display: none;"></div>
@@ -101,7 +101,7 @@ if (isset($_COOKIE["javasession"])){
     </div>
   </header>
 
-  <main>
+  <main>saveBlog
     <div class="canvas" id="canvas" aria-label="ブログキャンバス"></div>
     <div class="muted" style="margin-top:8px">各ブロックにマウスを合わせると、ブロックの上に編集ボタン（オーバーレイ）が表示されます。</div>
   </main>
@@ -249,7 +249,8 @@ if (isset($_COOKIE["javasession"])){
           path = currentPath.textContent;
         }
         // Upload the file to the server
-        await UpManager.uploadFile(fileInput, path);
+        //await UpManager.uploadFile(fileInput, path);
+        await UpManager.saveBlog(blob, path, filename + ".html");
         // Remove temporary elements
         document.body.removeChild(fileInput);
         uploadBtn.remove();

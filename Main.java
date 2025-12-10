@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Exchanger;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -45,6 +46,7 @@ public class Main {
         server.createContext("/deleteFile", new DeleteFileHandler());
         server.createContext("/getFileContent", new FetchFileContent());
         server.createContext("/saveFile", new SaveFileHandler());
+        server.createContext("/saveBlog", new SaveBlogHandler());
         server.createContext("/createFolder", new CreateFolderHandler());
         server.createContext("/deleteFolder", new DeleteFolderHandler());
         server.createContext("/moveIt", new MoveItHandler());
@@ -161,6 +163,21 @@ public class Main {
                     return;
                 }
 
+            } else if (requestPath.endsWith(".blog")){
+                System.out.println("-- Looking for blog --");
+                Path blogPath = Paths.get(userPath, "blog", requestPath.replace(".blog", ".html"));
+                System.out.println("-- Path: " + blogPath.toString() + " --");
+                if (Files.exists(blogPath)) {
+                    System.out.println("-- Found the file! --");
+                    response = Files.readAllBytes(blogPath);
+                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+                    exchange.sendResponseHeaders(200, response.length);
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(response);
+                    os.close();
+                    exchange.close();
+                    return;
+                }
             }
             
             // If the host is the development url
@@ -179,22 +196,36 @@ public class Main {
                     Path resolvePath = Paths.get(userPath, "static", requestPath).normalize();
                     System.out.println("Looking for: " + resolvePath.toString());
                     if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
+                        //Look for a HTML file
                         resolvePath = Paths.get(userPath, "static", requestPath, "index.html").normalize();
                         System.out.println("Looking for: " + resolvePath.toString());
                         if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
+                            // Look for a PHP file
                             resolvePath = Paths.get(userPath, "static", requestPath, "index.php").normalize();
                             System.out.println("Looking for: " + resolvePath.toString());
-                            //System.out.println("resolvePath: " + resolvePath.toString());
                             if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
-                                System.out.println("Invalid path:" + resolvePath.toString());
-                                response = Files.readAllBytes(Paths.get("www/static/notfound.html"));
-                                exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
-                                exchange.sendResponseHeaders(404, response.length);
-                                OutputStream os = exchange.getResponseBody();
-                                os.write(response);
-                                os.close();
-                                exchange.close();
-                                return;
+                                resolvePath = Paths.get(userPath, "static", requestPath, "index.blog").normalize();
+                                System.out.println("Looking for: " + resolvePath.toString());
+                                if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
+                                    System.out.println("Invalid path:" + resolvePath.toString());
+                                    response = Files.readAllBytes(Paths.get("www/static/notfound.html"));
+                                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+                                    exchange.sendResponseHeaders(404, response.length);
+                                    OutputStream os = exchange.getResponseBody();
+                                    os.write(response);
+                                    os.close();
+                                    exchange.close();
+                                    return;
+                                } else {
+                                    response = Files.readAllBytes(Paths.get(userPath, "blog", requestPath, "index.html"));
+                                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+                                    exchange.sendResponseHeaders(200, response.length);
+                                    OutputStream os = exchange.getResponseBody();
+                                    os.write(response);
+                                    os.close();
+                                    exchange.close();
+                                    return;
+                                }
                             } else {
                                 System.out.println("Proccessing: " + resolvePath.toString());
                                 // Proccess the requested PHP file
@@ -821,7 +852,7 @@ public class Main {
                     StringBuilder json = new StringBuilder();
                     String response = "";
 
-                    String[] types = {"folder", "html", "php", "css", "img", "js", "video"};
+                    String[] types = {"folder", "html", "php", "css", "img", "js", "video", "blog"};
                     boolean success = true;
                     json.append("[{");
                         String[] files;
@@ -1074,6 +1105,10 @@ public class Main {
                         return;
                     }
                 }
+            } else {
+                exchange.sendResponseHeaders(405, -1);
+                exchange.getResponseBody().close();
+                return;
             }
         }
     }
@@ -1198,7 +1233,7 @@ public class Main {
                 }
 
             } else {
-                exchange.sendResponseHeaders(403, -1);
+                exchange.sendResponseHeaders(405, -1);
                 exchange.getResponseBody().close();
                 return;
             }
@@ -1248,6 +1283,55 @@ public class Main {
             } else {
                 exchange.sendResponseHeaders(403, -1);
                 exchange.getResponseBody().close();
+                return;
+            }
+        }
+    }
+    static class SaveBlogHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if("POST".equals(exchange.getRequestMethod())){
+                //Gete the request body
+                String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+                // Parse the body into Map
+                Map<String, String> map = parseJsonToMap(body);
+                // Verify the user
+                String sessionId = getJavaSessionId(exchange);
+                String user = SessionManager.getUsername(sessionId);
+                // Reject the request if the verification fails
+                if (user == null) {
+                    exchange.sendResponseHeaders(403, -1);
+                    exchange.close();
+                    return;
+                } else {
+                    // Initial response message
+                    String msg = "Fail";
+                    // Save the file and the blog as a HTML file and make a '.blog' file as a symbolic file
+                    String filename = map.get("filename");
+                    String blogname = filename.replace(".html", ".blog");
+                    int fileSize = map.get("data").length();
+                    String saveData = 
+                        "filename=" + filename + "\n" + 
+                        "blogname=" + blogname + "\n" + 
+                        "path=" + map.get("path").toString() + "\n" +
+                        "size=" + fileSize;
+                    if (saveFile(filename, map.get("data").getBytes(), "blog/" + map.get("path"), user)){
+                        if (saveFile(blogname, saveData.getBytes(), "static/" + map.get("path"), user)) {
+                            msg = "Success";
+                        }
+                    }
+                     byte[] response = msg.getBytes();
+                    exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
+                    exchange.sendResponseHeaders(200, response.length);
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(response);
+                    os.close();
+                    exchange.close();
+                    return;
+                }
+            } else {
+                exchange.sendResponseHeaders(405, -1);
+                exchange.close();
                 return;
             }
         }
@@ -2100,19 +2184,25 @@ public class Main {
         }
         return msg;
     }
-    private static void saveFile(String fileName, byte[] data, String path, String user) throws IOException {
-        Path uploadDir = Paths.get("/home/lukas/users", user, "static", path);
+    private static boolean saveFile(String fileName, byte[] data, String path, String user) {
+        try {
+            Path uploadDir = Paths.get("/home/lukas/users", user, path);
 
-        if (user.equals(ADMIN_HOST)) {
-            uploadDir = Paths.get(ADMIN_DIR + "/static", path);
+            if (user.equals(ADMIN_HOST)) {
+                uploadDir = Paths.get(ADMIN_DIR, path);
+            }
+            
+            if (!Files.exists(uploadDir)) {
+                Files.createDirectories(uploadDir);
+            }
+            Path filePath = uploadDir.resolve(sanitizeFileName(fileName));
+            Files.write(filePath, data);
+            System.out.println("Saved file: " + filePath);
+            return true;
+        } catch (IOException e){
+            return false;
         }
         
-        if (!Files.exists(uploadDir)) {
-            Files.createDirectories(uploadDir);
-        }
-        Path filePath = uploadDir.resolve(sanitizeFileName(fileName));
-        Files.write(filePath, data);
-        System.out.println("Saved file: " + filePath);
     }
     private static String extractFilePath(String headers){
         int start = headers.indexOf("filename=\"");
