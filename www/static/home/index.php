@@ -147,6 +147,9 @@ if (isset($_COOKIE["javasession"])){
             </div>
         </div>
     </div>
+    <div id="loadImage" style="width: 50%;margin:0 auto;display:none;">
+      <img src="../img/muppet-load.gif" alt="muppet load image">
+    </div>
     <header><h1>ファイル管理</h1></header>
     <div id="container">
         <main id="main-content">
@@ -194,19 +197,29 @@ if (isset($_COOKIE["javasession"])){
 
         const uploadInputFile = document.getElementById("uploadInputFile");
         const bufferInput = document.getElementById("bufferInput");
+
+        const grayScreen = document.getElementById('grayScreen');
+        const miniExplorer = document.getElementById('miniExplorer');
+        const loadImage = document.getElementById("loadImage");
+
+        const uploadContainer = document.getElementById("uploadContainer");
+        const droppedFiles = document.getElementById("droppedFiles");
+        const droppZone = document.getElementById("dropzone");
+
+        const createFile = document.getElementById("createFileBtn");
         
         dm.flexContainer();
         dm.fileBurgerMenu();
         dm.getFiles();
         document.getElementById("uploadSomeBtn").addEventListener("click", () => {
-            document.getElementById("grayScreen").style.display = "block";
-            document.getElementById("uploadContainer").style.display = "block";
+            grayScreen.style.display = "block";
+            uploadContainer.style.display = "block";
         });
         document.getElementById("cancelUpload").addEventListener("click", () => {
-            document.getElementById("droppedFiles").innerHTML = "";
+            droppedFiles.innerHTML = "";
             uploadInputFile.value = null;
-            document.getElementById("uploadContainer").style.display = "none";
-            document.getElementById("grayScreen").style.display = "none";
+            uploadContainer.style.display = "none";
+            grayScreen.style.display = "none";
         });
         document.getElementById("uploadBtn").addEventListener("click", async () => {
             const files = document.getElementById("filesContainer");
@@ -223,12 +236,12 @@ if (isset($_COOKIE["javasession"])){
                 console.log("Sending: ", currentPath.textContent);
             }
             else dm.getFiles();
-            document.getElementById("droppedFiles").innerHTML = "";
+            droppedFiles.innerHTML = "";
             uploadInputFile.value = null;
-            document.getElementById("uploadContainer").style.display = "none";
-            document.getElementById("grayScreen").style.display = "none";
+            uploadContainer.style.display = "none";
+            grayScreen.style.display = "none";
         });
-        document.getElementById("dropzone").addEventListener("click", () =>{
+        droppZone.addEventListener("click", () =>{
             document.getElementById("bufferInput").click();
         });
         bufferInput.addEventListener("change", () => {
@@ -249,7 +262,7 @@ if (isset($_COOKIE["javasession"])){
             }
         });
         // Put this in place of your current drop handler
-        document.getElementById('dropzone').addEventListener('drop', async (e) => {
+        droppZone.addEventListener('drop', async (e) => {
             e.preventDefault();
 
             // 1) Prefer FileList (most direct, same as input.files)
@@ -356,13 +369,13 @@ if (isset($_COOKIE["javasession"])){
                 }
             });
         }
-        document.getElementById('dropzone').addEventListener('dragover', e => e.preventDefault());
+        droppZone.addEventListener('dragover', e => e.preventDefault());
         // !!!
         document.getElementById("cancel").addEventListener("click", ()=> {
             document.getElementById("uploadBtnMini").remove();
-            document.getElementById("grayScreen").style.display = "none";
+            grayScreen.style.display = "none";
         });
-        document.getElementById("createFileBtn").addEventListener("click", ()=>{
+        createFile.addEventListener("click", ()=>{
             if (document.getElementById("newFileOptions").style.display == "block") {
                 document.getElementById("newFileOptions").style.display = "none";
             } else {
