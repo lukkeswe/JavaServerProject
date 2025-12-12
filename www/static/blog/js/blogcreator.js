@@ -89,7 +89,15 @@ function importHTML(html, canvas) {
     const bold   = div.dataset.bold;
     const italic = div.dataset.italic;
 
-    const block = createBlock(type, div.innerHTML.trim());
+    let block;
+
+    if (type === "image") {
+      const imgElement = div.querySelector("img");
+      const src = imgElement ? imgElement.src : "";
+      block = createBlock("image", src);
+    } else {
+      block = createBlock(type, div.innerHTML.trim());
+    }
 
     const t = block.querySelector(".text-content");
     if (t) {

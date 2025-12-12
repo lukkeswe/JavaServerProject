@@ -101,7 +101,7 @@ if (isset($_COOKIE["javasession"])){
     </div>
   </header>
 
-  <main>saveBlog
+  <main>
     <div class="canvas" id="canvas" aria-label="ブログキャンバス"></div>
     <div class="muted" style="margin-top:8px">各ブロックにマウスを合わせると、ブロックの上に編集ボタン（オーバーレイ）が表示されます。</div>
   </main>
