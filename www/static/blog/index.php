@@ -72,7 +72,6 @@ if (isset($_COOKIE["javasession"])){
   <div id="grayScreen">
     <div id="loadImage" style="width: 50%;margin:0 auto;display:none;">
       <img src="../img/muppet-load.gif" alt="muppet load image">
-      <progress id="uploadProgress" value="0" max="100" style="width: 100%; display: none;"></progress>
     </div>
     <div id="miniExplorer" style="display: none;">
       <input id="filename" type="text" value="index" style="width: 150px;"><span>.blog</span>
@@ -80,7 +79,6 @@ if (isset($_COOKIE["javasession"])){
       <div id="optionsContainerMini"></div>
       <div id="displayContainerMini" style="display: none;"></div>
       <div id="filesContainerMini"></div>
-      <progress id="uploadProgress" value="0" max="100" style="width: 100%; display: none;"></progress>
       <div id="uploadBtnContainerMini"></div>
       <button id="cancel">Cancel</button>
     </div>
@@ -262,14 +260,18 @@ if (isset($_COOKIE["javasession"])){
         if (currentPath && currentPath.innerHTML != ""){
           path = currentPath.textContent;
         }
+        // Hide the explorer
+        miniExplorer.style.display = "none";
+        // Show the loading image
+        loadImage.style.display = "block";
         // Upload the file to the server
         await UpManager.saveBlog(blob, path, filename + ".html");
         // Remove temporary elements
         uploadBtn.remove();
         // Alert the user
         alert("Blog saved to: " + path);
-        // Close the explorer
-        miniExplorer.style.display = "none";
+        // Hide the loading image and grayscreen
+        loadImage.style.display = "none";
         grayScreen.style.display = "none";
       });
       // Append the upload button
