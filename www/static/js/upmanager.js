@@ -121,6 +121,13 @@ export async function saveBlog(blob, path = "", filename){
     };
     console.log("Saving blog...");
 
+    const blogs = sessionStorage.getItem("blogList");
+    const blogname = filename.replace(".html", ".blog");
+    if (blogs.includes(blogname)){
+        const replace = confirm(`「${blogname}」 のファイルが存在しています。上書きますか？`);
+        if (!replace) return;
+    }
+
     const response = await fetch("/saveBlog", {
         method:"POST",
         headers: {"Content-Type": "application/json"},

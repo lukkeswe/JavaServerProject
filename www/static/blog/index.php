@@ -93,7 +93,7 @@ if (isset($_COOKIE["javasession"])){
         <button id="addImage">＋ 画像を追加</button>
         <label><input type="checkbox" id="toggleBase64" checked> Base64画像</label>
         <button id="download">↓ HTMLをダウンロード</button>
-        <button id="save">↑ HTMLを保存</button>
+        <button id="save">↑ BLOGを保存</button>
         <input id="hiddenFile" type="file" accept="image/*" style="display:none" />
       </div>
     </div>
@@ -292,8 +292,6 @@ if (isset($_COOKIE["javasession"])){
     if (filename){
       const content = await UpManager.fetchBlogContent(filename, path);
       if (content) {
-        console.log("Content");
-        console.log(content);
         importHTML(content, canvas);
       } else console.error("Error: importHTML");
     } else {

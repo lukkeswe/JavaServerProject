@@ -585,11 +585,12 @@ export default class DocumentManager {
             const backBtn = document.createElement("button");
             document.getElementById("displayContainer").innerHTML = "";
             let previousPath = "";
-            if (currentPath != null && currentPath.textContent != "") {
+            console.log("currentPath:", currentPath);
+            if (path != "") {
                 backBtn.innerHTML = "↑";
                 backBtn.className = "btn";
                 backBtn.addEventListener("click", () => {
-                    const slice = currentPath.textContent.split("/");
+                    const slice = path.split("/");
                     console.log("slice: " + slice);
                     
                     for (let i = 0; i < slice.length - 2; i++) {
@@ -725,10 +726,10 @@ export default class DocumentManager {
                             }
                             if (nameInput.value && nameInput.value.replace(" ", "") != "") {
                                 // Send a request to change the name of the file
-                                await moveIt(currentPath.textContent + oldName, currentPath.textContent + newName);
+                                await moveIt(path + oldName, path + newName);
                                 optionsContainer.style.display = "block";
                                 document.getElementById("displayContainer").innerHTML = "";
-                                this.getFiles(currentPath.textContent);
+                                this.getFiles(path);
                             } else {
                                 alert("Name fail");
                             }
@@ -741,18 +742,24 @@ export default class DocumentManager {
                     if (type == "folder") {
                         const span = document.createElement("span");
                         span.innerHTML = fileName;
-                        span.addEventListener("dblclick", () => {
+                        span.addEventListener("dblclick", async () => {
+                            const filesContainer = document.getElementById("filesContainer");
+                            const exLoad = document.getElementById("exLoad");
+                            filesContainer.style.display = "none";
+                            exLoad.style.display = "block";
                             this.emptyDisplayContainer();
-                            if (currentPath != null && currentPath.textContent.endsWith("/")) {
-                                this.getFiles(currentPath.textContent + fileName);
+                            if (path.endsWith("/")) {
+                                await this.getFiles(path + fileName);
                             } else {
-                                this.getFiles(fileName);
+                                await this.getFiles(fileName);
                             }
-                            const path = document.getElementById("path");
-                            if (currentPath != null && currentPath.textContent.endsWith("/")) {
-                                path.innerHTML = currentPath.textContent + fileName;
+                            filesContainer.style.display = "flex";
+                            exLoad.style.display = "none";
+                            const pathElement = document.getElementById("path");
+                            if (path.endsWith("/")) {
+                                pathElement.innerHTML = path + fileName;
                             } else {
-                                path.innerHTML = fileName;
+                                pathElement.innerHTML = fileName;
                             }
                         });
                         span.addEventListener("click", async ()=> {
@@ -763,9 +770,9 @@ export default class DocumentManager {
                             deleteFolderBtn.addEventListener("click", async ()=> {
                                 // Warn the user and make them confirm the action
                                 if (confirm(`Are you sure you want to delete "${fileName}", and all it's contents permanently? `)){
-                                    await deleteFolder(currentPath.textContent + fileName);
+                                    await deleteFolder(path + fileName);
                                     console.log("Done!")
-                                    this.getFiles(currentPath.textContent);
+                                    this.getFiles(path);
                                 } else {
                                     console.log("Aborting...");
                                 }
@@ -784,8 +791,8 @@ export default class DocumentManager {
                             // Create hyper-link
                             const a = document.createElement("a");
                             // Add a url
-                            if (currentPath != null && currentPath.textContent.endsWith("/")) {
-                                a.href = "https://" + sessionStorage["domain"] + "/" + currentPath.textContent + fileName;
+                            if (path.endsWith("/")) {
+                                a.href = "https://" + sessionStorage["domain"] + "/" + path + fileName;
                             } else {
                                 a.href = "https://" + sessionStorage["domain"] + "/" + fileName;
                             }
@@ -862,8 +869,8 @@ export default class DocumentManager {
                             video.width = "240";
                             // Add a source to the video element
                             const source = document.createElement("source");
-                            if (currentPath != null && currentPath.textContent != "") {
-                                source.src = "https://" + sessionStorage["domain"] + "/" + currentPath.textContent + fileName; 
+                            if (path != "") {
+                                source.src = "https://" + sessionStorage["domain"] + "/" + path + fileName; 
                             } else {
                                 source.src = "https://" + sessionStorage["domain"] + "/" + fileName; 
                             }
@@ -887,8 +894,8 @@ export default class DocumentManager {
                             // Create a link to edit the blog
                             const editBlog = document.createElement("a");
                             // Add url
-                            if (currentPath != null && currentPath.textContent.endsWith("/")) {
-                                editBlog.href = `https://tekknat.com/blog/?filename=${fileName.replace(".blog", ".html")}&path=${currentPath.textContent}`;
+                            if (path.endsWith("/")) {
+                                editBlog.href = `https://tekknat.com/blog/?filename=${fileName.replace(".blog", ".html")}&path=${path}`;
                             } else {
                                 editBlog.href = `https://tekknat.com/blog/?filename=${fileName.replace(".blog", ".html")}&path=`;
                             }
@@ -901,8 +908,8 @@ export default class DocumentManager {
                             // Create hyper-link
                             const a = document.createElement("a");
                             // Add a url
-                            if (currentPath != null && currentPath.textContent.endsWith("/")) {
-                                a.href = "https://" + sessionStorage["domain"] + "/" + currentPath.textContent + fileName;
+                            if (path.endsWith("/")) {
+                                a.href = "https://" + sessionStorage["domain"] + "/" + path + fileName;
                             } else {
                                 a.href = "https://" + sessionStorage["domain"] + "/" + fileName;
                             }
@@ -1030,7 +1037,6 @@ export default class DocumentManager {
                 // Append the ul
                 filesContainer.append(ul);
             }
-
         } catch (error) {
             console.error(error);
         }
