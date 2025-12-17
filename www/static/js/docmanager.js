@@ -1,6 +1,7 @@
 import { deleteFolder } from './upmanager.js';
 import { saveContentToFile } from './upmanager.js';
 import { moveIt } from './upmanager.js';
+import { deleteBlog } from './upmanager.js';
 
 export default class DocumentManager {
     constructor() {
@@ -585,7 +586,6 @@ export default class DocumentManager {
             const backBtn = document.createElement("button");
             document.getElementById("displayContainer").innerHTML = "";
             let previousPath = "";
-            console.log("currentPath:", currentPath);
             if (path != "") {
                 backBtn.innerHTML = "↑";
                 backBtn.className = "btn";
@@ -608,6 +608,7 @@ export default class DocumentManager {
             const filesContainer    = document.getElementById("filesContainer");
             filesContainer.style.padding = "18px";
             filesContainer.innerHTML = "";
+            const exLoad = document.getElementById("exLoad");
             // List of supported file types
             const fileTypes = ["folder", "html", "php", "css", "img", "js", "video", "blog"];
             for (let type of fileTypes){
@@ -629,15 +630,14 @@ export default class DocumentManager {
                     erase.className = "btn";
                     // Add an event listener
                     erase.addEventListener("click", async () => {
-                        const path = document.getElementById("path");
                         // Confirm deletion
                         if (confirm(`Are you sure you want to delete "${fileName}" permanently? `)){
                             // Call the delete function
-                            if (path != null && path.textContent != "") {
-                                console.log("Sending path: " + path.textContent);
-                                await this.deleteFile(fileName, type, path.textContent);
+                            if (path.endsWith("/")) {
+                                console.log("Sending path: " + path);
+                                await this.deleteFile(fileName, type, path);
                             } else {
-                                console.log("No path: " + path.textContent);
+                                console.log("No path: " + path);
                                 await this.deleteFile(fileName, type);
                             }
                         } else {
@@ -919,11 +919,33 @@ export default class DocumentManager {
                             a.innerHTML = "🌍";
                             // Add a classname
                             a.className = "btn";
+                            // Create a delete button
+                            const deleteBlogBtn = document.createElement("button");
+                            // Add an icon
+                            deleteBlogBtn.innerHTML = "🗑️";
+                            // Add a classname
+                            deleteBlogBtn.className = "btn";
+                            // Add an eventlistener
+                            deleteBlogBtn.addEventListener("click", async () => {
+                                // Confirm deletion
+                                if (confirm(`Are you sure you want to delete "${fileName}" permanently? `)){
+                                    if (path.endsWith("/")) await deleteBlog(path, fileName);
+                                    else await deleteBlog("", fileName);
+                                    filesContainer.style.display = "none";
+                                    exLoad.style.display = "block";
+                                    await this.getFiles(path);
+                                    filesContainer.style.display = "flex";
+                                    exLoad.style.display = "none";
+                                } else {
+                                    console.log("Aborting!");
+                                }
+                            });
                             // Add an eventlistener
                             name.addEventListener("click", ()=> {
                                 optionsContainer.innerHTML = "";
                                 optionsContainer.append(editBlog);
                                 optionsContainer.append(a);
+                                optionsContainer.append(deleteBlogBtn);
                                 optionsContainer.append(backBtn);
                             });
                             // Add a double click eventlistener

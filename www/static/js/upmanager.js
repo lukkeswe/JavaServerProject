@@ -138,6 +138,25 @@ export async function saveBlog(blob, path = "", filename){
     console.log("Response:", msg);
 }
 
+export async function deleteBlog(path = "", filename) {
+    let requestObject = {
+        "path"      : path,
+        "filename"  : filename
+    };
+    console.log("Deleting blog...");
+    
+    const response = await fetch("/deleteBlog", {
+        method  : "POST",
+        headers : {"Content-Type" : "application/json"},
+        body    : JSON.stringify(requestObject)
+    });
+
+    if (!response.ok) throw new Error(`Server responded with ${response.status}`);
+
+    const msg = await response.text();
+    console.log(msg);
+}
+
 export async function fetchBlogContent(file, path = ""){
     let requestObject = {
         "filename"  : file,

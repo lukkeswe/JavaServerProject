@@ -48,6 +48,7 @@ public class Main {
         server.createContext("/saveFile", new SaveFileHandler());
         server.createContext("/getBlogContent", new FetchBlogContentHandler());
         server.createContext("/saveBlog", new SaveBlogHandler());
+        server.createContext("/deleteBlog", new DeleteBlogHandler());
         server.createContext("/createFolder", new CreateFolderHandler());
         server.createContext("/deleteFolder", new DeleteFolderHandler());
         server.createContext("/moveIt", new MoveItHandler());
@@ -1379,8 +1380,83 @@ public class Main {
             }
         }
     }
+    static class DeleteBlogHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if ("POST".equals(exchange.getRequestMethod())) {
+                // Validate the user
+                String sessionId = getJavaSessionId(exchange);
+                String user = SessionManager.getUsername(sessionId);
+                if (user == null) {
+                    exchange.sendResponseHeaders(403, -1);
+                    exchange.close();
+                    return;
+                }
+                // Get the request body
+                String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+                // Parse the body into map
+                Map<String, String> map = parseJsonToMap(body);
+                // Make sure the needed variables are present
+                if (map.get("path") == null || map.get("filename") == null){
+                    exchange.sendResponseHeaders(403, -1);
+                    exchange.close();
+                    return;
+                }
+                // Build paths to the files
+                Path blogFilePath = Paths.get(USER_DIR, user, "static", map.get("path"), map.get("filename"));
+                Path htmlFilePath = Paths.get(USER_DIR, user, "blog", map.get("path"), map.get("filename").replace(".blog", ".html"));
+                // Delete the files
+                String msg = "Error deleting blog";
+                boolean htmlDeleted = false;
+                System.out.println("-- Deleting: " + htmlFilePath.toString() + " -- ");
+                // Make sure the HTML file exsits
+                if (Files.exists(htmlFilePath)){
+                    System.out.println(" -- HTML file found -- ");
+                    try {
+                        // Delete the file
+                        Files.delete(htmlFilePath);
+                        htmlDeleted = true;
+                        System.out.println("-- HTML file deleted -- ");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                boolean blogDeleted = false;
+                System.out.println(" -- Deleting: " + blogFilePath.toString() + " -- ");
+                // Make sure the BLOG file exists
+                if (Files.exists(blogFilePath)){
+                    System.out.println(" -- BLOG file found -- ");
+                    try {
+                        // Delete the file
+                        Files.delete(blogFilePath);
+                        blogDeleted = true;
+                        System.out.println(" -- BLOG file deleted -- ");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                // If successfully deleted the files change the response message
+                if (blogDeleted && htmlDeleted) {
+                    msg = "Success";
+                }
+                // Send the response
+                byte[] response = msg.getBytes();
+                exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
+                exchange.sendResponseHeaders(200, response.length);
+                OutputStream os = exchange.getResponseBody();
+                os.write(response);
+                os.close();
+                exchange.close();
+                return;
+            } else {
+                exchange.sendResponseHeaders(405, -1);
+                exchange.close();
+                return;
+            }
+        }
+    }
 
-    public static boolean moveIt(Path source, Path target){
+    private static boolean moveIt(Path source, Path target){
         // Check if the path exists
         if (!Files.exists(source)) return false;
         // Move the file or path
@@ -1393,7 +1469,7 @@ public class Main {
             return false;
         }
     }
-    public static boolean deleteFolder(Path path) throws IOException {
+    private static boolean deleteFolder(Path path) throws IOException {
         // Check if the path exsists
         if (!Files.exists(path)) return false;
         // Walk through all files and delete them
