@@ -189,6 +189,7 @@ if (isset($_COOKIE["javasession"])){
     <footer><p>&copy;Norlund J. Lukas</p></footer>
     <!-- Ace Editor JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.9/ace.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.6/ext-language_tools.min.js"></script>
     <script type="module">
         import DM from '../js/docmanager.js';
         import * as UpManager from "../js/upmanager.js";

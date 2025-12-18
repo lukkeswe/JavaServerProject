@@ -1070,6 +1070,11 @@ export default class DocumentManager {
         editor.setTheme("ace/theme/monokai");  // choose theme
         editor.session.setMode("ace/mode/" + mode); // syntax mode
         editor.setValue(content, -1); // Append the content
+        editor.setOptions({
+            enableBasicAutocompletion: true,
+            enableLiveAutocompletion: true,
+            enableSnippets: true
+        });
         document.getElementById("editor").style.display = "block"; // Display the editor
         document.getElementById("optionsContainer").innerHTML = ""; // Empty the options container
         // Hide create buttons
