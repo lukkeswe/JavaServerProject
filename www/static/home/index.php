@@ -146,6 +146,9 @@ if (isset($_COOKIE["javasession"])){
                 <button class="btn" id="cancelUpload">❌</button>
             </div>
         </div>
+        <div id="textInputContainer" style="display: none;">
+            <input id="textInput" type="text">
+        </div>
     </div>
     <div id="loadImage" style="width: 50%;margin:0 auto;display:none;">
       <img src="../img/muppet-load.gif" alt="muppet load image">

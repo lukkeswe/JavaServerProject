@@ -292,6 +292,21 @@ export async function moveIt(source, target){
     console.log(msg);
 }
 
+export async function renameBlog(path = "", filename, newname) {
+    let requestObject = {
+        "path"      : path,
+        "filename"  : filename,
+        "newname"   : newname
+    };
+    console.log("Renaming blog...");
+    let response = await fetch('/renameBlog', {
+        method : "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(requestObject)
+    });
+    let msg = await response.text();
+}
+
 export function isValidFileName(fileName){
     if (!fileName || fileName.trim() === "") return false;
     const validPattern = /^[a-zA-Z0-9._-]+$/;

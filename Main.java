@@ -49,6 +49,7 @@ public class Main {
         server.createContext("/getBlogContent", new FetchBlogContentHandler());
         server.createContext("/saveBlog", new SaveBlogHandler());
         server.createContext("/deleteBlog", new DeleteBlogHandler());
+        server.createContext("/renameBlog", new RenameBlogHandler());
         server.createContext("/createFolder", new CreateFolderHandler());
         server.createContext("/deleteFolder", new DeleteFolderHandler());
         server.createContext("/moveIt", new MoveItHandler());
@@ -1455,7 +1456,48 @@ public class Main {
             }
         }
     }
-
+    static class RenameBlogHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if ("POST".equals(exchange.getRequestMethod())){
+                // Validate the user
+                String sessionId = getJavaSessionId(exchange);
+                String user = SessionManager.getUsername(sessionId);
+                // Reject invalid user
+                if (user == null) {
+                    exchange.sendResponseHeaders(403, -1);
+                    exchange.close();
+                    return;
+                }
+                //Get the requestbody
+                String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+                //Parse the body into map
+                Map<String, String> map = parseJsonToMap(body);
+                // Build the paths
+                Path htmlSource = Paths.get(USER_DIR, user, "static", map.get("path"), map.get("filename"));
+                Path htmlTarget = Paths.get(USER_DIR, user, "static", map.get("path"), map.get("newname"));
+                Path blogSource = Paths.get(USER_DIR, user, "blog", map.get("path"), map.get("filename").replace(".blog", ".html"));
+                Path blogTarget = Paths.get(USER_DIR, user, "blog", map.get("path"), map.get("newname").replace(".blog", ".html"));
+                //Move the paths
+                String msg = "fail";
+                if (moveIt(htmlSource, htmlTarget) && moveIt(blogSource, blogTarget)) msg = "Success";
+                byte[] response = msg.getBytes();
+                exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
+                exchange.sendResponseHeaders(200, response.length);
+                OutputStream os = exchange.getResponseBody();
+                os.write(response);
+                os.close();
+                exchange.close();
+                return;
+            } else {
+                exchange.sendResponseHeaders(405, -1);
+                exchange.close();
+                return;
+            }
+        }
+    }
+    
+    // Helper methods
     private static boolean moveIt(Path source, Path target){
         // Check if the path exists
         if (!Files.exists(source)) return false;

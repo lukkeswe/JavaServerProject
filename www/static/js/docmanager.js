@@ -2,6 +2,7 @@ import { deleteFolder } from './upmanager.js';
 import { saveContentToFile } from './upmanager.js';
 import { moveIt } from './upmanager.js';
 import { deleteBlog } from './upmanager.js';
+import { renameBlog } from './upmanager.js';
 
 export default class DocumentManager {
     constructor() {
@@ -11,6 +12,9 @@ export default class DocumentManager {
         this.db;
         this.pathContainer  = document.getElementById("pathContainer");
         this.pathContainerMini  = document.getElementById("pathContainerMini");
+        this.grayScreen     = document.getElementById("grayScreen");
+        this.textInputContainer = document.getElementById("textInputContainer");
+        this.textInput      = document.getElementById("textInput");
     }
     flexContainer(){
         this.container.style.display = "flex";
@@ -919,6 +923,37 @@ export default class DocumentManager {
                             a.innerHTML = "🌍";
                             // Add a classname
                             a.className = "btn";
+                            // Create a rename button
+                            const renameBtn = document.createElement("button");
+                            // Add an icon
+                            renameBtn.innerHTML = "🔤";
+                            // Add a classname
+                            renameBtn.className = "btn";
+                            // Add an eventlistener
+                            renameBtn.addEventListener("click", async ()=> {
+                                // Create a confirmation button
+                                const confirm = document.createElement("button");
+                                // Add an icon
+                                confirm.innerHTML = "✅";
+                                // Add a classname
+                                confirm.className = "btn";
+                                // Add an eventlistener
+                                confirm.addEventListener("click", async ()=> {
+                                    // Get the text input
+                                    let input = this.textInput.value;
+                                    confirm.style.display = "none";
+                                    await renameBlog(path, fileName, input + ".blog");
+                                    confirm.remove();
+                                    this.textInputContainer.style.display = "none";
+                                    this.grayScreen.style.display = "none";
+                                    await this.getFiles(path);
+                                });
+                                // Append the confirm button
+                                this.textInputContainer.append(confirm);
+                                // Display the text input
+                                this.grayScreen.style.display = "block";
+                                this.textInputContainer.style.display = "block";
+                            });
                             // Create a delete button
                             const deleteBlogBtn = document.createElement("button");
                             // Add an icon
@@ -945,6 +980,7 @@ export default class DocumentManager {
                                 optionsContainer.innerHTML = "";
                                 optionsContainer.append(editBlog);
                                 optionsContainer.append(a);
+                                optionsContainer.append(renameBtn);
                                 optionsContainer.append(deleteBlogBtn);
                                 optionsContainer.append(backBtn);
                             });
