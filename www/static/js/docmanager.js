@@ -757,7 +757,8 @@ export default class DocumentManager {
                             } else {
                                 await this.getFiles(fileName);
                             }
-                            filesContainer.style.display = "flex";
+                            if (window.innerWidth <= 900) filesContainer.style.display = "block";
+                            else filesContainer.style.display = "flex";
                             exLoad.style.display = "none";
                             const pathElement = document.getElementById("path");
                             if (path.endsWith("/")) {

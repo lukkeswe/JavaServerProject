@@ -376,7 +376,7 @@ header h1 {
   padding: 18px;
   border-radius: 10px;
   box-shadow: var(--shadow-subtle);
-  display: flex;
+  display: block;
   flex-direction: column;
   gap: 14px;
   max-height: 800px;
@@ -535,7 +535,14 @@ footer {
     }
   #main-content { flex-direction: column; padding: 12px;}
   #upload-container { width: 100%; min-width: auto; padding-top: 42px; }
-  #filesContainer {display: block; padding: 12px;  justify-content: center; height: auto; max-height: 500px;}
+  #filesContainer {
+      display: block;
+      padding: 12px;
+      justify-content: center;
+      height: auto; 
+      max-height: 500px;
+      -webkit-overflow-scrolling: touch;
+  }
   #explorer {width: 100%;}
   #filesContainer ul { margin-bottom: 12px;}
   #filesContainer li { width: 75px; height: 75px; }

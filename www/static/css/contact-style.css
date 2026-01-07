@@ -35,7 +35,7 @@ a {
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
-    padding: 200px 0;
+    padding: 50px 0;
 }
 .mainvisual h1 {
     font-size: 30px;
@@ -147,11 +147,10 @@ aside img {
     margin-right: 50px;
 }
 .form span {
-    color: white;
+    color: red;
     font-size: 12px;
     padding: 3px;
     border-radius: 2px;
-    background-color: red;
     margin-left: 10px;
 }
 
@@ -209,7 +208,6 @@ footer {
     }
     .mainvisual{
         min-width: 300px;
-        padding: 400px 0;
     }
     .content {
         flex-direction: column-reverse;
