@@ -184,7 +184,7 @@ if (isset($_COOKIE["javasession"])){
                 <div id="pathContainer"><span><?php echo $db->domain; ?>/</span><p id="path"></p></div>
                 <div id="filesContainer"></div>
                 <div id="editor"></div>
-                <div id="exLoad" style="display:none;"> <img src="../img/muppet-load.gif" alt="muppet load image"></div>
+                <div id="exLoad"> <img src="../img/load.gif" alt="load image"></div>
             </div>
         </main>
     </div>

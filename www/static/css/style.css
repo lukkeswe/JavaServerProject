@@ -509,6 +509,15 @@ header h1 {
     font-size: 14px;
     margin-left: 5px;
 }
+#exLoad {
+    display: none;
+    width: max-content;
+    margin: 0 auto;
+}
+
+#exLoad img {
+    width: 150px;
+}
 
 /* Footer */
 footer {
