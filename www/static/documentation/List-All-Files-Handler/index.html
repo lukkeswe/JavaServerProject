@@ -142,8 +142,8 @@ flowchart TD
   H -->|Yes| I["Send 403 Forbidden<br/>Close response body"]
   H -->|No| J["Set base userPath for user"]
   J --> K{"Username ==<br/>norlund_johan_lukas_com?"}
-  K -->|Yes| L["Set userPath =<br/>/home/lukas/JavaServerProject/www/static/"]
-  K -->|No| M["Set userPath =<br/>/home/lukas/users/{user}/static/"]
+  K -->|Yes| L["Set userPath =<br/>ADMIN_DIR + /static/"]
+  K -->|No| M["Set userPath =<br/>USER_DIR + user +/static/"]
   L --> N
   M --> N
   N{"map.get(path) not<br/>empty and not null?"}
