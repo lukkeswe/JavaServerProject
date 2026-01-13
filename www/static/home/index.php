@@ -133,7 +133,7 @@ if (isset($_COOKIE["javasession"])){
                 <button class="btn" id="cancel">❌</button>
             </div>
         </div>
-        <div id="uploadContainer">
+        <div id="uploadContainer" class="grayWindow">
             <div id="dropzone">
             Drag files or folders here
             </div>
@@ -392,9 +392,11 @@ if (isset($_COOKIE["javasession"])){
             document.getElementById("newFileOptions").style.display = "none";
         });
         document.getElementById("createFolderBtn").addEventListener("click", ()=> {
-            const options = document.getElementById("newFolderOptions");
-            if (options.style.display == "none") options.style.display = "block";
-            else options.style.display = "none";
+            //const options = document.getElementById("newFolderOptions");
+            //if (options.style.display == "none") options.style.display = "block";
+            //else options.style.display = "none";
+            grayScreen.style.display = "block";
+            dm.showCreateFolderContainer();
         });
         document.getElementById("createNewFolder").addEventListener("click", async ()=> {
             const folderName = document.getElementById("folderName");

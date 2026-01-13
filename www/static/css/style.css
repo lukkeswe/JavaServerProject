@@ -157,7 +157,7 @@ body {
     margin-top: 8px;
 }
 
-#uploadContainer {
+.grayWindow {
   display: none;
   z-index:1001;
   position: relative;
@@ -376,7 +376,7 @@ header h1 {
   padding: 18px;
   border-radius: 10px;
   box-shadow: var(--shadow-subtle);
-  display: block;
+  display: flex;
   flex-direction: column;
   gap: 14px;
   max-height: 800px;

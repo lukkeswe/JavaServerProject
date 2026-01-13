@@ -3,6 +3,7 @@ import { saveContentToFile } from './upmanager.js';
 import { moveIt } from './upmanager.js';
 import { deleteBlog } from './upmanager.js';
 import { renameBlog } from './upmanager.js';
+import { createFolder } from './upmanager.js';
 
 export default class DocumentManager {
     constructor() {
@@ -709,13 +710,38 @@ export default class DocumentManager {
                     nameChange.innerHTML    = "🔤";
                     // Add eventlistener
                     nameChange.addEventListener("click", ()=>{
-                        // Hide the optionscontainer
-                        optionsContainer.style.display = "none";
+                        // Show greyscreen
+                        this.grayScreen.style.display = "block";
+                        const currentFileName = document.createElement("p");
+                        currentFileName.innerHTML = fileName;
                         // Create a input for the new name
                         const nameInput     = document.createElement("input");
                         nameInput.type      = "text";
                         nameInput.id        = "newName";
                         nameInput.className = "textInput";
+                        // Create an element to display the file extension
+                        const extension     = document.createElement("span");
+                        if(fileName.endsWith("/")){
+                            extension.innerHTML = "/";
+                        } else {
+                            extension.innerHTML = "." + fileName.split(".")[1];
+                        }
+                        // Create a container
+                        const nameChangeContainer = document.createElement("div");
+                        nameChangeContainer.id = "nameChangeContainer";
+                        nameChangeContainer.className = "grayWindow";
+                        nameChangeContainer.style.display = "block";
+                        // Create a button container
+                        const buttonContainer = document.createElement("div");
+                        buttonContainer.className = "spaceBetween";
+                        // Create a cancel button
+                        const cancel = document.createElement("button");
+                        cancel.innerHTML = "❌";
+                        cancel.className = "btn";
+                        cancel.addEventListener("click", () => {
+                            nameChangeContainer.remove();
+                            this.grayScreen.style.display = "none";
+                        });
                         // Give the input a submit button
                         const confirm       = document.createElement("button");
                         confirm.innerHTML   = "✅";
@@ -731,7 +757,8 @@ export default class DocumentManager {
                             if (nameInput.value && nameInput.value.replace(" ", "") != "") {
                                 // Send a request to change the name of the file
                                 await moveIt(path + oldName, path + newName);
-                                optionsContainer.style.display = "block";
+                                nameChangeContainer.remove();
+                                this.grayScreen.style.display = "none";
                                 document.getElementById("displayContainer").innerHTML = "";
                                 this.getFiles(path);
                             } else {
@@ -739,8 +766,13 @@ export default class DocumentManager {
                             }
                         });
                         // Append the input and submit button
-                        document.getElementById("displayContainer").append(nameInput);
-                        document.getElementById("displayContainer").append(confirm);
+                        nameChangeContainer.append(currentFileName);
+                        nameChangeContainer.append(nameInput);
+                        nameChangeContainer.append(extension);
+                        buttonContainer.append(confirm);
+                        buttonContainer.append(cancel);
+                        nameChangeContainer.append(buttonContainer);
+                        this.grayScreen.append(nameChangeContainer);
                     });
 
                     if (type == "folder") {
@@ -1354,5 +1386,37 @@ export default class DocumentManager {
             document.getElementById("newFile").style.display = "block";
         });
         return backBtn;
+    }
+    async showCreateFolderContainer(){
+        const container = document.createElement("div");
+        container.className = "grayWindow";
+        container.style.display = "block";
+        const cancel = document.createElement("button");
+        cancel.innerHTML = "❌";
+        cancel.className = "btn";
+        cancel.addEventListener("click", () => {
+            container.remove();
+            this.grayScreen.style.display = "none";
+        });
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "textInput";
+        const confirm = document.createElement("button");
+        confirm.innerHTML = "✅";
+        confirm.className = "btn";
+        confirm.addEventListener("click", async () => {
+            const path = document.getElementById("path");
+            await createFolder(input.value, path.innerHTML);
+            container.remove();
+            this.grayScreen.style.display = "none";
+            await this.getFiles(path.innerHTML);
+        });
+        const buttonContainer = document.createElement("div");
+        buttonContainer.className = "spaceBetween";
+        container.append(input);
+        buttonContainer.append(confirm);
+        buttonContainer.append(cancel);
+        container.append(buttonContainer);
+        this.grayScreen.append(container);
     }
 }
