@@ -780,8 +780,8 @@ export default class DocumentManager {
                         });
                         // Give the input a submit button
                         const confirm       = document.createElement("button");
-                        confirm.classList("btn");
-                        confirm.classList("check");
+                        confirm.classList.add("btn");
+                        confirm.classList.add("check");
                         confirm.addEventListener("click", async () => {
                             let oldName = fileName;
                             let newName = nameInput.value + "." + type;
@@ -801,6 +801,8 @@ export default class DocumentManager {
                                 alert("Name fail");
                             }
                         });
+                        console.log("name change");
+                        
                         // Append the input and submit button
                         nameChangeContainer.append(currentFileName);
                         nameChangeContainer.append(nameInput);
@@ -988,10 +990,16 @@ export default class DocumentManager {
                             }
                             // Add setting
                             editBlog.target = "_blank";
-                            // Add an icon 
-                            editBlog.innerHTML = "📝";
-                            // Add a classname
-                            editBlog.className = "btn";
+                            // Add classes
+                            editBlog.classList.add("btn");
+                            editBlog.classList.add("popUp");
+                            editBlog.classList.add("optionsIcon");
+                            editBlog.classList.add("edit");
+                            // Create tooltip
+                            const editBlogToolTip = document.createElement("p");
+                            editBlogToolTip.innerHTML = "Edit";
+                            editBlogToolTip.classList.add("description");
+                            editBlog.append(editBlogToolTip);
                             // Create hyper-link
                             const a = document.createElement("a");
                             // Add a url
@@ -1002,23 +1010,35 @@ export default class DocumentManager {
                             }
                             // Add setting
                             a.target = "_blank";
-                            // Add an icon to the hyper-link
-                            a.innerHTML = "🌍";
-                            // Add a classname
-                            a.className = "btn";
+                            // Add classes
+                            a.classList.add("btn");
+                            a.classList.add("popUp");
+                            a.classList.add("optionsIcon");
+                            a.classList.add("visit");
+                            // Create tooltip
+                            const visitBlogToolTip = document.createElement("p");
+                            visitBlogToolTip.innerHTML = "Visit";
+                            visitBlogToolTip.classList.add("description");
+                            a.append(visitBlogToolTip);
                             // Create a rename button
                             const renameBtn = document.createElement("button");
-                            // Add an icon
-                            renameBtn.innerHTML = "🔤";
-                            // Add a classname
-                            renameBtn.className = "btn";
+                            // Add classes
+                            renameBtn.classList.add("btn");
+                            renameBtn.classList.add("popUp");
+                            renameBtn.classList.add("optionsIcon");
+                            renameBtn.classList.add("namechange");
+                            // Create tooltip
+                            const renameBlogToolTip = document.createElement("p");
+                            renameBlogToolTip.innerHTML = "Rename";
+                            renameBlogToolTip.classList.add("description");
+                            renameBtn.append(renameBlogToolTip);
                             // Add an eventlistener
                             renameBtn.addEventListener("click", async ()=> {
                                 // Create a confirmation button
                                 const confirm = document.createElement("button");
                                 // Add a classname
-                                confirm.classList("btn");
-                                confirm.classList("check");
+                                confirm.classList.add("btn");
+                                confirm.classList.add("check");
                                 // Add an eventlistener
                                 confirm.addEventListener("click", async ()=> {
                                     // Get the text input
@@ -1038,10 +1058,16 @@ export default class DocumentManager {
                             });
                             // Create a delete button
                             const deleteBlogBtn = document.createElement("button");
-                            // Add an icon
-                            deleteBlogBtn.innerHTML = "🗑️";
-                            // Add a classname
-                            deleteBlogBtn.className = "btn";
+                            // Add classes
+                            deleteBlogBtn.classList.add("btn");
+                            deleteBlogBtn.classList.add("popUp");
+                            deleteBlogBtn.classList.add("optionsIcon");
+                            deleteBlogBtn.classList.add("erase");
+                            // Create tooltip
+                            const deleteBlogToolTip = document.createElement("p");
+                            deleteBlogToolTip.innerHTML = "Delete permanently";
+                            deleteBlogToolTip.classList.add("description");
+                            deleteBlogBtn.append(deleteBlogToolTip);
                             // Add an eventlistener
                             deleteBlogBtn.addEventListener("click", async () => {
                                 // Confirm deletion
@@ -1058,7 +1084,7 @@ export default class DocumentManager {
                                 }
                             });
                             // Add an eventlistener
-                            name.addEventListener("click", ()=> {
+                            icon.addEventListener("click", ()=> {
                                 optionsContainer.innerHTML = "";
                                 optionsContainer.append(editBlog);
                                 optionsContainer.append(a);
