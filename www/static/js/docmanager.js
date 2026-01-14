@@ -592,8 +592,16 @@ export default class DocumentManager {
             document.getElementById("displayContainer").innerHTML = "";
             let previousPath = "";
             if (path != "") {
-                backBtn.innerHTML = "↑";
-                backBtn.className = "btn";
+                backBtn.classList.add("btn");
+                backBtn.classList.add("popUp");
+                backBtn.classList.add("optionsIcon");
+                backBtn.classList.add("back");
+                // Create a tooltip
+                const backBtnToolTip = document.createElement("p");
+                backBtnToolTip.innerHTML = "Go back";
+                backBtnToolTip.classList.add("description");
+                backBtn.append(backBtnToolTip);
+                // Add an eventlistener
                 backBtn.addEventListener("click", () => {
                     const slice = path.split("/");
                     console.log("slice: " + slice);
@@ -638,8 +646,15 @@ export default class DocumentManager {
                     name.innerHTML  = fileName;
                     // Create a delete button
                     const erase     = document.createElement("button");
-                    erase.innerHTML = "🗑️";
-                    erase.className = "btn";
+                    erase.classList.add("btn");
+                    erase.classList.add("popUp");
+                    erase.classList.add("optionsIcon");
+                    erase.classList.add("erase");
+                    // Create tooltip
+                    const eraseToolTip = document.createElement("p");
+                    eraseToolTip.innerHTML = "Delete permanently";
+                    eraseToolTip.classList.add("description");
+                    erase.append(eraseToolTip);
                     // Add an event listener
                     erase.addEventListener("click", async () => {
                         // Confirm deletion
@@ -666,8 +681,15 @@ export default class DocumentManager {
 
                     // Create an edit button
                     const edit      = document.createElement("button");
-                    edit.className  = "btn";
-                    edit.innerHTML  = "📝";
+                    edit.classList.add("btn");
+                    edit.classList.add("popUp");
+                    edit.classList.add("optionsIcon");
+                    edit.classList.add("edit");
+                    // Create tooltip
+                    const editToolTip = document.createElement("p");
+                    editToolTip.innerHTML = "Edit";
+                    editToolTip.classList.add("description");
+                    edit.append(editToolTip);
                     // Add eventlistener 
                     edit.addEventListener("click", async () => {
                         // Get the current path
@@ -713,8 +735,15 @@ export default class DocumentManager {
                     });
                     // Create a name change button
                     const nameChange        = document.createElement("button");
-                    nameChange.className    = "btn";
-                    nameChange.innerHTML    = "🔤";
+                    nameChange.classList.add("btn");
+                    nameChange.classList.add("popUp");
+                    nameChange.classList.add("optionsIcon");
+                    nameChange.classList.add("namechange");
+                    // Create tooltip
+                    const nameChangeToolTip = document.createElement("p");
+                    nameChangeToolTip.innerHTML = "Rename";
+                    nameChangeToolTip.classList.add("description");
+                    nameChange.append(nameChangeToolTip);
                     // Add eventlistener
                     nameChange.addEventListener("click", ()=>{
                         // Show greyscreen
@@ -808,8 +837,18 @@ export default class DocumentManager {
                         span.addEventListener("click", async ()=> {
                             // Create a delete folder option
                             const deleteFolderBtn = document.createElement("button");
-                            deleteFolderBtn.innerHTML = "🗑️";
-                            deleteFolderBtn.className = "btn";
+                            deleteFolderBtn.classList.add("btn");
+                            deleteFolderBtn.classList.add("popUp");
+                            deleteFolderBtn.classList.add("optionsIcon");
+                            deleteFolderBtn.classList.add("erase");
+                            // Create tooltip
+                            const deleteFolderBtnToolTip = document.createElement("p");
+                            deleteFolderBtnToolTip.innerHTML = "Delete permanently";
+                            deleteFolderBtnToolTip.classList.add("description");
+                            deleteFolderBtn.append(deleteFolderBtnToolTip);
+                            // Append the filename to the displaycontainer
+                            this.emptyDisplayContainer();
+                            this.showInfo(fileName);
                             deleteFolderBtn.addEventListener("click", async ()=> {
                                 // Warn the user and make them confirm the action
                                 if (confirm(`Are you sure you want to delete "${fileName}", and all it's contents permanently? `)){
@@ -821,7 +860,6 @@ export default class DocumentManager {
                                 }
                             });
                             optionsContainer.innerHTML = "";
-                            this.emptyDisplayContainer();
                             optionsContainer.append(nameChange);
                             optionsContainer.append(deleteFolderBtn);
                             optionsContainer.append(backBtn);
@@ -841,10 +879,16 @@ export default class DocumentManager {
                             }
                             // Add setting
                             a.target = "_blank";
-                            // Add an icon to the hyper-link
-                            a.innerHTML = "🌍";
-                            // Add a classname
-                            a.className = "btn";
+                            // Add classes
+                            a.classList.add("btn");
+                            a.classList.add("popUp");
+                            a.classList.add("optionsIcon");
+                            a.classList.add("visit");
+                            // Create tooltip
+                            const aToolTip = document.createElement("p");
+                            aToolTip.innerHTML = "Visit";
+                            aToolTip.classList.add("description");
+                            a.append(aToolTip);
                             // Append the span
                             fileObject.append(icon);
                             // Add eventlistener
@@ -1037,7 +1081,10 @@ export default class DocumentManager {
                 // Save the list of files in session storage
                 sessionStorage.setItem(ul.id, JSON.stringify(list));
                 // Append the ul
-                filesContainer.append(ul);
+                if (list.length > 0){
+                    filesContainer.append(ul);
+                }
+                
             }
 
         } catch (error) {
@@ -1157,8 +1204,15 @@ export default class DocumentManager {
         
         // Create a save button
         const save = document.createElement("button");
-        save.innerHTML = "💾";
-        save.className = "btn";
+        save.classList.add("btn");
+        save.classList.add("popUp");
+        save.classList.add("optionsIcon");
+        save.classList.add("save");
+        // Create a tooltip description
+        const saveToolTip = document.createElement("p");
+        saveToolTip.innerHTML = "Save";
+        saveToolTip.classList.add("description");
+        save.append(saveToolTip);
         // Add an eventlistener
         save.addEventListener("click", async () => {
             const path = document.getElementById("path");
@@ -1173,8 +1227,15 @@ export default class DocumentManager {
         document.getElementById("optionsContainer").append(save);
         // Creeate a 「名前を付けて保存」button
         const saveAs = document.createElement("button");
-        saveAs.innerHTML = "✏️";
-        saveAs.className = "btn";
+        saveAs.classList.add("btn");
+        saveAs.classList.add("popUp");
+        saveAs.classList.add("optionsIcon");
+        saveAs.classList.add("saveAs");
+        // Create tooltip description
+        const saveAsToolTip = document.createElement("p");
+        saveAsToolTip.innerHTML = "Save As...";
+        saveAsToolTip.classList.add("description");
+        saveAs.append(saveAsToolTip);
         // Add eventlistener
         saveAs.addEventListener("click", ()=> {
             // Show the explorer

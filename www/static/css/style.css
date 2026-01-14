@@ -394,6 +394,42 @@ header h1 {
   padding: 16px;
 }
 
+.optionsIcon {
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 16px;
+  height: 16px;
+  padding: 16px;
+}
+
+.edit {
+  background-image: url(../img/edit-16.png);
+}
+
+.namechange {
+  background-image: url(../img/namechange-16.png);
+}
+
+.visit {
+  background-image: url(../img/visit-16.png);
+}
+
+.erase {
+  background-image: url(../img/erase-16.png);
+}
+
+.back {
+  background-image: url(../img/back-16.png);
+}
+
+.save {
+  background-image: url(../img/save-16.png);
+}
+
+.saveAs {
+  background-image: url(../img/save-as-16.png);
+}
+
 .newOptions {
     margin-top: 8px;
 }
