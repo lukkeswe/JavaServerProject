@@ -72,6 +72,21 @@ body {
   font-weight: bold;
 }
 
+#tooltip {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  display: none;
+
+  background: white;
+  color: #111;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
 #grayScreen {
   display: none;
   z-index: 1000;
@@ -336,6 +351,8 @@ header h1 {
   height: 30px;
 }
 
+
+
 /* small helper UI inside left panel */
 #displayContainer {              /* preview/info area */
   background: rgba(255,255,255,0.02);
@@ -438,12 +455,13 @@ header h1 {
 
 /* File tile card (keeps size & colour-coded spans) */
 #filesContainer li {
+  z-index: 1;
   width: 100px;
   height: 120px;
   display: flex;
   flex-direction: column;
   border-radius: var(--tile-radius);
-  overflow: hidden;
+  /* overflow: hidden; */
   box-shadow: 0 4px 10px rgba(0,0,0,0.45);
   transition: transform 0.12s ease, box-shadow 0.12s ease;
   background: transparent; /* color is on the span inside */
@@ -547,7 +565,7 @@ header h1 {
   overflow: hidden;
   text-overflow: clip;
   padding-bottom: 5px;
-  padding-right: 5px;
+  padding-left: 5px;
 }
 
 /* Hover shade for the colored spans to feel tactile */
@@ -556,12 +574,30 @@ header h1 {
   /* box-shadow: 0 6px 14px rgba(0,0,0,0.6); */
 }
 
+.popUp {
+  position: relative;
+}
+
+.popUp .description {
+  position: absolute;
+  z-index: 2;
+  display: none;
+  width: fit-content;
+  white-space: nowrap;
+  background-color: white;
+  color: #111;
+  border-radius: 3px;
+  padding: 5px;
+  top: 100%;
+  left: 0;
+}
+
 /* Small animation for entry */
 @keyframes tileIn {
   from { opacity: 0; transform: translateY(6px) scale(.99); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
-#filesContainer li { animation: tileIn .18s ease both; }
+/* #filesContainer li { animation: tileIn .18s ease both; } */
 
 /* scrollbar styling for explorer / files area */
 #filesContainer::-webkit-scrollbar {

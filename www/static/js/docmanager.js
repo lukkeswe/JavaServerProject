@@ -622,14 +622,20 @@ export default class DocumentManager {
                 let list = [];
                 for (let file = 0; file < data[0][type].length; file++){
                     const fileName = data[0][type][file];
-                    
+                    // Create the list element that will act as a container
                     const fileObject  = document.createElement("li");
-                    
+                    fileObject.classList.add("popUp");
+                    // Create a pop up name description
+                    const popUp = document.createElement("p");
+                    popUp.classList.add("description");
+                    popUp.innerHTML = fileName;
+                    fileObject.append(popUp);
+                    // Create an icon for the list element
                     const icon      = document.createElement("span");
+                    // Create a p element that contains the file's name
                     const name      = document.createElement("p");
                     name.className  = "fileName";
                     name.innerHTML  = fileName;
-
                     // Create a delete button
                     const erase     = document.createElement("button");
                     erase.innerHTML = "🗑️";

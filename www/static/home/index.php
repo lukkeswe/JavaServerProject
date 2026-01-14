@@ -115,6 +115,7 @@ if (isset($_COOKIE["javasession"])){
     <script type="module" src="/js/docmanager.js"></script>
 </head>
 <body>
+    <div id="tooltip"></div>
     <div id="grayScreen">
         <div id="miniExplorer" style="display:none;">
             <button class="createBtn" id="createFolderBtnMini">📁</button>
@@ -158,9 +159,9 @@ if (isset($_COOKIE["javasession"])){
         <main id="main-content">
             <div id="upload-container">
                 <div id="createButtons">
-                    <button class="createBtn" id="createFileBtn"></button>
-                    <button class="createBtn" id="createFolderBtn"></button>
-                    <button class="createBtn" id="uploadSomeBtn"></button>
+                    <button class="createBtn popUp" id="createFileBtn"><span class="description">New File</span></button>
+                    <button class="createBtn popUp" id="createFolderBtn"><span class="description">New Folder</span></button>
+                    <button class="createBtn popUp" id="uploadSomeBtn"><span class="description">Upload</span></button>
                 </div>
                 <div id="newFileOptions" class="newOptions" style="display: none;">
                     <input type="text" id="newFilename" class="textInput" value="filename">
@@ -448,6 +449,33 @@ if (isset($_COOKIE["javasession"])){
                 document.getElementById("optionsContainer").append(backBtn);
             });
         }
+
+        const tooltip = document.getElementById("tooltip");
+
+        document.addEventListener("mouseover", (e) => {
+            const popUp = e.target.closest(".popUp");
+            if (!popUp) return;
+
+            const desc = popUp.querySelector(".description");
+            if (!desc) return;
+
+            tooltip.textContent = desc.textContent;
+            tooltip.style.display = "block";
+            });
+
+            document.addEventListener("mousemove", (e) => {
+            if (tooltip.style.display !== "block") return;
+
+            tooltip.style.left = e.clientX + 12 + "px";
+            tooltip.style.top  = e.clientY + 12 + "px";
+            });
+
+            document.addEventListener("mouseout", (e) => {
+            if (e.target.closest(".popUp")) {
+                tooltip.style.display = "none";
+            }
+        });
+
     </script>
 </body>
 </html>
