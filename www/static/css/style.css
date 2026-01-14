@@ -312,6 +312,30 @@ header h1 {
   transform: translateY(-2px);
 }
 
+#createFileBtn {
+  background: url(../img/newfile-20.png);
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 25px;
+  height: 30px;
+}
+
+#createFolderBtn {
+  background: url(../img/newfolder-20.png);
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 25px;
+  height: 30px;
+}
+
+#uploadSomeBtn {
+  background: url(../img/upload-20.png);
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 25px;
+  height: 30px;
+}
+
 /* small helper UI inside left panel */
 #displayContainer {              /* preview/info area */
   background: rgba(255,255,255,0.02);
@@ -333,7 +357,25 @@ header h1 {
   cursor: pointer;
   transition: background .12s, transform .08s;
 }
-.btn:hover { background: #3c3f42; transform: translateY(-1px); }
+.btn:hover { transform: translateY(-1px); }
+
+.check {
+  background-image: url(../img/check-16.png);
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 16px;
+  height: 16px;
+  padding: 16px;
+}
+
+.cancel {
+  background-image: url(../img/cancel-16.png);
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 16px;
+  height: 16px;
+  padding: 16px;
+}
 
 .newOptions {
     margin-top: 8px;
@@ -397,7 +439,7 @@ header h1 {
 /* File tile card (keeps size & colour-coded spans) */
 #filesContainer li {
   width: 100px;
-  height: 100px;
+  height: 120px;
   display: flex;
   flex-direction: column;
   border-radius: var(--tile-radius);
@@ -443,43 +485,75 @@ header h1 {
 
 /* Color-coded types (matches your previous palette but tuned for dark) */
 #folderList li span {
-  background: linear-gradient(180deg,#d99b2a,#c4831f);
+  /* background: linear-gradient(180deg,#d99b2a,#c4831f); */
+  background-image: url(../img/folder-90.png);
+  background-position: center;
+  background-repeat: no-repeat;
   color: #111;
 }
 #htmlList li span {
-  background: linear-gradient(180deg,#e26a6a,#c74a4a);
-  color: #111;
+  /* background: linear-gradient(180deg,#e26a6a,#c74a4a); */
+  background-image: url(../img/html-file-90.png);
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #fff;
 }
 #cssList li span {
-  background: linear-gradient(180deg,#e0cc56,#c9b23a);
-  color: #111;
+  /* background: linear-gradient(180deg,#e0cc56,#c9b23a); */
+  background-image: url(../img/css-file-90.png);
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #fff;
 }
 #jsList li span {
-  background: linear-gradient(180deg,#66d0d9,#38b2c0);
-  color: #111;
+  /* background: linear-gradient(180deg,#66d0d9,#38b2c0); */
+  background-image: url(../img/js-file-90.png);
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #fff;
 }
 #phpList li span {
-  background: linear-gradient(180deg,#9b7ae5,#7f59d1);
-  color: #111;
+  /* background: linear-gradient(180deg,#9b7ae5,#7f59d1); */
+  background-image: url(../img/php-file-90.png);
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #fff;
 }
 #imgList li span {
-  background: linear-gradient(180deg,#7ec8f6,#54aeda);
-  color: #111;
+  /* background: linear-gradient(180deg,#7ec8f6,#54aeda); */
+  background-image: url(../img/img-file-90.png);
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #fff;
 }
 #videoList li span {
-  background: linear-gradient(180deg,#7ef688,#54da54);
-  color: #111;
+  /* background: linear-gradient(180deg,#7ef688,#54da54); */
+  background-image: url(../img/video-file-90.png);
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #fff;
 }
 
 #blogList li span {
-  background: linear-gradient(180deg,#f67ecc,#da54a7);
-  color: #111;
+  /* background: linear-gradient(180deg,#f67ecc,#da54a7); */
+  background-image: url(../img/blog-file-90.png);
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #fff;
+}
+
+.fileName {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+  padding-bottom: 5px;
+  padding-right: 5px;
 }
 
 /* Hover shade for the colored spans to feel tactile */
 #filesContainer li span:hover {
   filter: brightness(0.95);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.6);
+  /* box-shadow: 0 6px 14px rgba(0,0,0,0.6); */
 }
 
 /* Small animation for entry */
@@ -560,6 +634,45 @@ footer {
 	font-size: 10px;
 	padding: 3px;
 	}
+  #folderList li span {
+  /* background: linear-gradient(180deg,#d99b2a,#c4831f); */
+  background-image: url(../img/folder-65.png);
+}
+#htmlList li span {
+  /* background: linear-gradient(180deg,#e26a6a,#c74a4a); */
+  background-image: url(../img/html-file-65.png);
+}
+#cssList li span {
+  /* background: linear-gradient(180deg,#e0cc56,#c9b23a); */
+  background-image: url(../img/css-file-65.png);
+}
+#jsList li span {
+  /* background: linear-gradient(180deg,#66d0d9,#38b2c0); */
+  background-image: url(../img/js-file-65.png);
+}
+#phpList li span {
+  /* background: linear-gradient(180deg,#9b7ae5,#7f59d1); */
+  background-image: url(../img/php-file-65.png);
+}
+#imgList li span {
+  /* background: linear-gradient(180deg,#7ec8f6,#54aeda); */
+  background-image: url(../img/img-file-65.png);
+}
+#videoList li span {
+  /* background: linear-gradient(180deg,#7ef688,#54da54); */
+  background-image: url(../img/video-file-65.png);
+}
+
+#blogList li span {
+  /* background: linear-gradient(180deg,#f67ecc,#da54a7); */
+  background-image: url(../img/blog-file-65.png);
+}
+
+/* Hover shade for the colored spans to feel tactile */
+#filesContainer li span:hover {
+  filter: brightness(0.95);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.6);
+}
   #editor {
       height: 500px;
       width: 100%;

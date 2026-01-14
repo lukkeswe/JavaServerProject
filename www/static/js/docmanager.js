@@ -625,7 +625,8 @@ export default class DocumentManager {
                     
                     const fileObject  = document.createElement("li");
                     
-                    const name      = document.createElement("span");
+                    const icon      = document.createElement("span");
+                    const name      = document.createElement("p");
                     name.className  = "fileName";
                     name.innerHTML  = fileName;
 
@@ -736,16 +737,16 @@ export default class DocumentManager {
                         buttonContainer.className = "spaceBetween";
                         // Create a cancel button
                         const cancel = document.createElement("button");
-                        cancel.innerHTML = "❌";
-                        cancel.className = "btn";
+                        cancel.classList.add("btn");
+                        cancel.classList.add("cancel");
                         cancel.addEventListener("click", () => {
                             nameChangeContainer.remove();
                             this.grayScreen.style.display = "none";
                         });
                         // Give the input a submit button
                         const confirm       = document.createElement("button");
-                        confirm.innerHTML   = "✅";
-                        confirm.className   = "btn";
+                        confirm.classList("btn");
+                        confirm.classList("check");
                         confirm.addEventListener("click", async () => {
                             let oldName = fileName;
                             let newName = nameInput.value + "." + type;
@@ -777,7 +778,6 @@ export default class DocumentManager {
 
                     if (type == "folder") {
                         const span = document.createElement("span");
-                        span.innerHTML = fileName;
                         span.addEventListener("dblclick", async () => {
                             const filesContainer = document.getElementById("filesContainer");
                             const exLoad = document.getElementById("exLoad");
@@ -840,9 +840,9 @@ export default class DocumentManager {
                             // Add a classname
                             a.className = "btn";
                             // Append the span
-                            fileObject.append(name);
+                            fileObject.append(icon);
                             // Add eventlistener
-                            name.addEventListener("click", () => {
+                            icon.addEventListener("click", () => {
                                 this.emptyDisplayContainer();
                                 // Empty optioins container
                                 optionsContainer.innerHTML = "";
@@ -860,17 +860,17 @@ export default class DocumentManager {
                                 this.showInfo(fileName);
                             });
                             // Add a double click eventlistener
-                            name.addEventListener("dblclick", ()=> {
+                            icon.addEventListener("dblclick", ()=> {
                                 // Redirect the user
                                 window.open(a.href, "_blank");
                             });
                         //}
                     } else {
                         // Append the name object with the span element
-                        fileObject.append(name);
+                        fileObject.append(icon);
                         // If the file type is of "img" type
                         if (type == "img") {
-                            name.addEventListener("click", () => {
+                            icon.addEventListener("click", () => {
                                 this.emptyDisplayContainer();
                                 this.showInfo(fileName);
                                 this.showImage(fileName, "https://" + sessionStorage.getItem("domain") + "/");
@@ -884,7 +884,7 @@ export default class DocumentManager {
                         } else if(type == "css" || type == "js"){
                             // If the file is a css or JavaScript file
                             // Add event listener
-                            name.addEventListener("click", () => {
+                            icon.addEventListener("click", () => {
                                 this.emptyDisplayContainer();
 
                                 this.showInfo(fileName);
@@ -917,7 +917,7 @@ export default class DocumentManager {
                             video.append(source);
                             video.append("Your browser does not support video playback.");
                             // Add an eventlistener
-                            name.addEventListener("click", () => {
+                            icon.addEventListener("click", () => {
                                 this.emptyDisplayContainer();
                                 this.showInfo(fileName);
                                 // Append the video element to the display container
@@ -966,10 +966,9 @@ export default class DocumentManager {
                             renameBtn.addEventListener("click", async ()=> {
                                 // Create a confirmation button
                                 const confirm = document.createElement("button");
-                                // Add an icon
-                                confirm.innerHTML = "✅";
                                 // Add a classname
-                                confirm.className = "btn";
+                                confirm.classList("btn");
+                                confirm.classList("check");
                                 // Add an eventlistener
                                 confirm.addEventListener("click", async ()=> {
                                     // Get the text input
@@ -1025,6 +1024,7 @@ export default class DocumentManager {
                         }
 
                     }
+                    fileObject.append(name);
                     ul.append(fileObject);
                     list.push(fileName);
                 }
@@ -1118,7 +1118,7 @@ export default class DocumentManager {
                         fileObject.append(span);
                     } else {
                         // Append the name object with the span element
-                        fileObject.append(name);
+                        fileObject.append(icon);
                     }
                     ul.append(fileObject);
                     list.push(fileName);
@@ -1392,8 +1392,8 @@ export default class DocumentManager {
         container.className = "grayWindow";
         container.style.display = "block";
         const cancel = document.createElement("button");
-        cancel.innerHTML = "❌";
-        cancel.className = "btn";
+        cancel.classList.add("btn");
+        cancel.classList.add("cancel");
         cancel.addEventListener("click", () => {
             container.remove();
             this.grayScreen.style.display = "none";
@@ -1402,8 +1402,8 @@ export default class DocumentManager {
         input.type = "text";
         input.className = "textInput";
         const confirm = document.createElement("button");
-        confirm.innerHTML = "✅";
-        confirm.className = "btn";
+        confirm.classList.add("btn");
+        confirm.classList.add("check");
         confirm.addEventListener("click", async () => {
             const path = document.getElementById("path");
             await createFolder(input.value, path.innerHTML);

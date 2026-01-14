@@ -124,13 +124,13 @@ if (isset($_COOKIE["javasession"])){
             <div id="optionsContainerMini"></div>
             <div id="newFolderOptionsMini">
                 <input id="folderNameMini" type="text" style="width: 200px;">
-                <button id="createNewFolderMini" class="btn">✅</button>
+                <button id="createNewFolderMini" class="btn check"></button>
             </div>
             <div id="displayContainerMini" style="display: none;"></div>
             <div id="filesContainerMini"></div>
             <div class="cancelContainer">
                 <div id="uploadBtnContainerMini"></div>
-                <button class="btn" id="cancel">❌</button>
+                <button class="btn cancel" id="cancel"></button>
             </div>
         </div>
         <div id="uploadContainer" class="grayWindow">
@@ -142,8 +142,8 @@ if (isset($_COOKIE["javasession"])){
             <input type="file" id="bufferInput" style="display: none;">
             <progress id="uploadProgress" value="0" max="100" style="width: 100%; display: none;"></progress>
             <div class="spaceBetween">
-                <button id="uploadBtn" class="btn">✅</button>
-                <button class="btn" id="cancelUpload">❌</button>
+                <button id="uploadBtn" class="btn check"></button>
+                <button class="btn cancel" id="cancelUpload"></button>
             </div>
         </div>
         <div id="textInputContainer" style="display: none;">
@@ -158,9 +158,9 @@ if (isset($_COOKIE["javasession"])){
         <main id="main-content">
             <div id="upload-container">
                 <div id="createButtons">
-                    <button class="createBtn" id="createFileBtn">📄</button>
-                    <button class="createBtn" id="createFolderBtn">📁</button>
-                    <button class="createBtn" id="uploadSomeBtn">📤</button>
+                    <button class="createBtn" id="createFileBtn"></button>
+                    <button class="createBtn" id="createFolderBtn"></button>
+                    <button class="createBtn" id="uploadSomeBtn"></button>
                 </div>
                 <div id="newFileOptions" class="newOptions" style="display: none;">
                     <input type="text" id="newFilename" class="textInput" value="filename">
@@ -170,12 +170,12 @@ if (isset($_COOKIE["javasession"])){
                         <option value="js">JavaScript</option>
                         <option value="php">PHP</option>
                     </select><br>
-                    <button id="create" class="btn">✅</button>
-                    <button id="cancelFile" class="btn">❌</button>
+                    <button id="create" class="btn check"></button>
+                    <button id="cancelFile" class="btn cancel"></button>
                 </div>
                 <div id="newFolderOptions" class="newOptions" style="display: none;">
                     <input id="folderName" class="textInput" type="text" style="width: 200px;">
-                    <button id="createNewFolder" class="btn">✅</button>
+                    <button id="createNewFolder" class="btn check"></button>
                 </div>
                 <div id="optionsContainer"></div>
                 <div id="displayContainer"></div>
