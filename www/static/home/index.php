@@ -453,29 +453,31 @@ if (isset($_COOKIE["javasession"])){
         const tooltip = document.getElementById("tooltip");
 
         document.addEventListener("mouseover", (e) => {
-            const popUp = e.target.closest(".popUp");
-            if (!popUp) return;
+            if (!window.matchMedia("(max-width: 900px)").matches) {
+                const popUp = e.target.closest(".popUp");
+                if (!popUp) return;
 
-            const desc = popUp.querySelector(".description");
-            if (!desc) return;
+                const desc = popUp.querySelector(".description");
+                if (!desc) return;
 
-            tooltip.textContent = desc.textContent;
-            tooltip.style.display = "block";
+                tooltip.textContent = desc.textContent;
+                tooltip.style.display = "block";
+                }
+                document.addEventListener("mousemove", (e) => {
+                if (tooltip.style.display !== "block") return;
+
+                tooltip.style.left = e.clientX + 12 + "px";
+                tooltip.style.top  = e.clientY + 12 + "px";
+                });
             });
 
-            document.addEventListener("mousemove", (e) => {
-            if (tooltip.style.display !== "block") return;
+            
 
-            tooltip.style.left = e.clientX + 12 + "px";
-            tooltip.style.top  = e.clientY + 12 + "px";
-            });
-
-            document.addEventListener("mouseout", (e) => {
+        document.addEventListener("mouseout", (e) => {
             if (e.target.closest(".popUp")) {
                 tooltip.style.display = "none";
             }
         });
-
     </script>
 </body>
 </html>
