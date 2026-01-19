@@ -314,12 +314,15 @@ header h1 {
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
   border: 1px solid rgba(255,255,255,0.03);
   color: var(--muted);
-  padding: 6px 8px;
   border-radius: 0 0 8px 8px;  /* tab-like */
   box-shadow: 0 -2px 6px rgba(0,0,0,0.45) inset;
   cursor: pointer;
   transition: background 0.12s, transform 0.08s;
-  font-size: 16px;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 32px;
+  height: 32px;
+  padding: 18px;
 }
 .createBtn:hover {
   background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.03));
@@ -328,27 +331,15 @@ header h1 {
 }
 
 #createFileBtn {
-  background: url(../img/newfile-20.png);
-  background-repeat: no-repeat;
-  background-position: center;
-  width: 25px;
-  height: 30px;
+  background-image: url(../img/newfile-32.png);
 }
 
 #createFolderBtn {
-  background: url(../img/newfolder-20.png);
-  background-repeat: no-repeat;
-  background-position: center;
-  width: 25px;
-  height: 30px;
+  background-image: url(../img/newfolder-32.png);
 }
 
 #uploadSomeBtn {
-  background: url(../img/upload-20.png);
-  background-repeat: no-repeat;
-  background-position: center;
-  width: 25px;
-  height: 30px;
+  background-image: url(../img/upload-32.png);
 }
 
 
@@ -683,13 +674,14 @@ footer {
         max-height: 0;
         overflow: hidden;
         transition: max-height 1s ease;
-    }
-    #burger.open {
+  }
+  #burger.open {
         width: 100%;
         max-height: 500px;
-    }
+  }
   #main-content { flex-direction: column; padding: 12px;}
   #upload-container { width: 100%; min-width: auto; padding-top: 42px; }
+  #createButtons {left: unset; right: 12px;}
   #filesContainer {
       display: block;
       padding: 12px;
@@ -709,42 +701,43 @@ footer {
   #folderList li span {
   /* background: linear-gradient(180deg,#d99b2a,#c4831f); */
   background-image: url(../img/folder-65.png);
-}
-#htmlList li span {
-  /* background: linear-gradient(180deg,#e26a6a,#c74a4a); */
-  background-image: url(../img/html-file-65.png);
-}
-#cssList li span {
-  /* background: linear-gradient(180deg,#e0cc56,#c9b23a); */
-  background-image: url(../img/css-file-65.png);
-}
-#jsList li span {
-  /* background: linear-gradient(180deg,#66d0d9,#38b2c0); */
-  background-image: url(../img/js-file-65.png);
-}
-#phpList li span {
-  /* background: linear-gradient(180deg,#9b7ae5,#7f59d1); */
-  background-image: url(../img/php-file-65.png);
-}
-#imgList li span {
-  /* background: linear-gradient(180deg,#7ec8f6,#54aeda); */
-  background-image: url(../img/img-file-65.png);
-}
-#videoList li span {
-  /* background: linear-gradient(180deg,#7ef688,#54da54); */
-  background-image: url(../img/video-file-65.png);
-}
+  }
+  #htmlList li span {
+    /* background: linear-gradient(180deg,#e26a6a,#c74a4a); */
+    background-image: url(../img/html-file-65.png);
+  }
+  #cssList li span {
+    /* background: linear-gradient(180deg,#e0cc56,#c9b23a); */
+    background-image: url(../img/css-file-65.png);
+  }
+  #jsList li span {
+    /* background: linear-gradient(180deg,#66d0d9,#38b2c0); */
+    background-image: url(../img/js-file-65.png);
+  }
+  #phpList li span {
+    /* background: linear-gradient(180deg,#9b7ae5,#7f59d1); */
+    background-image: url(../img/php-file-65.png);
+  }
+  #imgList li span {
+    /* background: linear-gradient(180deg,#7ec8f6,#54aeda); */
+    background-image: url(../img/img-file-65.png);
+  }
+  #videoList li span {
+    /* background: linear-gradient(180deg,#7ef688,#54da54); */
+    background-image: url(../img/video-file-65.png);
+  }
 
-#blogList li span {
-  /* background: linear-gradient(180deg,#f67ecc,#da54a7); */
-  background-image: url(../img/blog-file-65.png);
-}
+  #blogList li span {
+    /* background: linear-gradient(180deg,#f67ecc,#da54a7); */
+    background-image: url(../img/blog-file-65.png);
+  }
 
-/* Hover shade for the colored spans to feel tactile */
-#filesContainer li span:hover {
-  filter: brightness(0.95);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.6);
-}
+  /* Hover shade for the colored spans to feel tactile */
+  #filesContainer li span:hover {
+    filter: brightness(0.95);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.6);
+  }
+  .fileName {font-size: 10px;}
   #editor {
       height: 500px;
       width: 100%;
