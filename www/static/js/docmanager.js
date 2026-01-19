@@ -1499,7 +1499,7 @@ export default class DocumentManager {
         confirm.classList.add("check");
         confirm.addEventListener("click", async () => {
             const path = document.getElementById("path");
-            await createFolder(input.value, path.innerHTML);
+            await createFolder(path.innerHTML + input.value);
             container.remove();
             this.grayScreen.style.display = "none";
             await this.getFiles(path.innerHTML);
