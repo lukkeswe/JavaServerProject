@@ -79,8 +79,10 @@ if (isset($_COOKIE["javasession"])){
       <div id="optionsContainerMini"></div>
       <div id="displayContainerMini" style="display: none;"></div>
       <div id="filesContainerMini"></div>
-      <div id="uploadBtnContainerMini"></div>
-      <button id="cancel">Cancel</button>
+      <div class="spaceBetween" style="margin-top:10px;">
+        <div id="uploadBtnContainerMini"></div>
+        <button id="cancel" class="btn cancel"></button>
+      </div>
     </div>
   </div>
   <header>
@@ -248,7 +250,9 @@ if (isset($_COOKIE["javasession"])){
       const uploadBtnContainer = document.getElementById("uploadBtnContainerMini");
       const uploadBtn = document.createElement("button");
       uploadBtn.id = "uploadBtn";
-      uploadBtn.innerHTML = "Upload";
+      uploadBtn.classList.add("btn");
+      uploadBtn.classList.add("optionsIcon");
+      uploadBtn.classList.add("save");
       // Add an eventlistener
       uploadBtn.addEventListener("click", async ()=> {
         // Get the filename
