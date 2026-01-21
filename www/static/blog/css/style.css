@@ -5,6 +5,19 @@
   --accent: #2563eb;
   --card: #ffffff;
 }
+
+p,
+table,
+blockquote,
+address,
+pre,
+iframe,
+form,
+figure,
+dl {
+    margin: 0;
+}
+
 html,
 body {
   height: 100%;
@@ -132,7 +145,7 @@ main {
   font-size: 13px;
 }
 
-#grayScreen {
+/* #grayScreen {
   display: none;
   z-index: 1000;
   position: absolute;
@@ -190,55 +203,8 @@ main {
 
 #filesContainerMini li a span {
   display: block;
-}
+} */
 
-#folderList li span {
-  background-color: orange;
-}
-
-#htmlList li span {
-  background-color: red;
-  color: white;
-  height: 100%;
-}
-
-#htmlList li span:hover {
-  background-color: darkred;
-}
-
-#cssList li span {
-  background-color: yellow;
-}
-
-#cssList li span:hover {
-  background-color: rgb(208, 208, 0);
-}
-
-#imgList li span {
-  background-color: skyblue;
-}
-
-#imgList li span:hover {
-  background-color: blue;
-}
-
-#jsList li span {
-  background-color: aqua;
-}
-
-#jsList li span:hover {
-  background-color: blue;
-}
-
-#phpList li span {
-  background-color: blueviolet;
-  color: white;
-  height: 100%;
-}
-
-#phpList li span:hover {
-  background-color: purple;
-}
 
 footer {
   max-width: 900px;

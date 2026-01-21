@@ -118,7 +118,7 @@ if (isset($_COOKIE["javasession"])){
     <div id="tooltip"></div>
     <div id="grayScreen">
         <div id="miniExplorer" style="display:none;">
-            <button class="createBtn" id="createFolderBtnMini">📁</button>
+            <button class="createBtn" id="createFolderBtnMini"></button>
             <input id="filename" type="text" value="index" style="width: 150px;"><span id="extention"></span><br>
             <input id="newFolder" type="hidden" style="width: 150px;">
             <div id="pathContainerMini"><p id="pathMini"></p></div>

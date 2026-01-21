@@ -107,6 +107,10 @@ body {
   margin-top: 8px;
 }
 
+#createFolderBtnMini {
+  background-image: url(../img/newfolder-32.png);
+}
+
 #miniExplorer {
   position: relative;
   z-index:1001;
@@ -535,12 +539,18 @@ header h1 {
   background-repeat: no-repeat;
   color: #111;
 }
+#folderList li span.miniIcon {
+  background-image: url(../img/folder-40.png);
+}
 #htmlList li span {
   /* background: linear-gradient(180deg,#e26a6a,#c74a4a); */
   background-image: url(../img/html-file-90.png);
   background-position: center;
   background-repeat: no-repeat;
   color: #fff;
+}
+#htmlList li span.miniIcon {
+  background-image: url(../img/html-file-40.png);
 }
 #cssList li span {
   /* background: linear-gradient(180deg,#e0cc56,#c9b23a); */
@@ -549,12 +559,18 @@ header h1 {
   background-repeat: no-repeat;
   color: #fff;
 }
+#cssList li span.miniIcon {
+  background-image: url(../img/css-file-40.png);
+}
 #jsList li span {
   /* background: linear-gradient(180deg,#66d0d9,#38b2c0); */
   background-image: url(../img/js-file-90.png);
   background-position: center;
   background-repeat: no-repeat;
   color: #fff;
+}
+#jsList li span.miniIcon {
+  background-image: url(../img/js-file-40.png);
 }
 #phpList li span {
   /* background: linear-gradient(180deg,#9b7ae5,#7f59d1); */
@@ -563,6 +579,9 @@ header h1 {
   background-repeat: no-repeat;
   color: #fff;
 }
+#phpList li span.miniIcon {
+  background-image: url(../img/php-file-40.png);
+}
 #imgList li span {
   /* background: linear-gradient(180deg,#7ec8f6,#54aeda); */
   background-image: url(../img/img-file-90.png);
@@ -570,12 +589,18 @@ header h1 {
   background-repeat: no-repeat;
   color: #fff;
 }
+#imgList li span.miniIcon {
+  background-image: url(../img/img-file-40.png);
+}
 #videoList li span {
   /* background: linear-gradient(180deg,#7ef688,#54da54); */
   background-image: url(../img/video-file-90.png);
   background-position: center;
   background-repeat: no-repeat;
   color: #fff;
+}
+#videoList li span.miniIcon {
+  background-image: url(../img/video-file-40.png);
 }
 
 #blogList li span {
@@ -586,12 +611,20 @@ header h1 {
   color: #fff;
 }
 
+#blogList li span.miniIcon {
+  background-image: url(../img/blog-file-40.png);
+}
+
 .fileName {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: clip;
   padding-bottom: 5px;
   padding-left: 5px;
+}
+
+.miniIcon {
+  height: 30px;
 }
 
 /* Hover shade for the colored spans to feel tactile */

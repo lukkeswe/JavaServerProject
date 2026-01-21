@@ -1091,6 +1091,8 @@ export default class DocumentManager {
                                 optionsContainer.append(renameBtn);
                                 optionsContainer.append(deleteBlogBtn);
                                 optionsContainer.append(backBtn);
+                                this.emptyDisplayContainer();
+                                this.showInfo(fileName);
                             });
                             // Add a double click eventlistener
                             name.addEventListener("dblclick", ()=> {
@@ -1175,12 +1177,16 @@ export default class DocumentManager {
                     const fileObject  = document.createElement("li");
                     
                     const name      = document.createElement("span");
-                    name.className  = "fileName";
-                    name.innerHTML  = fileName;
+                    name.classList.add("fileName");
+                    name.classList.add("miniIcon");
+
+                    const p = document.createElement("p");
+                    p.innerHTML = fileName;
+                    p.classList.add("fileName");
 
                     if (type == "folder") {
                         const span = document.createElement("span");
-                        span.innerHTML = fileName;
+                        span.classList.add("miniIcon");
                         span.addEventListener("click", () => {
                             if (currentPath != null && currentPath.textContent.endsWith("/")) {
                                 this.getFilesMini(currentPath.textContent + fileName);
@@ -1197,8 +1203,9 @@ export default class DocumentManager {
                         fileObject.append(span);
                     } else {
                         // Append the name object with the span element
-                        fileObject.append(icon);
+                        fileObject.append(name);
                     }
+                    fileObject.append(p);
                     ul.append(fileObject);
                     list.push(fileName);
                 }
@@ -1279,8 +1286,10 @@ export default class DocumentManager {
             const uploadBtnContainer = document.getElementById("uploadBtnContainerMini");
             const uploadBtn = document.createElement("button");
             uploadBtn.id = "uploadBtnMini";
-            uploadBtn.className = "btn";
-            uploadBtn.innerHTML = "💾";
+            uploadBtn.classList.add("btn");
+            uploadBtn.classList.add("popUp");
+            uploadBtn.classList.add("optionsIcon");
+            uploadBtn.classList.add("save");
             // Get the file name (if there is one)
             const filename = document.getElementById("displayContainer");
             // Append the file name into the file name input field
