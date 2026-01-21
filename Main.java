@@ -279,6 +279,9 @@ public class Main {
                                 if (resolvePath.toString().endsWith(extension)) {
                                     isImage = true;
                                     contentType = "application/octet-stream";
+                                    if (extension.equals(".svg")) {
+                                        contentType = "image/svg+xml";
+                                    }
                                     break;
                                 }
                             }
