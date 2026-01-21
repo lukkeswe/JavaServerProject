@@ -587,6 +587,10 @@ export default class DocumentManager {
             console.log("Response from server:", data);
             const optionsContainer = document.getElementById("optionsContainer");
             optionsContainer.innerHTML = "";
+            const filesContainer    = document.getElementById("filesContainer");
+            filesContainer.style.padding = "18px";
+            filesContainer.innerHTML = "";
+            const exLoad = document.getElementById("exLoad");
             const currentPath = document.getElementById("path");
             const backBtn = document.createElement("button");
             document.getElementById("displayContainer").innerHTML = "";
@@ -602,7 +606,7 @@ export default class DocumentManager {
                 backBtnToolTip.classList.add("description");
                 backBtn.append(backBtnToolTip);
                 // Add an eventlistener
-                backBtn.addEventListener("click", () => {
+                backBtn.addEventListener("click", async () => {
                     const slice = path.split("/");
                     console.log("slice: " + slice);
                     
@@ -610,18 +614,19 @@ export default class DocumentManager {
                         previousPath = previousPath + slice[i] + "/";
                     }
                     console.log("targetPath: " + previousPath);
-                    
-                    this.getFiles(previousPath);
-                    currentPath.innerHTML = previousPath;
+                    filesContainer.style.display = "none";
+                    exLoad.style.display = "block";
+                    this.emptyDisplayContainer();
                     backBtn.remove();
+                    await this.getFiles(previousPath);
+                    if (window.innerWidth <= 900) filesContainer.style.display = "block";
+                    else filesContainer.style.display = "flex";
+                    exLoad.style.display = "none";
+                    currentPath.innerHTML = previousPath;
                 });
                 document.getElementById("displayContainer").innerHTML = "";
                 optionsContainer.append(backBtn);
             }
-            const filesContainer    = document.getElementById("filesContainer");
-            filesContainer.style.padding = "18px";
-            filesContainer.innerHTML = "";
-            const exLoad = document.getElementById("exLoad");
             // List of supported file types
             const fileTypes = ["folder", "html", "php", "css", "img", "js", "video", "blog"];
             for (let type of fileTypes){
@@ -818,8 +823,6 @@ export default class DocumentManager {
                         const span = document.createElement("span");
                         span.classList.add("fileIcon");
                         span.addEventListener("dblclick", async () => {
-                            const filesContainer = document.getElementById("filesContainer");
-                            const exLoad = document.getElementById("exLoad");
                             filesContainer.style.display = "none";
                             exLoad.style.display = "block";
                             this.emptyDisplayContainer();
