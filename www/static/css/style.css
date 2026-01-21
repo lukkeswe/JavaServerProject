@@ -324,6 +324,7 @@ header h1 {
   transition: background 0.12s, transform 0.08s;
   background-repeat: no-repeat;
   background-position: center;
+  background-size: 32px;
   width: 32px;
   height: 32px;
   padding: 18px;
@@ -334,15 +335,15 @@ header h1 {
 }
 
 #createFileBtn {
-  background-image: url(../img/newfile-32.png);
+  background-image: url(../img/newfile.svg);
 }
 
 #createFolderBtn {
-  background-image: url(../img/newfolder-32.png);
+  background-image: url(../img/newfolder.svg);
 }
 
 #uploadSomeBtn {
-  background-image: url(../img/upload-32.png);
+  background-image: url(../img/upload.svg);
 }
 
 
@@ -371,18 +372,20 @@ header h1 {
 .btn:hover { transform: translateY(-1px); }
 
 .check {
-  background-image: url(../img/check-16.png);
+  background-image: url(../img/check.svg);
   background-repeat: no-repeat;
   background-position: center;
+  background-size: 16px;
   width: 16px;
   height: 16px;
   padding: 16px;
 }
 
 .cancel {
-  background-image: url(../img/cancel-16.png);
+  background-image: url(../img/cancel.svg);
   background-repeat: no-repeat;
   background-position: center;
+  background-size: 16px;
   width: 16px;
   height: 16px;
   padding: 16px;
@@ -391,37 +394,38 @@ header h1 {
 .optionsIcon {
   background-repeat: no-repeat;
   background-position: center;
+  background-size: 16px;
   width: 16px;
   height: 16px;
   padding: 16px;
 }
 
 .edit {
-  background-image: url(../img/edit-16.png);
+  background-image: url(../img/edit.svg);
 }
 
 .namechange {
-  background-image: url(../img/namechange-16.png);
+  background-image: url(../img/namechange.svg);
 }
 
 .visit {
-  background-image: url(../img/visit-16.png);
+  background-image: url(../img/visit.svg);
 }
 
 .erase {
-  background-image: url(../img/erase-16.png);
+  background-image: url(../img/erase.svg);
 }
 
 .back {
-  background-image: url(../img/back-16.png);
+  background-image: url(../img/back.svg);
 }
 
 .save {
-  background-image: url(../img/save-16.png);
+  background-image: url(../img/save.svg);
 }
 
 .saveAs {
-  background-image: url(../img/save-as-16.png);
+  background-image: url(../img/save-as.svg);
 }
 
 .newOptions {
@@ -531,88 +535,51 @@ header h1 {
   text-decoration: none;
 }
 
+.fileIcon {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 85px;
+}
+
+.miniIcon {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 40px;
+}
+
 /* Color-coded types (matches your previous palette but tuned for dark) */
 #folderList li span {
   /* background: linear-gradient(180deg,#d99b2a,#c4831f); */
-  background-image: url(../img/folder-90.png);
-  background-position: center;
-  background-repeat: no-repeat;
-  color: #111;
-}
-#folderList li span.miniIcon {
-  background-image: url(../img/folder-40.png);
+  background-image: url(../img/folder.svg);
 }
 #htmlList li span {
   /* background: linear-gradient(180deg,#e26a6a,#c74a4a); */
-  background-image: url(../img/html-file-90.png);
-  background-position: center;
-  background-repeat: no-repeat;
-  color: #fff;
-}
-#htmlList li span.miniIcon {
-  background-image: url(../img/html-file-40.png);
+  background-image: url(../img/html-file.svg);
 }
 #cssList li span {
   /* background: linear-gradient(180deg,#e0cc56,#c9b23a); */
-  background-image: url(../img/css-file-90.png);
-  background-position: center;
-  background-repeat: no-repeat;
-  color: #fff;
-}
-#cssList li span.miniIcon {
-  background-image: url(../img/css-file-40.png);
+  background-image: url(../img/css-file.svg);
 }
 #jsList li span {
   /* background: linear-gradient(180deg,#66d0d9,#38b2c0); */
-  background-image: url(../img/js-file-90.png);
-  background-position: center;
-  background-repeat: no-repeat;
-  color: #fff;
-}
-#jsList li span.miniIcon {
-  background-image: url(../img/js-file-40.png);
+  background-image: url(../img/js-file.svg);
 }
 #phpList li span {
   /* background: linear-gradient(180deg,#9b7ae5,#7f59d1); */
-  background-image: url(../img/php-file-90.png);
-  background-position: center;
-  background-repeat: no-repeat;
-  color: #fff;
-}
-#phpList li span.miniIcon {
-  background-image: url(../img/php-file-40.png);
+  background-image: url(../img/php-file.svg);
 }
 #imgList li span {
   /* background: linear-gradient(180deg,#7ec8f6,#54aeda); */
-  background-image: url(../img/img-file-90.png);
-  background-position: center;
-  background-repeat: no-repeat;
-  color: #fff;
-}
-#imgList li span.miniIcon {
-  background-image: url(../img/img-file-40.png);
+  background-image: url(../img/img-file.svg);
 }
 #videoList li span {
   /* background: linear-gradient(180deg,#7ef688,#54da54); */
-  background-image: url(../img/video-file-90.png);
-  background-position: center;
-  background-repeat: no-repeat;
-  color: #fff;
-}
-#videoList li span.miniIcon {
-  background-image: url(../img/video-file-40.png);
+  background-image: url(../img/video-file.svg);
 }
 
 #blogList li span {
   /* background: linear-gradient(180deg,#f67ecc,#da54a7); */
-  background-image: url(../img/blog-file-90.png);
-  background-position: center;
-  background-repeat: no-repeat;
-  color: #fff;
-}
-
-#blogList li span.miniIcon {
-  background-image: url(../img/blog-file-40.png);
+  background-image: url(../img/blog-file.svg);
 }
 
 .fileName {
@@ -730,39 +697,7 @@ footer {
 	font-size: 10px;
 	padding: 3px;
 	}
-  #folderList li span {
-  /* background: linear-gradient(180deg,#d99b2a,#c4831f); */
-  background-image: url(../img/folder-65.png);
-  }
-  #htmlList li span {
-    /* background: linear-gradient(180deg,#e26a6a,#c74a4a); */
-    background-image: url(../img/html-file-65.png);
-  }
-  #cssList li span {
-    /* background: linear-gradient(180deg,#e0cc56,#c9b23a); */
-    background-image: url(../img/css-file-65.png);
-  }
-  #jsList li span {
-    /* background: linear-gradient(180deg,#66d0d9,#38b2c0); */
-    background-image: url(../img/js-file-65.png);
-  }
-  #phpList li span {
-    /* background: linear-gradient(180deg,#9b7ae5,#7f59d1); */
-    background-image: url(../img/php-file-65.png);
-  }
-  #imgList li span {
-    /* background: linear-gradient(180deg,#7ec8f6,#54aeda); */
-    background-image: url(../img/img-file-65.png);
-  }
-  #videoList li span {
-    /* background: linear-gradient(180deg,#7ef688,#54da54); */
-    background-image: url(../img/video-file-65.png);
-  }
-
-  #blogList li span {
-    /* background: linear-gradient(180deg,#f67ecc,#da54a7); */
-    background-image: url(../img/blog-file-65.png);
-  }
+  .fileIcon {background-size: 60px;}
 
   /* Hover shade for the colored spans to feel tactile */
   #filesContainer li span:hover {

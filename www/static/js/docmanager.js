@@ -640,6 +640,7 @@ export default class DocumentManager {
                     fileObject.append(popUp);
                     // Create an icon for the list element
                     const icon      = document.createElement("span");
+                    icon.classList.add("fileIcon");
                     // Create a p element that contains the file's name
                     const name      = document.createElement("p");
                     name.className  = "fileName";
@@ -815,6 +816,7 @@ export default class DocumentManager {
 
                     if (type == "folder") {
                         const span = document.createElement("span");
+                        span.classList.add("fileIcon");
                         span.addEventListener("dblclick", async () => {
                             const filesContainer = document.getElementById("filesContainer");
                             const exLoad = document.getElementById("exLoad");
