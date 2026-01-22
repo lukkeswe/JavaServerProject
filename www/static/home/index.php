@@ -263,7 +263,11 @@ if (isset($_COOKIE["javasession"])){
             droppedFiles.innerHTML = "";
             for (let file of combinedFiles) {
                 const p = document.createElement("p");
-                p.innerHTML = file.name;
+                if (file.relativePath != null) {
+                    p.innerHTML = file.relativePath;
+                } else {
+                    p.innerHTML = file.name;
+                }
                 droppedFiles.append(p);
             }
         });
@@ -327,7 +331,11 @@ if (isset($_COOKIE["javasession"])){
                 droppedFiles.innerHTML = "";
             for (let file of uploadInputFile.files) {
                 const p = document.createElement("p");
-                p.innerHTML = file.name;
+                if (file.relativePath != null){
+                    p.innerHTML = file.relativePath;
+                } else {
+                    p.innerHTML = file.name;
+                }
                 droppedFiles.append(p);
             }
 

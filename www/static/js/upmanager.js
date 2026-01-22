@@ -2,16 +2,39 @@ export async function uploadFile(input, path = "") {
     const files = input.files;
     const progress = document.getElementById("uploadProgress");
     const formData = new FormData();
+    let folderList = sessionStorage.getItem("folderList");
     let htmlFiles = sessionStorage.getItem("htmlList");
     let phpFiles = sessionStorage.getItem("phpList");
     let cssFiles = sessionStorage.getItem("cssList");
     let imgFiles = sessionStorage.getItem("imgList");
+    let videoFiles = sessionStorage.getItem("videoList");
     let fileName;
     let isValidFile = false;
 
     formData.append("path", path);
 
     for (let file of files) {
+        if (!isValidFileName(file.name)){
+            alert(`「${file.name}」をファイル名として出来ません。`);
+            continue;
+        }
+        if (file.relativePath != null) {
+            let newFolder = file.relativePath.split("/")[0];
+            if (folderList.includes(newFolder + "/")){
+                const replace = confirm(`\"${newFolder}/\" already exsist. Do you want to overwrite it's contents?\n(If there are any files with the same name in the current folder they will be replaced!)`);
+                if (!replace) continue;
+            }
+            let relativePath = file.relativePath.split("/");
+            let isValid = true;
+            for (let dir of relativePath) {
+                if (!isValidFileName(dir)) {
+                    isValid = false;
+                    alert(`\"${file.relativePath}\" has an invalid folder name.`);
+                    break;
+                }
+            }
+            if (!isValid) continue;
+        }
         if (
             htmlFiles.includes(file.name) ||
             phpFiles.includes(file.name) ||
@@ -20,10 +43,8 @@ export async function uploadFile(input, path = "") {
         ){
             const replace = confirm(`「${file.name}」 のファイルが存在しています。上書きますか？`);
             if (!replace) {continue;}
-        } else if (!isValidFileName(file.name)){
-            alert(`「${file.name}」をファイル名として出来ません。`);
-            continue;
         }
+        
         formData.append("files", file, file.relativePath);
         fileName = file.name;
         isValidFile = true;
