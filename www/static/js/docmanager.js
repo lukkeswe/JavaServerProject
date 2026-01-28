@@ -740,7 +740,7 @@ export default class DocumentManager {
                         optionsContainer.append(backBtn);
                     });
                     // Create a name change button
-                    const nameChange        = document.createElement("button");
+                    const nameChange = document.createElement("button");
                     nameChange.classList.add("btn");
                     nameChange.classList.add("popUp");
                     nameChange.classList.add("optionsIcon");
@@ -773,6 +773,10 @@ export default class DocumentManager {
                         nameChangeContainer.id = "nameChangeContainer";
                         nameChangeContainer.className = "grayWindow";
                         nameChangeContainer.style.display = "block";
+                        // Create a title for the container
+                        const h2 = document.createElement("h2");
+                        h2.innerHTML = "Change filename";
+                        h2.classList.add("grayTitle");
                         // Create a button container
                         const buttonContainer = document.createElement("div");
                         buttonContainer.className = "spaceBetween";
@@ -810,6 +814,7 @@ export default class DocumentManager {
                         console.log("name change");
                         
                         // Append the input and submit button
+                        nameChangeContainer.append(h2);
                         nameChangeContainer.append(currentFileName);
                         nameChangeContainer.append(nameInput);
                         nameChangeContainer.append(extension);
@@ -1498,6 +1503,9 @@ export default class DocumentManager {
         const container = document.createElement("div");
         container.className = "grayWindow";
         container.style.display = "block";
+        const h2 = document.createElement("h2");
+        h2.innerHTML = "📁 New folder";
+        h2.classList.add("grayTitle");
         const cancel = document.createElement("button");
         cancel.classList.add("btn");
         cancel.classList.add("cancel");
@@ -1520,6 +1528,7 @@ export default class DocumentManager {
         });
         const buttonContainer = document.createElement("div");
         buttonContainer.className = "spaceBetween";
+        container.append(h2);
         container.append(input);
         buttonContainer.append(confirm);
         buttonContainer.append(cancel);
