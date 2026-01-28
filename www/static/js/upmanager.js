@@ -144,6 +144,10 @@ export async function saveBlog(blob, path = "", filename){
 
     const blogs = sessionStorage.getItem("blogList");
     const blogname = filename.replace(".html", ".blog");
+    if (!isValidFileName(blogname)){
+        alert(`\"${blogname}\" is not a valid filename!`);
+        return;
+    }
     if (blogs.includes(blogname)){
         const replace = confirm(`「${blogname}」 のファイルが存在しています。上書きますか？`);
         if (!replace) return;
@@ -319,6 +323,10 @@ export async function renameBlog(path = "", filename, newname) {
         "filename"  : filename,
         "newname"   : newname
     };
+    if (!isValidFileName(filename)) {
+        alert(`\"${filename}\" is not a valid filename!`);
+        return;
+    }
     console.log("Renaming blog...");
     let response = await fetch('/renameBlog', {
         method : "POST",
@@ -329,13 +337,14 @@ export async function renameBlog(path = "", filename, newname) {
 }
 
 export function isValidFileName(fileName){
-    if (!fileName || fileName.trim() === "") return false;
+    if (!fileName) return false;
+    if (fileName === "." || fileName === "..") return false;
     const validPattern = /^[a-zA-Z0-9._-]+$/;
     return validPattern.test(fileName);
 }
 
 export function isValidPath(path) {
-    if (!path || path.trim() === "") return false;
+    if (!path) return false;
 
     const validPattern = /^[a-zA-Z0-9._-]+$/;
 
@@ -343,9 +352,9 @@ export function isValidPath(path) {
     const parts = path.split("/");
 
     for (const part of parts) {
-        if (!validPattern.test(part)){
-            return false;
-        }
+        if (!part) return false;
+        if (part === "." || part === "..") return false;
+        if (!validPattern.test(part))return false;
     }
     return true;
 }

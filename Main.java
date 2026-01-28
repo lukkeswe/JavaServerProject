@@ -14,6 +14,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.regex.Pattern;
 import java.nio.*;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
@@ -80,6 +81,8 @@ public class Main {
     private static final Set<String> STATIC_EXTENSIONS = Set.of(
         "/static", "/static/css", "/css", "/static/img", "/img", "/static/js", "/js"
     );
+
+    private static final Pattern VALID_PATTERN = Pattern.compile("^[a-zA-Z0-9._-]+$");
 
     private static final Properties DB_PROPERTIES;
     static {
@@ -1051,6 +1054,14 @@ public class Main {
                     if (!map.get("path").isEmpty() && map.get("path") != null) userPath += map.get("path");
                     userPath += map.get("filename");
 
+                    if (!isValidPath(userPath)) {
+                        System.out.println(" --- INVALID PATH! --- ");
+                        System.out.println(" Possible hacker: " + "\"" + user + "\"");
+                        exchange.sendResponseHeaders(403, -1);
+                        exchange.getResponseBody().close();
+                        return;
+                    }
+
                     Path path = Paths.get(userPath);
                     
                     if (!Files.exists(path)){
@@ -1096,6 +1107,21 @@ public class Main {
                     if (user.equals(ADMIN_HOST)) userPath = ADMIN_DIR + "/static/";
                     if (!map.get("path").isEmpty() && map.get("path") != null) userPath += map.get("path");
                     userPath += map.get("filename");
+                    // Check if the filename is valid
+                    if (!isValidFilename(map.get("filename"))) {
+                        System.out.println(" --- INVALID FILENAME! --- ");
+                        System.out.println(" Possible hacker: " + "\"" + user + "\"");
+                        exchange.sendResponseHeaders(403, -1);
+                        exchange.getResponseBody().close();
+                        return;
+                    }
+                    if (!isValidPath(userPath)) {
+                        System.out.println(" --- INVALID PATH! --- ");
+                        System.out.println(" Possible hacker: " + "\"" + user + "\"");
+                        exchange.sendResponseHeaders(403, -1);
+                        exchange.getResponseBody().close();
+                        return;
+                    }
                     // Save the file
                     if (writeFile(userPath, content)){
                         String msg = "Success";
@@ -1169,6 +1195,13 @@ public class Main {
                 } else {
                     // Build the new path
                     String path = USER_DIR + user + "/static/" + map.get("path");
+                    if (!isValidPath(path.toString())) {
+                        System.out.println(" --- INVALID PATH! --- ");
+                        System.out.println(" Possible hacker: " + "\"" + user + "\"");
+                        exchange.sendResponseHeaders(403, -1);
+                        exchange.getResponseBody().close();
+                        return;
+                    }
                     if (ADMIN_HOST.equals(user)) {
                         path = ADMIN_DIR + "/static/" + map.get("path");
                     }
@@ -1215,6 +1248,14 @@ public class Main {
                     return;
                 } else {
                     String path = USER_DIR + user + "/static/" + map.get("path");
+                    // Validate path
+                    if (!isValidPath(path.toString())) {
+                        System.out.println(" --- INVALID PATH! --- ");
+                        System.out.println(" Possible hacker: " + "\"" + user + "\"");
+                        exchange.sendResponseHeaders(403, -1);
+                        exchange.getResponseBody().close();
+                        return;
+                    }
                     if (user.equals(ADMIN_HOST)) {
                         path = ADMIN_DIR + "/static/" + map.get("path");
                     }
@@ -1269,6 +1310,13 @@ public class Main {
                     String msg = "Fail";
                     int responseCode = 403;
                     String userPath = USER_DIR + user + "/static/";
+                    if (!isValidPath(map.get("source")) || !isValidPath(map.get("target"))) {
+                        System.out.println(" --- INVALID PATH! --- ");
+                        System.out.println(" Possible hacker: " + "\"" + user + "\"");
+                        exchange.sendResponseHeaders(403, -1);
+                        exchange.getResponseBody().close();
+                        return;
+                    }
                     if (user.equals(ADMIN_HOST)) {
                         userPath = ADMIN_DIR + "/static/";
                     }
@@ -1314,6 +1362,21 @@ public class Main {
                     String msg = "Fail";
                     // Save the file and the blog as a HTML file and make a '.blog' file as a symbolic file
                     String filename = map.get("filename");
+                    // Validate filename
+                    if (!isValidFilename(filename)){
+                        System.out.println(" --- INVALID FILENAME ---");
+                        System.out.println(" --- Possible hacker: \"" + user + "\"" );
+                        exchange.sendResponseHeaders(403, -1);
+                        exchange.close();
+                        return;
+                    }
+                    if (!isValidPath(map.get("path"))){
+                        System.out.println(" --- INVALID PATH ---");
+                        System.out.println(" --- Possibe hacker: \"" + user + "\"");
+                        exchange.sendResponseHeaders(403, -1);
+                        exchange.close();
+                        return;
+                    }
                     String blogname = filename.replace(".html", ".blog");
                     int fileSize = map.get("data").length();
                     String saveData = 
@@ -1476,6 +1539,21 @@ public class Main {
                 String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
                 //Parse the body into map
                 Map<String, String> map = parseJsonToMap(body);
+                // Validate filename
+                if (!isValidFilename(map.get("filename"))){
+                    System.out.println(" --- INVALID FILENAME ---");
+                    System.out.println(" --- Possible hacker: \"" + user + "\"");
+                    exchange.sendResponseHeaders(403, -1);
+                    exchange.close();
+                    return;
+                }
+                if (!isValidPath(map.get("path"))){
+                    System.out.println(" --- INVALID PATH --- ");
+                    System.out.println(" --- Possible hacker: \"" + user + "\"");
+                    exchange.sendResponseHeaders(403, -1);
+                    exchange.close();
+                    return;
+                }
                 // Build the paths
                 Path htmlSource = Paths.get(USER_DIR, user, "static", map.get("path"), map.get("filename"));
                 Path htmlTarget = Paths.get(USER_DIR, user, "static", map.get("path"), map.get("newname"));
@@ -2435,5 +2513,21 @@ public class Main {
     }
     private static boolean startsWith(byte[] data, int offset, byte[] prefix) {
         return matchBytes(data, prefix, offset);
+    }
+    private static boolean isValidFilename(String filename) {
+        if (filename.isEmpty()) return false;
+        if (filename.equals(".") || filename.equals("..")) return false;
+        if (filename.startsWith(".")) return false;
+        if (filename.length() > 255) return false;
+        return VALID_PATTERN.matcher(filename).matches();
+    }
+    private static boolean isValidPath(String path){
+        if (path.isEmpty()) return false;
+        String[] parts = path.split("/");
+        for (String part:  parts){
+            if (part.isEmpty()) return false;
+            if (!isValidFilename(part)) return false;
+        }
+        return true;
     }
 }
