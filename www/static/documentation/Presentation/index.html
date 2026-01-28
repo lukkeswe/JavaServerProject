@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>ポスター② マルチテナント & ファイル管理</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="poster">
+
+    <div class="header">
+        <div class="badge">【ポスター②】</div>
+        <div class="title">マルチテナント & ファイル管理</div>
+    </div>
+
+    <div class="content">
+
+        <!-- LEFT PANEL -->
+        <div class="panel">
+            <h2>■ マルチユーザー対応設計</h2>
+
+            <p>各ユーザーは完全に分離された環境を持ちます：</p>
+
+            <div class="tree">
+                /home/lukas/users/{username}/<br>
+                ├── <span class="folder">static/</span> Web公開ファイル<br>
+                ├── <span class="folder">blog/</span> ブログ記事<br>
+                └── <span class="file">php.ini</span> ユーザー専用PHP設定
+            </div>
+
+            <p><strong>ドメイン名による自動ルーティング</strong></p>
+            <p>他ユーザーのファイルには一切アクセス不可</p>
+
+            <div class="talk">
+                <h2>■ 発表用トークポイント</h2>
+                <p>✔ 一般的なレンタルサーバーと同等の操作感を目指しました</p>
+                <p>✔ FTP不要で、すべてWeb上で完結します</p>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="panel">
+            <h2>■ Webベースのファイル管理</h2>
+
+            <p>ブラウザ上ですべて操作可能：</p>
+
+            <ul>
+                <li><span class="check">✔</span> ファイル一覧表示</li>
+                <li><span class="check">✔</span> ドラッグ＆ドロップアップロード</li>
+                <li><span class="check">✔</span> フォルダ構造アップロード対応</li>
+                <li><span class="check">✔</span> 作成／削除／移動／リネーム</li>
+                <li><span class="check">✔</span> HTML・CSS・JS・PHPの直接編集</li>
+                <li><span class="check">✔</span> ページ再読み込みなし（非同期処理）</li>
+            </ul>
+
+            <div class="screenshot">
+                <!-- Replace src with your actual screenshot -->
+                <img src="filemanager.png" alt="File Manager Screenshot">
+                <!-- ファイルマネージャー画面（スクリーンショット） -->
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

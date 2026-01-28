@@ -82,7 +82,7 @@ public class Main {
         "/static", "/static/css", "/css", "/static/img", "/img", "/static/js", "/js"
     );
 
-    private static final Pattern VALID_PATTERN = Pattern.compile("^[a-zA-Z0-9._-]+$");
+    private static final Pattern VALID_PATTERN = Pattern.compile("^[a-zA-Z0-9._\\-]+$");
 
     private static final Properties DB_PROPERTIES;
     static {
@@ -2525,7 +2525,7 @@ public class Main {
         if (path.isEmpty()) return false;
         String[] parts = path.split("/");
         for (String part:  parts){
-            if (part.isEmpty()) return false;
+            if (part.isEmpty()) continue;
             if (!isValidFilename(part)) return false;
         }
         return true;
