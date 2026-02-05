@@ -756,11 +756,13 @@ export default class DocumentManager {
                         this.grayScreen.style.display = "block";
                         const currentFileName = document.createElement("p");
                         currentFileName.innerHTML = fileName;
+                        currentFileName.classList.add("center");
                         // Create a input for the new name
                         const nameInput     = document.createElement("input");
                         nameInput.type      = "text";
                         nameInput.id        = "newName";
-                        nameInput.className = "textInput";
+                        nameInput.classList.add("textInput");
+                        nameInput.classList.add("center");
                         // Create an element to display the file extension
                         const extension     = document.createElement("span");
                         if(fileName.endsWith("/")){
@@ -1515,7 +1517,8 @@ export default class DocumentManager {
         });
         const input = document.createElement("input");
         input.type = "text";
-        input.className = "textInput";
+        input.classList.add("textInput");
+        input.classList.add("center");
         const confirm = document.createElement("button");
         confirm.classList.add("btn");
         confirm.classList.add("check");

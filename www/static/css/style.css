@@ -96,6 +96,12 @@ body {
   height: 100%;
 }
 
+.grayTitle {
+  text-align: center;
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
 #filesContainerMini {
   display: block;
   position: relative;
@@ -436,6 +442,7 @@ header h1 {
     box-shadow: var(--shadow-subtle) inset;
     border-radius: 8px;
     padding: 8px;
+    margin-bottom: 12px;
 }
 
 #newName {
@@ -663,6 +670,10 @@ footer {
   padding: 10px 0;
   border-top: 1px solid var(--border);
   text-align: center;
+}
+
+.center {
+  margin-left: 75px;
 }
 
 /* ===== RESPONSIVE: stack on small screens ===== */
