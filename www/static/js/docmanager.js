@@ -628,7 +628,7 @@ export default class DocumentManager {
                 optionsContainer.append(backBtn);
             }
             // List of supported file types
-            const fileTypes = ["folder", "html", "php", "css", "img", "js", "video", "blog"];
+            const fileTypes = ["folder", "html", "php", "css", "img", "js", "video", "blog", "pdf", "txt"];
             for (let type of fileTypes){
                 const ul    = document.createElement("ul");
                 ul.id       = type + "List";
@@ -945,7 +945,7 @@ export default class DocumentManager {
                                 optionsContainer.append(erase);
                                 optionsContainer.append(backBtn);
                             });
-                        } else if(type == "css" || type == "js"){
+                        } else if(type == "css" || type == "js" || type == "txt"){
                             // If the file is a css or JavaScript file
                             // Add event listener
                             icon.addEventListener("click", () => {
@@ -986,7 +986,7 @@ export default class DocumentManager {
                                 this.showInfo(fileName);
                                 // Append the video element to the display container
                                 this.appendElementToDisplayContainer(video);
-                                // Add name change button
+                                // Add options
                                 optionsContainer.append(nameChange);
                                 optionsContainer.append(erase);
                                 optionsContainer.append(backBtn);
@@ -1108,6 +1108,42 @@ export default class DocumentManager {
                             });
                             // Add a double click eventlistener
                             name.addEventListener("dblclick", ()=> {
+                                // Redirect the user
+                                window.open(a.href, "_blank");
+                            });
+                        } else if (type == "pdf") {
+                            // Create hyper-link
+                            const a = document.createElement("a");
+                            // Add a url
+                            if (path.endsWith("/")) {
+                                a.href = "https://" + sessionStorage["domain"] + "/" + path + fileName;
+                            } else {
+                                a.href = "https://" + sessionStorage["domain"] + "/" + fileName;
+                            }
+                            // Add setting
+                            a.target = "_blank";
+                            // Add classes
+                            a.classList.add("btn");
+                            a.classList.add("popUp");
+                            a.classList.add("optionsIcon");
+                            a.classList.add("visit");
+                            // Create tooltip
+                            const aToolTip = document.createElement("p");
+                            aToolTip.innerHTML = "Visit";
+                            aToolTip.classList.add("description");
+                            a.append(aToolTip);
+                            // Add an eventlistener
+                            icon.addEventListener("click", () => {
+                                this.emptyDisplayContainer();
+                                this.showInfo(fileName);
+                                // Add options
+                                optionsContainer.append(a);
+                                optionsContainer.append(nameChange);
+                                optionsContainer.append(erase);
+                                optionsContainer.append(backBtn);
+                            });
+                            // Add double click eventlistener
+                            icon.addEventListener("dblclick", () => {
                                 // Redirect the user
                                 window.open(a.href, "_blank");
                             });

@@ -14,7 +14,7 @@ export async function uploadFile(input, path = "") {
     formData.append("path", path);
 
     for (let file of files) {
-        if (!isValidFileName(file.name)){
+        if (!isValidFileName(file.name) || !isValidFileFormat(file.name)){
             alert(`「${file.name}」をファイル名として出来ません。`);
             continue;
         }
@@ -357,4 +357,22 @@ export function isValidPath(path) {
         if (!validPattern.test(part))return false;
     }
     return true;
+}
+
+const TEXT_EXTENSIONS = [".html", ".php", ".css", ".js", ".txt"];
+const IMAGE_EXTENSIONS = [".gif", ".jpg", ".jpeg", ".JPG", ".png", ".webp", ".svg", ".bmp", ".ico", ".avif", ".heic", ".tiff"];
+const VIDEO_EXTENSIONS = [".mp4", ".mov", ".avi"];
+
+
+function isValidFileFormat(filename){
+    for (let extension of TEXT_EXTENSIONS) {
+        if (filename.endsWith(extension)) return true;
+    }
+    for (let extension of IMAGE_EXTENSIONS) {
+        if (filename.endsWith(extension)) return true;
+    }
+    for (let extension of VIDEO_EXTENSIONS) {
+        if (filename.endsWith(extension)) return true;
+    }
+    return false;
 }

@@ -431,7 +431,7 @@ header h1 {
 }
 
 .saveAs {
-  background-image: url(../img/save-as.svg);
+  background-image: url(../img/save-as-2.svg);
 }
 
 .newOptions {
@@ -587,6 +587,14 @@ header h1 {
 #blogList li span {
   /* background: linear-gradient(180deg,#f67ecc,#da54a7); */
   background-image: url(../img/blog-file.svg);
+}
+
+#pdfList li span {
+  background-image: url(../img/pdf-file.svg);
+}
+
+#txtList li span {
+  background-image: url(../img/txt-file.svg);
 }
 
 .fileName {

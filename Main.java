@@ -70,10 +70,10 @@ public class Main {
     private static final AtomicInteger ACTIVE_STREAMS = new AtomicInteger(0);
     private static final int MAX_STREAMS = 8;
 
-    private static final Set<String> TEXT_EXTENSIONS = Set.of(".html", ".php", ".css", ".js");
+    private static final Set<String> TEXT_EXTENSIONS = Set.of(".html", ".php", ".css", ".js", ".txt");
 
     private static final Set<String> IMAGE_EXTENSIONS = Set.of(
-    ".gif", ".jpg", ".jpeg", ".JPG", ".png", ".webp", ".svg", ".bmp", ".ico", ".avif", ".heic", ".tiff"
+    ".gif", ".jpg", ".jpeg", ".png", ".webp", ".svg", ".bmp", ".ico", ".avif", ".heic", ".tiff"
     );
 
     private static final Set<String> VIDEO_EXTENSIONS = Set.of(".mp4", ".mov", ".avi");
@@ -861,7 +861,7 @@ public class Main {
                     StringBuilder json = new StringBuilder();
                     String response = "";
 
-                    String[] types = {"folder", "html", "php", "css", "img", "js", "video", "blog"};
+                    String[] types = {"folder", "html", "php", "css", "img", "js", "video", "blog", "pdf", "txt"};
                     boolean success = true;
                     json.append("[{");
                         String[] files;
@@ -1881,6 +1881,8 @@ public class Main {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(path))){
             List<String> files = new ArrayList<>();
             for (Path entry : stream){
+                // Ignore filenames with non-standard characters
+                if (!VALID_PATTERN.matcher(entry.getFileName().toString()).matches()) continue;
                 if (Files.isDirectory(entry)){
                     files.add(entry.getFileName().toString() + "/");
                 } else {
@@ -2393,6 +2395,30 @@ public class Main {
 
             if (headers.contains("filename=\"")) {
                 String relativePath = extractFilePath(headers);
+                boolean validExtension = false;
+                for (String extension : TEXT_EXTENSIONS) {
+                    if (relativePath.toLowerCase().endsWith(extension)) {
+                        validExtension = true;
+                        break;
+                    }
+                }
+                if (!validExtension) {
+                    for (String extension : IMAGE_EXTENSIONS) {
+                        if (relativePath.toLowerCase().endsWith(extension)){
+                            validExtension = true;
+                            break;
+                        }
+                    }
+                }
+                if (!validExtension) {
+                    for (String extension : VIDEO_EXTENSIONS) {
+                        if (relativePath.toLowerCase().endsWith(extension)){
+                            validExtension = true;
+                            break;
+                        }
+                    }
+                }
+                if (!validExtension) return "Unsupported file format";
                 String fullPath = USER_DIR + user + "/static/" + path + relativePath;
 
                 if (user.equals(ADMIN_HOST)) {
