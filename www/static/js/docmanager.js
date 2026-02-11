@@ -4,6 +4,7 @@ import { moveIt } from './upmanager.js';
 import { deleteBlog } from './upmanager.js';
 import { renameBlog } from './upmanager.js';
 import { createFolder } from './upmanager.js';
+import { isValidFileName } from './upmanager.js';
 
 export default class DocumentManager {
     constructor() {
@@ -763,6 +764,17 @@ export default class DocumentManager {
                         nameInput.id        = "newName";
                         nameInput.classList.add("textInput");
                         nameInput.classList.add("center");
+                        // Add an eventlistener to the input
+                        let isValid = false;
+                        nameInput.addEventListener("input", () => {
+                            if (!isValidFileName(nameInput.value, true)) {
+                                nameInput.style.color = "red";
+                                isValid = false;
+                            } else {
+                                nameInput.style.color = "";
+                                isValid = true;
+                            }
+                        });
                         // Create an element to display the file extension
                         const extension     = document.createElement("span");
                         if(fileName.endsWith("/")){
@@ -797,7 +809,10 @@ export default class DocumentManager {
                         confirm.addEventListener("click", async () => {
                             let oldName = fileName;
                             let newName = nameInput.value + "." + type;
-                            if (type == "folder") newName = nameInput.value + "/";
+                            if (!isValid) {
+                                alert("Invalid input!");
+                            } 
+                            else if (type == "folder") newName = nameInput.value + "/";
                             else if (type == "img" || type == "video") {
                                 const extension = fileName.split(".").pop();
                                 newName = nameInput.value + "." + extension;
@@ -1555,15 +1570,28 @@ export default class DocumentManager {
         input.type = "text";
         input.classList.add("textInput");
         input.classList.add("center");
+        let isValid = false;
+        input.addEventListener("input", () => {
+            if (!isValidFileName(input.value, true)){
+                input.style.color = "red";
+                isValid = false;
+            } else {
+                input.style.color = "";
+                isValid = true;
+            }
+        });
         const confirm = document.createElement("button");
         confirm.classList.add("btn");
         confirm.classList.add("check");
         confirm.addEventListener("click", async () => {
-            const path = document.getElementById("path");
-            await createFolder(path.innerHTML + input.value);
-            container.remove();
-            this.grayScreen.style.display = "none";
-            await this.getFiles(path.innerHTML);
+            if (!isValid) alert("Invalid input!");
+            else {
+                const path = document.getElementById("path");
+                await createFolder(path.innerHTML + input.value);
+                container.remove();
+                this.grayScreen.style.display = "none";
+                await this.getFiles(path.innerHTML);
+            }
         });
         const buttonContainer = document.createElement("div");
         buttonContainer.className = "spaceBetween";

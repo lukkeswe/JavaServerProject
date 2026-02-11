@@ -213,10 +213,29 @@ if (isset($_COOKIE["javasession"])){
         const droppZone = document.getElementById("dropzone");
 
         const createFile = document.getElementById("createFileBtn");
-        
+
         dm.flexContainer();
         dm.fileBurgerMenu();
         dm.getFiles();
+        
+        const textInput = document.getElementById("textInput");
+        const nameInput = document.getElementById("newFilename");
+        const folderInput = document.getElementById("folderName");
+        const fileNameInput = document.getElementById("filename");
+        textInput.addEventListener("input", () => {validateFileName(textInput.value, textInput);});
+        nameInput.addEventListener("input", () => {validateFileName(nameInput.value, nameInput);});
+        folderInput.addEventListener("input", () => {validateFileName(folderInput.value, folderInput);})
+        fileNameInput.addEventListener("input", () => {validateFileName(fileNameInput.value, fileNameInput);});
+
+        function validateFileName(filename, element){
+            if (!UpManager.isValidFileName(filename, true)){
+                console.log("invalid text: ");
+                console.log(element);
+                element.style.color = "red";
+            } else {
+                element.style.color = "";
+            }
+        }
         document.getElementById("uploadSomeBtn").addEventListener("click", () => {
             grayScreen.style.display = "block";
             uploadContainer.style.display = "block";

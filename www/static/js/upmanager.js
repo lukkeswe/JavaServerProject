@@ -134,6 +134,14 @@ export async function uploadTempFile(input) {
 }
 
 export async function saveBlog(blob, path = "", filename){
+    if (!isValidFileName(filename)){
+        alert("Invalid filename!");
+        return;
+    }
+    if (!isValidPath(path) && path != ""){
+        alert("Invalid path!");
+        return;
+    }
     const content = await blob.text();
     let requestObject = {
         "path"      : path,
@@ -164,6 +172,14 @@ export async function saveBlog(blob, path = "", filename){
 }
 
 export async function deleteBlog(path = "", filename) {
+    if (!isValidFileName(filename)){
+        alert("Invalid filename!");
+        return;
+    }
+    if (!isValidPath(path) && path != ""){
+        alert("Invalid path!");
+        return;
+    }
     let requestObject = {
         "path"      : path,
         "filename"  : filename
@@ -233,6 +249,14 @@ function readEntry(entry){
 }
 
 export async function saveContentToFile(path ="", type, file, content) {
+    if (!isValidFileName(file)) {
+        alert("Invalid filename!");
+        return;
+    }
+    if (!isValidFileFormat(file)) {
+        alert("Invalid file format!");
+        return;
+    }
     let requestObject = {
         "path"      : path,
         "type"      : type,
@@ -283,6 +307,10 @@ export async function createFolder(path) {
 }
 
 export async function deleteFolder(path){
+    if (!isValidPath(path)){
+        alert("Invalid path!");
+        return;
+    }
     let requestObject = {"path"  : path};
     console.log("Deleting folder...");
 
@@ -301,6 +329,10 @@ export async function deleteFolder(path){
 }
 
 export async function moveIt(source, target){
+    if (!isValidPath(source) || !isValidPath(target)){
+        alert("Invallid path!");
+        return;
+    }
     let requestObject = {
         "source" : source,
         "target" : target
@@ -318,6 +350,14 @@ export async function moveIt(source, target){
 }
 
 export async function renameBlog(path = "", filename, newname) {
+    if (!isValidFileName(filename) || !isValidFileName(newname)){
+        alert("Invalid filename!");
+        return;
+    }
+    if (!isValidPath(path) && path != "") {
+        alert("Invalid path!");
+        return;
+    }
     let requestObject = {
         "path"      : path,
         "filename"  : filename,
@@ -336,10 +376,11 @@ export async function renameBlog(path = "", filename, newname) {
     let msg = await response.text();
 }
 
-export function isValidFileName(fileName){
+export function isValidFileName(fileName, nodots){
     if (!fileName) return false;
     if (fileName === "." || fileName === "..") return false;
-    const validPattern = /^[a-zA-Z0-9._-]+$/;
+    let validPattern = /^[a-zA-Z0-9._-]+$/;
+    if (nodots == true) validPattern = /^[a-zA-Z0-9_-]+$/;
     return validPattern.test(fileName);
 }
 
@@ -359,20 +400,22 @@ export function isValidPath(path) {
     return true;
 }
 
-const TEXT_EXTENSIONS = [".html", ".php", ".css", ".js", ".txt"];
+const TEXT_EXTENSIONS = [".html", ".php", ".css", ".js", ".txt", ".blog"];
 const IMAGE_EXTENSIONS = [".gif", ".jpg", ".jpeg", ".JPG", ".png", ".webp", ".svg", ".bmp", ".ico", ".avif", ".heic", ".tiff"];
 const VIDEO_EXTENSIONS = [".mp4", ".mov", ".avi"];
 
 
-function isValidFileFormat(filename){
-    for (let extension of TEXT_EXTENSIONS) {
-        if (filename.endsWith(extension)) return true;
-    }
-    for (let extension of IMAGE_EXTENSIONS) {
-        if (filename.endsWith(extension)) return true;
-    }
-    for (let extension of VIDEO_EXTENSIONS) {
-        if (filename.endsWith(extension)) return true;
-    }
-    return false;
+function isValidFileFormat(filename) {
+    const lastDot = filename.lastIndexOf(".");
+    if (lastDot === -1) return false;
+
+    const extension = filename.substring(lastDot).toLowerCase();
+
+    const ALL_EXTENSIONS = [
+        ...TEXT_EXTENSIONS,
+        ...IMAGE_EXTENSIONS,
+        ...VIDEO_EXTENSIONS
+    ].map(e => e.toLowerCase());
+
+    return ALL_EXTENSIONS.includes(extension);
 }
