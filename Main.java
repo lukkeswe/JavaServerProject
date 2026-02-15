@@ -183,6 +183,48 @@ public class Main {
                     os.close();
                     exchange.close();
                     return;
+                } else {
+                    response = Files.readAllBytes(Paths.get("www/static/notfound.html"));
+                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+                    exchange.sendResponseHeaders(404, response.length);
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(response);
+                    os.close();
+                    exchange.close();
+                    return;
+                }
+            } else if (requestPath.endsWith(".zip")) {
+                System.out.println("-- Looking for Zip file --");
+                Path zipPath = Paths.get(userPath, "static", requestPath);
+                System.out.println("-- Path: " + zipPath.toString() + " --");
+                if (Files.exists(zipPath)){
+                    System.err.println("-- Found the file! --");
+
+                    long fileSize = Files.size(zipPath);
+
+                    exchange.getResponseHeaders().set("Content-Type", "application/zip");
+                    exchange.getResponseHeaders().set("Content-Disposition", "attachment; filename=\"" + zipPath.getFileName().toString() + "\"");
+
+                    exchange.sendResponseHeaders(200, fileSize);
+
+                    try (OutputStream os = exchange.getResponseBody();
+                         InputStream is = Files.newInputStream(zipPath)){
+                            byte[] buffer = new byte[8192];
+                            int bytesRead;
+
+                            while ((bytesRead = is.read(buffer)) != -1){
+                                os.write(buffer, 0, bytesRead);
+                            }
+                         }
+                } else {
+                    response = Files.readAllBytes(Paths.get("www/static/notfound.html"));
+                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+                    exchange.sendResponseHeaders(404, response.length);
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(response);
+                    os.close();
+                    exchange.close();
+                    return;
                 }
             }
             
@@ -1370,7 +1412,7 @@ public class Main {
                         exchange.close();
                         return;
                     }
-                    if (!isValidPath(map.get("path"))){
+                    if (!isValidPath(map.get("path")) && !map.get("path").isEmpty()){
                         System.out.println(" --- INVALID PATH ---");
                         System.out.println(" --- Possibe hacker: \"" + user + "\"");
                         exchange.sendResponseHeaders(403, -1);
@@ -1547,7 +1589,7 @@ public class Main {
                     exchange.close();
                     return;
                 }
-                if (!isValidPath(map.get("path"))){
+                if (!isValidPath(map.get("path")) && !map.get("path").isEmpty()){
                     System.out.println(" --- INVALID PATH --- ");
                     System.out.println(" --- Possible hacker: \"" + user + "\"");
                     exchange.sendResponseHeaders(403, -1);
