@@ -341,7 +341,7 @@ public class Main {
                 if (!Files.exists(fullPath)){
                     // Serve 404 if path does not exist
                     System.out.println("invalid path: " + fullPath.toString());
-                    response = Files.readAllBytes(Paths.get("www/static/html/notfound.html"));
+                    response = Files.readAllBytes(Paths.get("www/static/notfound.html"));
                     exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
                     exchange.sendResponseHeaders(404, response.length);
                 } else {
@@ -420,6 +420,13 @@ public class Main {
                 if (!Files.exists(path) || !Files.isRegularFile(path)){
                     // Fallback if the file does not exist (404: not found :( )
                     response = Files.readAllBytes(Paths.get("www/static/notfound.html"));
+                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+                    exchange.sendResponseHeaders(404, response.length);
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(response);
+                    os.close();
+                    exchange.close();
+                    return;
                 } else {
                     // If the file exist, load it into the response
                     response = Files.readAllBytes(Paths.get(htmlFilePath));
@@ -433,6 +440,7 @@ public class Main {
             os.write(response);
             os.close();
             exchange.close();
+            return;
         }
     }
     
