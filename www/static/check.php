@@ -19,14 +19,15 @@ if (!isset($_GET["invite"])){
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/style.css">
-    <script src="js/docmanager.js"></script>
+    <script type="module" src="/js/docmanager.js"></script>
     <title>Sign up</title>
 </head>
 <body>
     <?php echo "<input type='hidden' id='invite' value='{$invite}'>"; ?>
     <div id="container"></div>
-    <script type="text/javascript">
-        const dm = new DocumentManager();
+    <script type="module">
+        import DM from '/js/docmanager.js';
+        const dm = new DM();
         dm.userSignUp();
     </script>
 </body>
