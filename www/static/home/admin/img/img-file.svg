@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="1000"
+   height="1000"
+   viewBox="0 0 264.5833 264.5833"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="img-file.svg"
+   inkscape:version="1.4.2 (2aeb623e1d, 2025-05-12)"
+   inkscape:export-filename="../6f82f731/img-file-65.png"
+   inkscape:export-xdpi="6.2399998"
+   inkscape:export-ydpi="6.2399998"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     inkscape:zoom="1.0396254"
+     inkscape:cx="646.38667"
+     inkscape:cy="519.8988"
+     inkscape:window-width="2560"
+     inkscape:window-height="1441"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1" />
+  <defs
+     id="defs1">
+    <linearGradient
+       id="swatch4"
+       inkscape:swatch="solid">
+      <stop
+         style="stop-color:#7cb2e8;stop-opacity:1;"
+         offset="0"
+         id="stop4" />
+    </linearGradient>
+    <rect
+       x="146.20651"
+       y="315.49826"
+       width="25.009008"
+       height="299.14621"
+       id="rect3" />
+    <rect
+       x="161.59667"
+       y="262.59458"
+       width="9.6188493"
+       height="256.82327"
+       id="rect2" />
+    <inkscape:path-effect
+       effect="fillet_chamfer"
+       id="path-effect12"
+       is_visible="true"
+       lpeversion="1"
+       nodesatellites_param="F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1"
+       radius="0"
+       unit="px"
+       method="auto"
+       mode="F"
+       chamfer_steps="1"
+       flexible="false"
+       use_knot_distance="true"
+       apply_no_radius="true"
+       apply_with_radius="true"
+       only_selected="false"
+       hide_knots="false" />
+    <inkscape:path-effect
+       effect="fillet_chamfer"
+       id="path-effect11"
+       is_visible="true"
+       lpeversion="1"
+       nodesatellites_param="F,0,0,1,0,13.335731,0,1 @ F,0,0,1,0,11.604073,0,1 @ F,0,0,1,0,12.495886,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,13.621276,0,1 @ F,0,0,1,0,0,0,1"
+       radius="0"
+       unit="px"
+       method="auto"
+       mode="F"
+       chamfer_steps="1"
+       flexible="false"
+       use_knot_distance="true"
+       apply_no_radius="true"
+       apply_with_radius="true"
+       only_selected="false"
+       hide_knots="false" />
+    <inkscape:path-effect
+       effect="fillet_chamfer"
+       id="path-effect10"
+       is_visible="true"
+       lpeversion="1"
+       nodesatellites_param="F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1"
+       radius="0"
+       unit="px"
+       method="auto"
+       mode="F"
+       chamfer_steps="1"
+       flexible="false"
+       use_knot_distance="true"
+       apply_no_radius="true"
+       apply_with_radius="true"
+       only_selected="false"
+       hide_knots="false" />
+    <linearGradient
+       id="swatch6"
+       inkscape:swatch="solid">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop6" />
+    </linearGradient>
+  </defs>
+  <path
+     style="fill:none;fill-opacity:1;stroke:#7cd6e8;stroke-width:7.9375;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+     d="M 12.979433,251.4447 251.6992,251.1902 v 0 l -80.16708,-145.31875 -39.4473,65.66067 12.97943,-21.8869 -52.935726,-83.730059 z"
+     id="path4"
+     sodipodi:nodetypes="cccccccc" />
+  <ellipse
+     style="fill:none;fill-opacity:1;stroke:#7cd6e8;stroke-width:7.9375;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+     id="path5"
+     cx="190.36502"
+     cy="58.789196"
+     rx="26.213366"
+     ry="26.722363" />
+</svg>

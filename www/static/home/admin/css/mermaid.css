@@ -1,0 +1,43 @@
+body {
+    margin: 20px;
+    background: #f9fafb; /* light background */
+    color: #111827;      /* dark text for contrast */
+    font-family: Inter, Roboto, Arial, sans-serif;
+}
+
+h1 {
+    color: #3b82f6;      /* vibrant blue for headers */
+    margin-bottom: 8px;
+}
+
+p {
+    color: #4b5563;      /* slightly muted gray for paragraphs */
+    margin-bottom: 14px;
+}
+
+.wrap {
+    background: #ffffff; /* white card background */
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* soft modern shadow */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wrap:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.mermaid {
+    min-height: 620px;
+    background: #f3f4f6; /* subtle light background for diagrams */
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.description {
+    width: 50%;
+    max-width: 800px;
+    min-width: 500px;
+    margin: 0 auto;
+}

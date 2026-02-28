@@ -1,0 +1,740 @@
+/* ===================================================================
+   Filemanager — Modern Dark Theme (upload panel LEFT, files RIGHT)
+   Preserves original structure & color-coded tiles
+   =================================================================== */
+
+:root{
+  --bg: #1e1e1f;            /* page background (slightly lighter dark) */
+  --panel: #252527;         /* panels (upload / inner explorer) */
+  --panel-2: #2b2b2d;       /* tile card background */
+  --muted: #9aa0a6;
+  --text: #d7d7d7;
+  --accent: #6ea8ff;
+  --border: #333438;
+  --radius: 8px;
+  --tile-radius: 6px;
+  --shadow-soft: 0 6px 18px rgba(0,0,0,0.55);
+  --shadow-subtle: 0 3px 8px rgba(0,0,0,0.45);
+  --gap: 14px;
+  font-family: "Segoe UI", "Inter", "Noto Sans JP", system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+}
+
+/* --- Page shell --- */
+* { box-sizing: border-box; }
+html,body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.welcome {
+  margin: 0 auto;
+  margin-top: 56px;
+  font-size: 42px;
+}
+
+#loginContainer {
+    display: block;
+    text-align: left;
+    font-size: 36px;
+    background: var(--panel-2);
+    box-shadow: var(--shadow-subtle);
+    border: solid #fff 1px;
+    border-radius: 3px;
+    padding: 30px;
+    width: max-content;
+    margin: 0 auto;
+    margin-top: 56px;
+}
+
+#loginContainer input{
+    background-color: white;
+}
+
+#loginBtn {
+    margin: 0 auto;
+    margin-top: 20px;
+    border: solid white 1px;
+}
+
+#contactBtn {
+  font-size: 16px;
+}
+
+#contactBtn:hover {
+  font-weight: bold;
+}
+
+#tooltip {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  display: none;
+
+  background: white;
+  color: #111;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+#grayScreen {
+  display: none;
+  z-index: 1000;
+  position: absolute;
+  background-color: rgba(154, 160, 166, 0.5);
+  width: 100%;
+  height: 100%;
+}
+
+.grayTitle {
+  text-align: center;
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+#filesContainerMini {
+  display: block;
+  position: relative;
+  z-index: 1001;
+  height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: var(--shadow-subtle) inset;
+  margin-top: 8px;
+}
+
+#createFolderBtnMini {
+  background-image: url(../img/newfolder-32.png);
+}
+
+#miniExplorer {
+  position: relative;
+  z-index:1001;
+  width: 400px;
+  margin: 0 auto;
+  background-color: white;
+  color: black;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+#miniExplorer input {
+    border: solid black 1px;
+}
+
+#miniExplorer select {
+    border: solid black 1px;
+}
+
+#newFolderOptionsMini {
+  display: none;
+}
+
+#filesContainerMini ul {
+  display: flex;
+  flex-direction: row;
+  font-size: 7px;
+  flex-wrap: wrap;
+  padding: 0;
+}
+
+#filesContainerMini li {
+  display: flex;
+  flex-direction: column;
+  width: 50px;
+  height: 50px;
+  margin: 5px;
+}
+
+#filesContainerMini li:hover {
+  cursor: pointer;
+}
+
+#filesContainerMini li span {
+  flex: 5;
+  padding: 5px;
+  border-radius: 3px;
+  overflow-wrap: break-word;
+}
+#filesContainerMini li a {
+  flex: 5;
+}
+
+#filesContainerMini li a span {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.cancelContainer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+}
+
+.grayWindow {
+  display: none;
+  z-index:1001;
+  position: relative;
+  width: 400px;
+  margin: 0 auto;
+  margin-top: 200px;
+  background-color: white;
+  color: black;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+#dropzone {
+  border:2px dashed #333; 
+  border-radius: 5px;
+  box-shadow: var(--shadow-subtle) inset;
+  padding: 100px 20px;
+  background-color: #fff;
+  text-align: center;
+}
+
+#dropzone:hover {
+  background-color: gainsboro;
+  cursor: pointer;
+}
+
+#droppedFiles {
+  display: block;
+  padding: 10px 5px;
+  margin: 5px 0;
+  border-radius: 3px;
+}
+
+.spaceBetween {
+  display: flex;
+  justify-content: space-between;
+}
+
+/* --- Header / Title --- */
+header {
+  background: #242425;
+  border-bottom: 1px solid var(--border);
+  padding: 10px 0;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  z-index: 30;
+}
+header h1 {
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: 1px;
+  font-family: "Courier New", monospace;  /* dev-feel title */
+  color: var(--text);
+}
+
+/* --- Main container: burger (aside) + main content --- */
+#container {
+  display: flex;                 /* <-- keeps aside + main horizontally */
+  gap: 0;
+  flex: 1;
+  min-height: min-content; /* leave room for the content */
+}
+
+/* --- Sidebar (burger) --- */
+#burgerContainer{
+  background: #202020;
+  border-right: 1px solid var(--border);
+  padding-top: 8px;
+}
+#burger {
+    width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: width 1s ease;
+}
+#burger.open {
+    width: 150px;
+}
+#burgerBtn{
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 6px;
+}
+#burgerBtn {
+    font-size: 42px;
+}
+
+#burger li {
+    cursor: pointer;
+    font-size: 16px;
+    padding: 5px;
+}
+
+#burger li:hover {
+    font-weight: bold;
+    font-size: 18px;
+}
+#burgerBtn:hover { color: var(--text); }
+
+/* --- Main content area (holds upload-container and explorer) --- */
+/* IMPORTANT: this is what fixes the upload panel being stacked */
+#main-content {
+  display: flex;                /* row layout: upload on left, explorer on right */
+  flex-direction: row;
+  gap: var(--gap);
+  flex: 1;
+  padding: 18px;
+  align-items: flex-start;      /* top aligned panels */
+}
+
+/* --- Upload / Preview Panel (LEFT) --- */
+#upload-container {
+  width: 300px;                 /* fixed left column width */
+  min-width: 260px;
+  background: var(--panel);
+  border-radius: var(--radius);
+  padding: 18px;
+  padding-top: 34px;            /* extra top padding to allow anchored tabs */
+  box-shadow: var(--shadow-soft);
+  position: relative;           /* for createButtons absolute positioning */
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Create buttons anchored to top edge (tab-style) */
+#createButtons {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  display: flex;
+  gap: 6px;
+  z-index: 5;
+}
+.createBtn {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
+  border: 1px solid rgba(255,255,255,0.03);
+  color: var(--muted);
+  border-radius: 0 0 8px 8px;  /* tab-like */
+  box-shadow: 0 -2px 6px rgba(0,0,0,0.45) inset;
+  cursor: pointer;
+  transition: background 0.12s, transform 0.08s;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 32px;
+  width: 32px;
+  height: 32px;
+  padding: 18px;
+}
+.createBtn:hover {
+  color: var(--text);
+  transform: translateY(-2px);
+}
+
+#createFileBtn {
+  background-image: url(../img/newfile.svg);
+}
+
+#createFolderBtn {
+  background-image: url(../img/newfolder.svg);
+}
+
+#uploadSomeBtn {
+  background-image: url(../img/upload.svg);
+}
+
+
+
+/* small helper UI inside left panel */
+#displayContainer {              /* preview/info area */
+  background: rgba(255,255,255,0.02);
+  border-radius: 8px;
+  padding: 10px;
+  min-height: 160px;
+  border: 1px solid rgba(255,255,255,0.02);
+}
+#displayContainer img { width: 100%; margin-top: 8px;}
+#optionsContainer { display:flex; gap:8px; flex-wrap:wrap; margin-top: 8px;}
+
+/* Buttons inside left column */
+.btn {
+  background: #2f3133;
+  border: 1px solid rgba(255,255,255,0.03);
+  color: var(--text);
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background .12s, transform .08s;
+}
+.btn:hover { transform: translateY(-1px); }
+
+.check {
+  background-image: url(../img/check.svg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 16px;
+  width: 16px;
+  height: 16px;
+  padding: 16px;
+}
+
+.cancel {
+  background-image: url(../img/cancel.svg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 16px;
+  width: 16px;
+  height: 16px;
+  padding: 16px;
+}
+
+.optionsIcon {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 16px;
+  width: 16px;
+  height: 16px;
+  padding: 16px;
+}
+
+.edit {
+  background-image: url(../img/edit.svg);
+}
+
+.namechange {
+  background-image: url(../img/namechange.svg);
+}
+
+.visit {
+  background-image: url(../img/visit.svg);
+}
+
+.erase {
+  background-image: url(../img/erase.svg);
+}
+
+.back {
+  background-image: url(../img/back.svg);
+}
+
+.save {
+  background-image: url(../img/save.svg);
+}
+
+.saveAs {
+  background-image: url(../img/save-as-2.svg);
+}
+
+.newOptions {
+    margin-top: 8px;
+}
+
+.textInput {
+    box-shadow: var(--shadow-subtle) inset;
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 12px;
+}
+
+#newName {
+  width: 150px;
+}
+
+/* --- Explorer (RIGHT) --- */
+#explorer {
+  flex: 1;                      /* occupies the rest of the horizontal space */
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
+
+/* Path bar above file grid */
+#pathContainer {
+  display: flex;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.03);
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: var(--muted);
+  font-family: "Courier New", monospace;
+  box-shadow: var(--shadow-subtle) inset;
+}
+
+/* Files panel container (a card inside explorer) */
+#filesContainer {
+  background: var(--panel-2);
+  padding: 18px;
+  border-radius: 10px;
+  box-shadow: var(--shadow-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 800px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Make the file lists flow as tiles (preserves your ul/li structure) */
+#filesContainer ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+/* File tile card (keeps size & colour-coded spans) */
+#filesContainer li {
+  z-index: 1;
+  width: 100px;
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--tile-radius);
+  /* overflow: hidden; */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.45);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  background: transparent; /* color is on the span inside */
+}
+
+/* Slight pop on hover */
+#filesContainer li:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.6);
+  cursor: pointer;
+}
+
+/* The colored label area (you already used span inside li) */
+#filesContainer li span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  width: 100%;
+  height: 100%;
+  color: #111;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.1;
+  word-break: break-word;
+  border-radius: var(--tile-radius);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25) inset;
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+}
+
+/* Keep links usable (span inside anchor) */
+#filesContainer li a {
+  display: block;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+}
+
+.fileIcon {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 85px;
+}
+
+.miniIcon {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 40px;
+}
+
+/* Color-coded types (matches your previous palette but tuned for dark) */
+#folderList li span {
+  /* background: linear-gradient(180deg,#d99b2a,#c4831f); */
+  background-image: url(../img/folder.svg);
+}
+#htmlList li span {
+  /* background: linear-gradient(180deg,#e26a6a,#c74a4a); */
+  background-image: url(../img/html-file.svg);
+}
+#cssList li span {
+  /* background: linear-gradient(180deg,#e0cc56,#c9b23a); */
+  background-image: url(../img/css-file.svg);
+}
+#jsList li span {
+  /* background: linear-gradient(180deg,#66d0d9,#38b2c0); */
+  background-image: url(../img/js-file.svg);
+}
+#phpList li span {
+  /* background: linear-gradient(180deg,#9b7ae5,#7f59d1); */
+  background-image: url(../img/php-file.svg);
+}
+#imgList li span {
+  /* background: linear-gradient(180deg,#7ec8f6,#54aeda); */
+  background-image: url(../img/img-file.svg);
+}
+#videoList li span {
+  /* background: linear-gradient(180deg,#7ef688,#54da54); */
+  background-image: url(../img/video-file.svg);
+}
+
+#blogList li span {
+  /* background: linear-gradient(180deg,#f67ecc,#da54a7); */
+  background-image: url(../img/blog-file.svg);
+}
+
+#pdfList li span {
+  background-image: url(../img/pdf-file.svg);
+}
+
+#txtList li span {
+  background-image: url(../img/txt-file.svg);
+}
+
+.fileName {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+  padding-bottom: 5px;
+  padding-left: 5px;
+}
+
+.miniIcon {
+  height: 30px;
+}
+
+/* Hover shade for the colored spans to feel tactile */
+#filesContainer li span:hover {
+  filter: brightness(0.95);
+  /* box-shadow: 0 6px 14px rgba(0,0,0,0.6); */
+}
+
+.popUp {
+  position: relative;
+}
+
+.popUp .description {
+  position: absolute;
+  z-index: 2;
+  display: none;
+  width: fit-content;
+  white-space: nowrap;
+  background-color: white;
+  color: #111;
+  border-radius: 3px;
+  padding: 5px;
+  top: 100%;
+  left: 0;
+}
+
+/* Small animation for entry */
+@keyframes tileIn {
+  from { opacity: 0; transform: translateY(6px) scale(.99); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+/* #filesContainer li { animation: tileIn .18s ease both; } */
+
+/* scrollbar styling for explorer / files area */
+#filesContainer::-webkit-scrollbar {
+  width: 10px;
+}
+#filesContainer::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.04);
+  border-radius: 6px;
+  border: 2px solid rgba(0,0,0,0.1);
+}
+
+/* Editor area (hidden by default in your HTML) */
+#editor { 
+    display: none; 
+    width: 100%;
+    height: calc(100% - 25px);
+    max-height: 800px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    margin-left: 5px;
+}
+#exLoad {
+    display: none;
+    width: max-content;
+    margin: 0 auto;
+}
+
+#exLoad img {
+    width: 150px;
+}
+
+/* Footer */
+footer {
+  margin-top: auto;
+  background: #222;
+  color: #aaa;
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+.center {
+  margin-left: 75px;
+}
+
+/* ===== RESPONSIVE: stack on small screens ===== */
+@media (max-width: 900px) {
+  #container {flex-direction: column;}
+  #burgerContainer {width: 100%;}
+  #burger {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 1s ease;
+  }
+  #burger.open {
+        width: 100%;
+        max-height: 500px;
+  }
+  #main-content { flex-direction: column; padding: 12px;}
+  #upload-container { width: 100%; min-width: auto; padding-top: 42px; }
+  #createButtons {left: unset; right: 12px;}
+  #filesContainer {
+      display: block;
+      padding: 12px;
+      justify-content: center;
+      height: auto; 
+      max-height: 500px;
+      -webkit-overflow-scrolling: touch;
+  }
+  #explorer {width: 100%;}
+  #filesContainer ul { margin-bottom: 12px;}
+  #filesContainer li { width: 75px; height: 75px; }
+  #filesContainer li span,
+  #filesContainer li a span {
+	font-size: 10px;
+	padding: 3px;
+	}
+  .fileIcon {background-size: 60px;}
+
+  /* Hover shade for the colored spans to feel tactile */
+  #filesContainer li span:hover {
+    filter: brightness(0.95);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.6);
+  }
+  .fileName {font-size: 10px;}
+  #editor {
+      height: 500px;
+      width: 100%;
+  }
+  #displayContainer {min-height: 0px;}
+}
+
+#explorer, #main-content {
+  overflow: visible;
+}
+
+/* utility small tweaks to preserve your original interactions (no layout-breaking) */
+.active { display: block !important; }
+.inactive { display: none !important; }

@@ -1,6 +1,6 @@
 <?php
-require_once(__DIR__ . "/../dbmanager.php");
-require_once(__DIR__. "/../config.php");
+require_once(__DIR__ . "/../../dbmanager.php");
+require_once(__DIR__. "/../../config.php");
 
 if (isset($_COOKIE["javasession"])){
     // Initialize cURL
@@ -41,71 +41,16 @@ if (isset($_COOKIE["javasession"])){
     // Initialize the DB manager
     if (isset($_COOKIE["email"]) && isset($_COOKIE["password"])){
         $db = new DBmanager($_COOKIE["email"], $_COOKIE["password"]);
-        if(!$db->login()){
+        if ($_COOKIE["email"] != "admin@tekknat.com" || !$db->login()){
             header("Location:/logout/");
             exit();
-        } else {
-            if ($_COOKIE["email"] === "admin@tekknat.com"){
-                header("Location:/home/admin/");
-                exit();
-            }
-        }
+        } 
     } else {
         header("Location:/logout/");
         exit();
     }
     
 
-} else if(isset($_POST["email"]) && isset($_POST["password"])) {
-    $db = new DBmanager($_POST["email"], $_POST["password"]);
-    if(!$db->login()){
-        header("Location:/login/");
-        exit();
-    } else {
-        // Initialize cURL
-        $ch = curl_init();
-        // Target server
-        $url = API_SERVER . "/create-session";
-        curl_setopt($ch, CURLOPT_URL, $url);
-        // Set timeout
-        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-        // Enable POST  method
-        curl_setopt($ch, CURLOPT_POST, true);
-        // Request data
-        $data = [
-            "email" => $_POST["email"]
-        ];
-        // Convert to JSON
-        $jsonData = json_encode($data);
-        // -- Set the request options --
-        // Return response as a string
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        // Prepare POST
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
-        // Set the header with apropriate content type and leangth
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Content-Length: ' . strlen($jsonData)
-        ]);
-        // Execute POST request
-        $response = curl_exec($ch);
-        // Error check
-        if ($response === false) {
-            header("Location:/login/");
-            exit();
-        } else {
-            // Set the cookies
-            setcookie("javasession", $response, 0, "/");
-            setcookie("email", $_POST["email"], 0, "/", "", true, true);
-            setcookie("password", $_POST["password"], 0, "/", "", true, true);
-            if ($_POST["email"] === "admin@tekknat.com"){
-                header("Location:/home/admin/");
-                exit();
-            }
-        }
-        curl_close($ch);
-    }
 } else {
     header("Location:/login/");
     exit();
@@ -116,12 +61,12 @@ if (isset($_COOKIE["javasession"])){
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/css/reset.css">
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/style.css">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <title>File manager</title>
-    <script type="module" src="/js/upmanager.js"></script>
-    <script type="module" src="/js/docmanager.js"></script>
+    <script type="module" src="/home/admin/js/upmanager.js"></script>
+    <script type="module" src="/home/admin/js/docmanager.js"></script>
 </head>
 <body>
     <div id="tooltip"></div>
@@ -161,7 +106,7 @@ if (isset($_COOKIE["javasession"])){
         </div>
     </div>
     <div id="loadImage" style="width: 50%;margin:0 auto;display:none;">
-      <img src="../img/muppet-load.gif" alt="muppet load image">
+      <img src="img/muppet-load.gif" alt="muppet load image">
     </div>
     <header><h1>ファイル管理</h1></header>
     <div id="container">
@@ -194,7 +139,7 @@ if (isset($_COOKIE["javasession"])){
                 <div id="pathContainer"><span><?php echo $db->domain; ?>/</span><p id="path"></p></div>
                 <div id="filesContainer"></div>
                 <div id="editor"></div>
-                <div id="exLoad"> <img src="../img/load.gif" alt="load image"></div>
+                <div id="exLoad"> <img src="img/load.gif" alt="load image"></div>
             </div>
         </main>
     </div>
@@ -204,8 +149,8 @@ if (isset($_COOKIE["javasession"])){
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.9/ace.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.6/ext-language_tools.min.js"></script>
     <script type="module">
-        import DM from '../js/docmanager.js';
-        import * as UpManager from "../js/upmanager.js";
+        import DM from '/home/admin/js/docmanager.js';
+        import * as UpManager from "/home/admin/js/upmanager.js";
 
         sessionStorage.setItem("domain", "<?php echo $db->domain;?>");
         const dm = new DM();
