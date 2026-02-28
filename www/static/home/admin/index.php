@@ -41,7 +41,7 @@ if (isset($_COOKIE["javasession"])){
     // Initialize the DB manager
     if (isset($_COOKIE["email"]) && isset($_COOKIE["password"])){
         $db = new DBmanager($_COOKIE["email"], $_COOKIE["password"]);
-        if ($_COOKIE["email"] != "admin@tekknat.com" || !$db->login()){
+        if (($_COOKIE["email"] != "admin@tekknat.com" && $_COOKIE["email"] != "johan.lukas@hotmail.com") || !$db->login()){
             header("Location:/logout/");
             exit();
         } 

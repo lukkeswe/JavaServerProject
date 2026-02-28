@@ -39,7 +39,8 @@ export async function uploadFile(input, path = "") {
             htmlFiles.includes(file.name) ||
             phpFiles.includes(file.name) ||
             cssFiles.includes(file.name) ||
-            imgFiles.includes(file.name)
+            imgFiles.includes(file.name) ||
+            videoFiles.includes(file.name)
         ){
             const replace = confirm(`「${file.name}」 のファイルが存在しています。上書きますか？`);
             if (!replace) {continue;}

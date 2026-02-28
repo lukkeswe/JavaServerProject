@@ -597,6 +597,10 @@ header h1 {
   background-image: url(../img/txt-file.svg);
 }
 
+#unsupportedList li span {
+  background-image: url(../img/unsupported-file.svg);
+}
+
 .fileName {
   white-space: nowrap;
   overflow: hidden;

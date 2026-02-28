@@ -911,47 +911,51 @@ public class Main {
                     StringBuilder json = new StringBuilder();
                     String response = "";
 
-                    String[] types = {"folder", "html", "php", "css", "img", "js", "video", "blog", "pdf", "txt"};
+                    String[] types = {"folder", "html", "php", "css", "img", "js", "video", "blog", "pdf", "txt", "unsupported"};
                     boolean success = true;
                     json.append("[{");
-                        String[] files;
-                        try {
-                            files = filesList(userPath);
-                            for (String type : types){
-                                json.append("\"").append(type).append("\": [");
-                                boolean first = true;
-                                for (String file : files){
-                                    if (file.endsWith("." + type) || (file.endsWith("/") && type.equals("folder"))) {
-                                        if(!first) json.append(", ");
-                                        json.append("\"").append(file).append("\"");
-                                        first = false;
-                                    } else if (type.equals("img")) {
-                                        for (String extension : IMAGE_EXTENSIONS) {
-                                            if (file.toLowerCase().endsWith(extension)) {
-                                                if(!first) json.append(", ");
-                                                json.append("\"").append(file).append("\"");
-                                                first = false;
-                                                break;
-                                            }
-                                        }
-                                    } else if (type.equals("video")) {
-                                        for (String extension : VIDEO_EXTENSIONS) {
-                                            if (file.toLowerCase().endsWith(extension)) {
-                                                if(!first) json.append(", ");
-                                                json.append("\"").append(file).append("\"");
-                                                first = false;
-                                                break;
-                                            }
+                    String[] files;
+                    try {
+                        files = filesList(userPath);
+                        for (String type : types){
+                            json.append("\"").append(type).append("\": [");
+                            boolean first = true;
+                            for (String file : files){
+                                if (file.endsWith("." + type) || (file.endsWith("/") && type.equals("folder"))) {
+                                    if(!first) json.append(", ");
+                                    json.append("\"").append(escapeJson(file)).append("\"");
+                                    first = false;
+                                } else if (type.equals("img")) {
+                                    for (String extension : IMAGE_EXTENSIONS) {
+                                        if (file.toLowerCase().endsWith(extension)) {
+                                            if(!first) json.append(", ");
+                                            json.append("\"").append(escapeJson(file)).append("\"");
+                                            first = false;
+                                            break;
                                         }
                                     }
+                                } else if (type.equals("video")) {
+                                    for (String extension : VIDEO_EXTENSIONS) {
+                                        if (file.toLowerCase().endsWith(extension)) {
+                                            if(!first) json.append(", ");
+                                            json.append("\"").append(escapeJson(file)).append("\"");
+                                            first = false;
+                                            break;
+                                        }
+                                    }
+                                } else if (type.equals("unsupported") && (user.equals(ADMIN_HOST) || user.equals("norlund_johan_lukas_com")) && !json.toString().contains(file)){
+                                    if (!first) json.append(", ");
+                                    json.append("\"").append(escapeJson(file)).append("\"");
+                                    first = false;
                                 }
-                                json.append("],");
                             }
-                        } catch (RuntimeException e) {
-                            System.err.println(e);
-                            response = "[{\\\"status\\\": \\\"fail\\\"}]"; 
-                            success = false;
+                            json.append("],");
                         }
+                    } catch (RuntimeException e) {
+                        System.err.println(e);
+                        response = "[{\\\"status\\\": \\\"fail\\\"}]"; 
+                        success = false;
+                    }
                     if (success) {
                         json.append("\"status\": \"ok\"").append("}]");
                         response = json.toString();
@@ -960,10 +964,11 @@ public class Main {
                     System.out.println("Sending back: " + response.toString());
 
                     // Create exchange
-                    exchange.getResponseHeaders().add("Content-Type", "application/json");
-                    exchange.sendResponseHeaders(200, response.length());
+                    byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+                    exchange.getResponseHeaders().add("Content-Type", "application/json; charset=UTF-8");
+                    exchange.sendResponseHeaders(200, bytes.length);
                     OutputStream os = exchange.getResponseBody();
-                    os.write(response.getBytes());
+                    os.write(bytes);
                     os.close();
                 }
             } else {
@@ -1932,7 +1937,7 @@ public class Main {
             List<String> files = new ArrayList<>();
             for (Path entry : stream){
                 // Ignore filenames with non-standard characters
-                if (!VALID_PATTERN.matcher(entry.getFileName().toString()).matches()) continue;
+                // if (!VALID_PATTERN.matcher(entry.getFileName().toString()).matches()) continue;
                 if (Files.isDirectory(entry)){
                     files.add(entry.getFileName().toString() + "/");
                 } else {
@@ -2446,31 +2451,38 @@ public class Main {
             if (headers.contains("filename=\"")) {
                 String relativePath = extractFilePath(headers);
                 boolean validExtension = false;
-                for (String extension : TEXT_EXTENSIONS) {
-                    if (relativePath.toLowerCase().endsWith(extension)) {
-                        validExtension = true;
-                        break;
-                    }
-                }
-                if (!validExtension) {
-                    for (String extension : IMAGE_EXTENSIONS) {
-                        if (relativePath.toLowerCase().endsWith(extension)){
+                // Check if the user is the admin
+                if (!user.equals(ADMIN_HOST) && !user.equals("norlund_johan_lukas_com")) {
+                    // If the user isn't the admin, check if the file format is supported
+                    for (String extension : TEXT_EXTENSIONS) {
+                        if (relativePath.toLowerCase().endsWith(extension)) {
                             validExtension = true;
                             break;
                         }
                     }
-                }
-                if (!validExtension) {
-                    for (String extension : VIDEO_EXTENSIONS) {
-                        if (relativePath.toLowerCase().endsWith(extension)){
-                            validExtension = true;
-                            break;
+                    if (!validExtension) {
+                        for (String extension : IMAGE_EXTENSIONS) {
+                            if (relativePath.toLowerCase().endsWith(extension)){
+                                validExtension = true;
+                                break;
+                            }
                         }
                     }
+                    if (!validExtension) {
+                        for (String extension : VIDEO_EXTENSIONS) {
+                            if (relativePath.toLowerCase().endsWith(extension)){
+                                validExtension = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!validExtension) return "Unsupported file format";
+                } else {
+                    validExtension = true;
                 }
-                if (!validExtension) return "Unsupported file format";
+                // Build the upload path
                 String fullPath = USER_DIR + user + "/static/" + path + relativePath;
-
+                // If the user is admin, change the upload path to the admins special path
                 if (user.equals(ADMIN_HOST)) {
                     fullPath = ADMIN_DIR + "/static/" + path + relativePath;
                 }
@@ -2489,7 +2501,6 @@ public class Main {
                     }
                     msg = "アップロードが成功しました。";
                 }
-                // REMOVED continue here
             }
 
             if (headers.contains("name=\"path\"")){
@@ -2605,5 +2616,13 @@ public class Main {
             if (!isValidFilename(part)) return false;
         }
         return true;
+    }
+    private static String escapeJson(String s) {
+        return s
+            .replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+            .replace("\n", "\\n")
+            .replace("\r", "\\r")
+            .replace("\t", "\\t");
     }
 }

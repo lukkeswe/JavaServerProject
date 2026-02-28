@@ -629,7 +629,7 @@ export default class DocumentManager {
                 optionsContainer.append(backBtn);
             }
             // List of supported file types
-            const fileTypes = ["folder", "html", "php", "css", "img", "js", "video", "blog", "pdf", "txt"];
+            const fileTypes = ["folder", "html", "php", "css", "img", "js", "video", "blog", "pdf", "txt", "unsupported"];
             for (let type of fileTypes){
                 const ul    = document.createElement("ul");
                 ul.id       = type + "List";
@@ -1150,6 +1150,7 @@ export default class DocumentManager {
                             // Add an eventlistener
                             icon.addEventListener("click", () => {
                                 this.emptyDisplayContainer();
+                                optionsContainer.innerHTML = "";
                                 this.showInfo(fileName);
                                 // Add options
                                 optionsContainer.append(a);
@@ -1161,6 +1162,21 @@ export default class DocumentManager {
                             icon.addEventListener("dblclick", () => {
                                 // Redirect the user
                                 window.open(a.href, "_blank");
+                            });
+                        } else if (type == "unsupported") {
+                            // If the file is a unsupported file format
+                            // Add eventlistener
+                            icon.addEventListener("click", () => {
+                                this.emptyDisplayContainer();
+
+                                this.showInfo(fileName);
+                                optionsContainer.innerHTML = "";
+                                // Add name change button
+                                optionsContainer.append(nameChange);
+                                // Add delete button
+                                optionsContainer.append(erase);
+                                // Append back button
+                                optionsContainer.append(backBtn);
                             });
                         }
 

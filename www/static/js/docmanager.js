@@ -1150,6 +1150,7 @@ export default class DocumentManager {
                             // Add an eventlistener
                             icon.addEventListener("click", () => {
                                 this.emptyDisplayContainer();
+                                optionsContainer.innerHTML = "";
                                 this.showInfo(fileName);
                                 // Add options
                                 optionsContainer.append(a);

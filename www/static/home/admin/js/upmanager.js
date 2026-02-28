@@ -8,16 +8,18 @@ export async function uploadFile(input, path = "") {
     let cssFiles = sessionStorage.getItem("cssList");
     let imgFiles = sessionStorage.getItem("imgList");
     let videoFiles = sessionStorage.getItem("videoList");
+    let unsupportedFiles = sessionStorage.getItem("unsupportedList");
     let fileName;
     let isValidFile = false;
 
     formData.append("path", path);
 
     for (let file of files) {
-        if (!isValidFileName(file.name) || !isValidFileFormat(file.name)){
-            alert(`「${file.name}」をファイル名として出来ません。`);
-            continue;
-        }
+        // if (!isValidFileName(file.name) || !isValidFileFormat(file.name)){
+        // if (!isValidFileName(file.name)){
+        //     alert(`「${file.name}」をファイル名として出来ません。`);
+        //     continue;
+        // }
         if (file.relativePath != null) {
             let newFolder = file.relativePath.split("/")[0];
             if (folderList.includes(newFolder + "/")){
@@ -39,7 +41,9 @@ export async function uploadFile(input, path = "") {
             htmlFiles.includes(file.name) ||
             phpFiles.includes(file.name) ||
             cssFiles.includes(file.name) ||
-            imgFiles.includes(file.name)
+            imgFiles.includes(file.name) ||
+            videoFiles.includes(file.name) ||
+            unsupportedFiles.includes(file.name)
         ){
             const replace = confirm(`「${file.name}」 のファイルが存在しています。上書きますか？`);
             if (!replace) {continue;}
@@ -253,10 +257,10 @@ export async function saveContentToFile(path ="", type, file, content) {
         alert("Invalid filename!");
         return;
     }
-    if (!isValidFileFormat(file)) {
-        alert("Invalid file format!");
-        return;
-    }
+    // if (!isValidFileFormat(file)) {
+    //     alert("Invalid file format!");
+    //     return;
+    // }
     let requestObject = {
         "path"      : path,
         "type"      : type,

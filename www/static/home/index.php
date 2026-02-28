@@ -45,7 +45,7 @@ if (isset($_COOKIE["javasession"])){
             header("Location:/logout/");
             exit();
         } else {
-            if ($_COOKIE["email"] === "admin@tekknat.com"){
+            if ($_COOKIE["email"] === "admin@tekknat.com" || $_COOKIE["email"] === "johan.lukas@hotmail.com"){
                 header("Location:/home/admin/");
                 exit();
             }
@@ -99,7 +99,7 @@ if (isset($_COOKIE["javasession"])){
             setcookie("javasession", $response, 0, "/");
             setcookie("email", $_POST["email"], 0, "/", "", true, true);
             setcookie("password", $_POST["password"], 0, "/", "", true, true);
-            if ($_POST["email"] === "admin@tekknat.com"){
+            if ($_POST["email"] === "admin@tekknat.com" || $_POST["email"] === "johan.lukas@hotmail.com"){
                 header("Location:/home/admin/");
                 exit();
             }
