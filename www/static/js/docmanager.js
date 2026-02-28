@@ -998,6 +998,7 @@ export default class DocumentManager {
                             // Add an eventlistener
                             icon.addEventListener("click", () => {
                                 this.emptyDisplayContainer();
+                                optionsContainer.innerHTML = "";
                                 this.showInfo(fileName);
                                 // Append the video element to the display container
                                 this.appendElementToDisplayContainer(video);

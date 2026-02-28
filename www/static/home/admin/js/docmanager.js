@@ -949,6 +949,11 @@ export default class DocumentManager {
                         fileObject.append(icon);
                         // If the file type is of "img" type
                         if (type == "img") {
+                            if (path.endsWith("/")){
+                                icon.style.backgroundImage = `url(https://${sessionStorage["domain"]}/${path + fileName})`;
+                            } else {
+                                icon.style.backgroundImage = `url(https://${sessionStorage["domain"]}/${fileName})`;
+                            }
                             icon.addEventListener("click", () => {
                                 this.emptyDisplayContainer();
                                 this.showInfo(fileName);
@@ -998,6 +1003,7 @@ export default class DocumentManager {
                             // Add an eventlistener
                             icon.addEventListener("click", () => {
                                 this.emptyDisplayContainer();
+                                optionsContainer.innerHTML = "";
                                 this.showInfo(fileName);
                                 // Append the video element to the display container
                                 this.appendElementToDisplayContainer(video);
