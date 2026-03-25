@@ -471,5 +471,8 @@ $items = array_filter(glob('*'), function ($path) {
         <li class="links"><a href="<?= urlencode($item) ?>"><?= str_replace("-", " ", htmlspecialchars($item)) ?></a></li>
     <?php endforeach; ?>
     </ul>
+    <footer>
+    © 2025 Tekknat & Norlund J. Lukas — All rights reserved.
+    </footer>
 </body>
 </html>
