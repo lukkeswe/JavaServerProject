@@ -420,3 +420,24 @@ function isValidFileFormat(filename) {
 
     return ALL_EXTENSIONS.includes(extension);
 }
+
+export async function copyIt(source, target) {
+    if (!isValidPath(source) || !isValidPath(target)){
+        alert("Invallid path!");
+        return;
+    }
+    let requestObject = {
+        "source" : source,
+        "target" : target
+    };
+    console.log("Copying it...");
+
+    const response = await fetch("/copyIt", {
+        method  : "POST",
+        headers : {"Content-Type" : "application/json"},
+        body    : JSON.stringify(requestObject)
+    });
+
+    let msg = await response.text();
+    console.log(msg);
+}

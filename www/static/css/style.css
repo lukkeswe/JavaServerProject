@@ -434,6 +434,18 @@ header h1 {
   background-image: url(../img/save-as-2.svg);
 }
 
+.move {
+  background-image: url(../img/save-as-2.svg);
+}
+
+.paste {
+  background-image: url(../img/save-as-2.svg);
+}
+
+.copy {
+  background-image: url(../img/save-as-2.svg);
+}
+
 .newOptions {
     margin-top: 8px;
 }

@@ -54,6 +54,7 @@ public class Main {
         server.createContext("/createFolder", new CreateFolderHandler());
         server.createContext("/deleteFolder", new DeleteFolderHandler());
         server.createContext("/moveIt", new MoveItHandler());
+        server.createContext("/copyIt", new CopyHandler());
         server.createContext("/create-session", new SessionHandler());
         server.createContext("/check-session", new CheckJavaSession());
         server.createContext("/", new DelegatingHandler(normalExecutor, videoExecutor));
@@ -1396,6 +1397,58 @@ public class Main {
             }
         }
     }
+    static class CopyHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if ("POST".equals(exchange.getRequestMethod())){
+                // Get the request body 
+                String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+                // Parse the body
+                Map<String, String> map = parseJsonToMap(body);
+                // Validate the user
+                String sessionId = getJavaSessionId(exchange);
+                String user = SessionManager.getUsername(sessionId);
+                // Rejec the request if the user is invalid
+                if (user == null){
+                    exchange.sendResponseHeaders(403, -1);
+                    exchange.getRequestBody().close();
+                    return;
+                } else {
+                    // Copy the file or folder
+                    String msg = "Fail";
+                    int responseCode = 403;
+                    String userPath = USER_DIR + user + "/static/";
+                    if (!isValidPath(map.get("source")) || !isValidPath(map.get("target"))){
+                        System.out.println(" --- INVALID PATH! --- ");
+                        System.out.println(" Possible hacker: " + "\"" + user + "\"");
+                        exchange.sendResponseHeaders(403, -1);
+                        exchange.getResponseBody().close();
+                        return;
+                    }
+                    if (user.equals(ADMIN_HOST)) {
+                        userPath = ADMIN_DIR + "/static/";
+                    }
+                    if (copyIt(
+                        Paths.get(userPath + map.get("source")), 
+                        Paths.get(userPath + map.get("target"))
+                    )){
+                        msg = "Success";
+                        responseCode = 200;
+                    }
+                    byte[] response = msg.getBytes();
+                    exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
+                    exchange.sendResponseHeaders(responseCode, response.length);
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(response);
+                    os.close();
+                }
+            } else {
+                exchange.sendResponseHeaders(403, -1);
+                exchange.getRequestBody().close();
+                return;
+            }
+        }
+    }
     static class SaveBlogHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
@@ -1634,6 +1687,19 @@ public class Main {
     }
     
     // Helper methods
+    private static boolean copyIt(Path source, Path target){
+        // Check if the path exists
+        if (!Files.exists(source)) return false;
+        // Copy the file
+        try {
+            Files.createDirectories(target.getParent());
+            Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+            return true;
+        } catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
     private static boolean moveIt(Path source, Path target){
         // Check if the path exists
         if (!Files.exists(source)) return false;
