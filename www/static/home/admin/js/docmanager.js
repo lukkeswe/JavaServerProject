@@ -5,6 +5,7 @@ import { deleteBlog } from './upmanager.js';
 import { renameBlog } from './upmanager.js';
 import { createFolder } from './upmanager.js';
 import { isValidFileName } from './upmanager.js';
+import { copyIt } from './upmanager.js';
 
 export default class DocumentManager {
     constructor() {
@@ -840,6 +841,58 @@ export default class DocumentManager {
                         nameChangeContainer.append(buttonContainer);
                         this.grayScreen.append(nameChangeContainer);
                     });
+                    // Create copy button
+                    const move = this.optionsButton("move", "Move");
+                    // Add eventlistener
+                    move.addEventListener("click",  async () => {
+                        // Start the copying proccess
+                        this.copy(fileName, path);
+                        // Create a paste button
+                        const paste = this.optionsButton("paste", "Paste");
+                        // Add an eventlistener
+                        paste.addEventListener("click", async () => {
+                            // Get the current path
+                            const targetPath = document.getElementById("path").innerHTML;
+                            // Build the source and the target
+                            let source = sessionStorage.getItem("copyPath") + sessionStorage.getItem("file");
+                            let target = targetPath + sessionStorage.getItem("file");
+                            // Paste the file in the current path
+                            await moveIt(source, target);
+                            // Remove the paste button
+                            paste.remove();
+                            // Update the current path
+                            this.getFiles(targetPath);
+                        });
+                        // Append the paste button
+                        const container = document.getElementById("createButtons");
+                        container.append(paste);
+                    });
+                    // Create copy button
+                     const copy = this.optionsButton("copy", "Copy");
+                    // Add eventlistener
+                    copy.addEventListener("click",  async () => {
+                        // Start the copying proccess
+                        this.copy(fileName, path);
+                        // Create a paste button
+                        const paste = this.optionsButton("paste", "Paste");
+                        // Add an eventlistener
+                        paste.addEventListener("click", async () => {
+                            // Get the current path
+                            const targetPath = document.getElementById("path").innerHTML;
+                            // Build the source and the target
+                            let source = sessionStorage.getItem("copyPath") + sessionStorage.getItem("file");
+                            let target = targetPath + sessionStorage.getItem("file");
+                            // Paste the file in the current path
+                            await copyIt(source, target);
+                            // Remove the paste button
+                            paste.remove();
+                            // Update the current path
+                            this.getFiles(targetPath);
+                        });
+                        // Append the paste button
+                        const container = document.getElementById("createButtons");
+                        container.append(paste);
+                    });
 
                     if (type == "folder") {
                         const span = document.createElement("span");
@@ -931,6 +984,10 @@ export default class DocumentManager {
                                 optionsContainer.append(nameChange);
                                 // Add the hyper-link
                                 optionsContainer.append(a);
+                                // Add move button
+                                optionsContainer.append(move);
+                                // Add copy button
+                                optionsContainer.append(copy);
                                 // Add the delete button to the options container
                                 optionsContainer.append(erase);
                                 // Add back the back button
@@ -977,6 +1034,10 @@ export default class DocumentManager {
                                 optionsContainer.append(edit);
                                 // Add name change button
                                 optionsContainer.append(nameChange);
+                                // Add move button
+                                optionsContainer.append(move);
+                                // Add copy button
+                                optionsContainer.append(copy);
                                 // Add delete button
                                 optionsContainer.append(erase);
                                 // Add back button
@@ -1009,6 +1070,10 @@ export default class DocumentManager {
                                 this.appendElementToDisplayContainer(video);
                                 // Add options
                                 optionsContainer.append(nameChange);
+                                // Add move button
+                                optionsContainer.append(move);
+                                // Add copy button
+                                optionsContainer.append(copy);
                                 optionsContainer.append(erase);
                                 optionsContainer.append(backBtn);
                             });
@@ -1122,6 +1187,10 @@ export default class DocumentManager {
                                 optionsContainer.append(editBlog);
                                 optionsContainer.append(a);
                                 optionsContainer.append(renameBtn);
+                                // Add move button
+                                optionsContainer.append(move);
+                                // Add copy button
+                                optionsContainer.append(copy);
                                 optionsContainer.append(deleteBlogBtn);
                                 optionsContainer.append(backBtn);
                                 this.emptyDisplayContainer();
@@ -1161,6 +1230,10 @@ export default class DocumentManager {
                                 // Add options
                                 optionsContainer.append(a);
                                 optionsContainer.append(nameChange);
+                                // Add move button
+                                optionsContainer.append(move);
+                                // Add copy button
+                                optionsContainer.append(copy);
                                 optionsContainer.append(erase);
                                 optionsContainer.append(backBtn);
                             });
@@ -1623,5 +1696,29 @@ export default class DocumentManager {
         buttonContainer.append(cancel);
         container.append(buttonContainer);
         this.grayScreen.append(container);
+    }
+    optionsButton(option, tooltipText){
+        // Create button element
+        const element = document.createElement("button");
+        // Add classnames
+        element.classList.add("btn");
+        element.classList.add("popUp");
+        element.classList.add("optionsIcon");
+        element.classList.add(option);
+        // Create tooltip
+        const tooltip = document.createElement("p");
+        tooltip.innerHTML = tooltipText;
+        tooltip.classList.add("description");
+        // Append tooltip
+        element.append(tooltip);
+        // Return the button
+        return element;
+    }
+    // Helper function for the copy button
+    copy(file, path){
+        sessionStorage.setItem("file", file);
+        sessionStorage.setItem("copyPath", path);
+        console.log(`Copying \"${file}\" from ${path}`);
+        console.log(".....");
     }
 }

@@ -411,7 +411,7 @@ header h1 {
 }
 
 .namechange {
-  background-image: url(../img/namechange.svg);
+  background-image: url(../img/edit-name.svg);
 }
 
 .visit {
@@ -432,6 +432,18 @@ header h1 {
 
 .saveAs {
   background-image: url(../img/save-as-2.svg);
+}
+
+.move {
+  background-image: url(../img/cut.svg);
+}
+
+.paste {
+  background-image: url(../img/clipboard.svg);
+}
+
+.copy {
+  background-image: url(../img/copy.svg);
 }
 
 .newOptions {
@@ -595,10 +607,6 @@ header h1 {
 
 #txtList li span {
   background-image: url(../img/txt-file.svg);
-}
-
-#unsupportedList li span {
-  background-image: url(../img/unsupported-file.svg);
 }
 
 .fileName {
