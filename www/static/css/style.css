@@ -411,7 +411,7 @@ header h1 {
 }
 
 .namechange {
-  background-image: url(../img/namechange.svg);
+  background-image: url(../img/edit-name.svg);
 }
 
 .visit {
@@ -435,15 +435,15 @@ header h1 {
 }
 
 .move {
-  background-image: url(../img/save-as-2.svg);
+  background-image: url(../img/cut.svg);
 }
 
 .paste {
-  background-image: url(../img/save-as-2.svg);
+  background-image: url(../img/clipboard.svg);
 }
 
 .copy {
-  background-image: url(../img/save-as-2.svg);
+  background-image: url(../img/copy.svg);
 }
 
 .newOptions {
