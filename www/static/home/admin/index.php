@@ -443,14 +443,14 @@ if (isset($_COOKIE["javasession"])){
 
                 tooltip.textContent = desc.textContent;
                 tooltip.style.display = "block";
-                }
-                document.addEventListener("mousemove", (e) => {
-                if (tooltip.style.display !== "block") return;
+            }
+            document.addEventListener("mousemove", (e) => {
+            if (tooltip.style.display !== "block") return;
 
-                tooltip.style.left = e.clientX + 12 + "px";
-                tooltip.style.top  = e.clientY + 12 + "px";
-                });
+            tooltip.style.left = e.clientX + 12 + "px";
+            tooltip.style.top  = e.clientY + 12 + "px";
             });
+        });
 
             
 

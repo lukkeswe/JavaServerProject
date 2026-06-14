@@ -1,3 +1,4 @@
+// Written by Norlund J. Lukas
 import { deleteFolder } from './upmanager.js';
 import { saveContentToFile } from './upmanager.js';
 import { moveIt } from './upmanager.js';
@@ -636,6 +637,9 @@ export default class DocumentManager {
                 ul.id       = type + "List";
                 let list = [];
                 for (let file = 0; file < data[0][type].length; file++){
+                    // Create a list for the options
+                    let fileOptions = [];
+                    // Extract the filename
                     const fileName = data[0][type][file];
                     // Create the list element that will act as a container
                     const fileObject  = document.createElement("li");
@@ -653,17 +657,7 @@ export default class DocumentManager {
                     name.className  = "fileName";
                     name.innerHTML  = fileName;
                     // Create a delete button
-                    const erase     = document.createElement("button");
-                    erase.classList.add("btn");
-                    erase.classList.add("popUp");
-                    erase.classList.add("optionsIcon");
-                    erase.classList.add("erase");
-                    // Create tooltip
-                    const eraseToolTip = document.createElement("p");
-                    eraseToolTip.innerHTML = "Delete permanently";
-                    eraseToolTip.classList.add("description");
-                    erase.append(eraseToolTip);
-                    // Add an event listener
+                    const erase     = this.optionsButton("erase", "Delete");
                     erase.addEventListener("click", async () => {
                         // Confirm deletion
                         if (confirm(`Are you sure you want to delete "${fileName}" permanently? `)){
@@ -686,18 +680,8 @@ export default class DocumentManager {
                         // Remove the element
                         fileObject.remove();
                     });
-
                     // Create an edit button
-                    const edit      = document.createElement("button");
-                    edit.classList.add("btn");
-                    edit.classList.add("popUp");
-                    edit.classList.add("optionsIcon");
-                    edit.classList.add("edit");
-                    // Create tooltip
-                    const editToolTip = document.createElement("p");
-                    editToolTip.innerHTML = "Edit";
-                    editToolTip.classList.add("description");
-                    edit.append(editToolTip);
+                    const edit      = this.optionsButton("edit", "Edit");
                     // Add eventlistener 
                     edit.addEventListener("click", async () => {
                         // Get the current path
@@ -742,16 +726,7 @@ export default class DocumentManager {
                         optionsContainer.append(backBtn);
                     });
                     // Create a name change button
-                    const nameChange = document.createElement("button");
-                    nameChange.classList.add("btn");
-                    nameChange.classList.add("popUp");
-                    nameChange.classList.add("optionsIcon");
-                    nameChange.classList.add("namechange");
-                    // Create tooltip
-                    const nameChangeToolTip = document.createElement("p");
-                    nameChangeToolTip.innerHTML = "Rename";
-                    nameChangeToolTip.classList.add("description");
-                    nameChange.append(nameChangeToolTip);
+                    const nameChange = this.optionsButton("namechange", "Rename");
                     // Add eventlistener
                     nameChange.addEventListener("click", ()=>{
                         // Show greyscreen
@@ -897,6 +872,17 @@ export default class DocumentManager {
                     if (type == "folder") {
                         const span = document.createElement("span");
                         span.classList.add("fileIcon");
+                        // Create a delete folder option
+                        const deleteFolderBtn = document.createElement("button");
+                        deleteFolderBtn.classList.add("btn");
+                        deleteFolderBtn.classList.add("popUp");
+                        deleteFolderBtn.classList.add("optionsIcon");
+                        deleteFolderBtn.classList.add("erase");
+                        // Create tooltip
+                        const deleteFolderBtnToolTip = document.createElement("p");
+                        deleteFolderBtnToolTip.innerHTML = "Delete permanently";
+                        deleteFolderBtnToolTip.classList.add("description");
+                        deleteFolderBtn.append(deleteFolderBtnToolTip);
                         span.addEventListener("dblclick", async () => {
                             filesContainer.style.display = "none";
                             exLoad.style.display = "block";
@@ -916,18 +902,7 @@ export default class DocumentManager {
                                 pathElement.innerHTML = fileName;
                             }
                         });
-                        span.addEventListener("click", async ()=> {
-                            // Create a delete folder option
-                            const deleteFolderBtn = document.createElement("button");
-                            deleteFolderBtn.classList.add("btn");
-                            deleteFolderBtn.classList.add("popUp");
-                            deleteFolderBtn.classList.add("optionsIcon");
-                            deleteFolderBtn.classList.add("erase");
-                            // Create tooltip
-                            const deleteFolderBtnToolTip = document.createElement("p");
-                            deleteFolderBtnToolTip.innerHTML = "Delete permanently";
-                            deleteFolderBtnToolTip.classList.add("description");
-                            deleteFolderBtn.append(deleteFolderBtnToolTip);
+                        span.addEventListener("click", async ()=> {                 
                             // Append the filename to the displaycontainer
                             this.emptyDisplayContainer();
                             this.showInfo(fileName);
@@ -946,61 +921,102 @@ export default class DocumentManager {
                             optionsContainer.append(deleteFolderBtn);
                             optionsContainer.append(backBtn);
                         });
+                        // Add a right click option
+                        span.addEventListener("contextmenu", (event) => {
+                            // Prevent default right click
+                            event.preventDefault();
+                            // Add options to the options list
+                            fileOptions = [];
+                            fileOptions.push(nameChange.cloneNode(true));
+                            fileOptions.push(deleteFolderBtn.cloneNode(true));
+                            // Create the right click menu
+                            const contextmenu = this.rightClick(fileOptions);
+                            // Activate the right click menu
+                            this.activateContextMenu(contextmenu, event);
+                            // Append the right click menu to the body
+                            document.body.prepend(contextmenu);
+                        });
                         fileObject.append(span);
                     }
 
                     // If the file is a HTML or PHP file, add a hyper-link to that file
                     else if (type == "html" || type == "php"){
-                            // Create hyper-link
-                            const a = document.createElement("a");
-                            // Add a url
-                            if (path.endsWith("/")) {
-                                a.href = "https://" + sessionStorage["domain"] + "/" + path + fileName;
-                            } else {
-                                a.href = "https://" + sessionStorage["domain"] + "/" + fileName;
-                            }
-                            // Add setting
-                            a.target = "_blank";
-                            // Add classes
-                            a.classList.add("btn");
-                            a.classList.add("popUp");
-                            a.classList.add("optionsIcon");
-                            a.classList.add("visit");
-                            // Create tooltip
-                            const aToolTip = document.createElement("p");
-                            aToolTip.innerHTML = "Visit";
-                            aToolTip.classList.add("description");
-                            a.append(aToolTip);
-                            // Append the span
-                            fileObject.append(icon);
-                            // Add eventlistener
-                            icon.addEventListener("click", () => {
-                                this.emptyDisplayContainer();
-                                // Empty optioins container
-                                optionsContainer.innerHTML = "";
-                                // Add the edit button
-                                optionsContainer.append(edit);
-                                // Add name change button
-                                optionsContainer.append(nameChange);
-                                // Add the hyper-link
-                                optionsContainer.append(a);
-                                // Add move button
-                                optionsContainer.append(move);
-                                // Add copy button
-                                optionsContainer.append(copy);
-                                // Add the delete button to the options container
-                                optionsContainer.append(erase);
-                                // Add back the back button
-                                optionsContainer.append(backBtn);
-                                
-                                this.showInfo(fileName);
-                            });
-                            // Add a double click eventlistener
-                            icon.addEventListener("dblclick", ()=> {
-                                // Redirect the user
-                                window.open(a.href, "_blank");
-                            });
-                        //}
+                        // Create hyper-link
+                        const a = document.createElement("a");
+                        // Add a url
+                        if (path.endsWith("/")) {
+                            a.href = "https://" + sessionStorage["domain"] + "/" + path + fileName;
+                        } else {
+                            a.href = "https://" + sessionStorage["domain"] + "/" + fileName;
+                        }
+                        // Add setting
+                        a.target = "_blank";
+                        // Add classes
+                        a.classList.add("btn");
+                        a.classList.add("popUp");
+                        a.classList.add("optionsIcon");
+                        a.classList.add("visit");
+                        // Create tooltip
+                        const aToolTip = document.createElement("p");
+                        aToolTip.innerHTML = "Visit";
+                        aToolTip.classList.add("description");
+                        a.append(aToolTip);
+                        // Append the span
+                        fileObject.append(icon);
+                        // Add eventlistener
+                        icon.addEventListener("click", () => {
+                            this.emptyDisplayContainer();
+                            // Empty optioins container
+                            optionsContainer.innerHTML = "";
+                            // Add the edit button
+                            optionsContainer.append(edit);
+                            // Add name change button
+                            optionsContainer.append(nameChange);
+                            // Add the hyper-link
+                            optionsContainer.append(a);
+                            // Add move button
+                            optionsContainer.append(move);
+                            // Add copy button
+                            optionsContainer.append(copy);
+                            // Add the delete button to the options container
+                            optionsContainer.append(erase);
+                            // Add back the back button
+                            optionsContainer.append(backBtn);
+                            
+                            this.showInfo(fileName);
+                        });
+                        // Add a double click eventlistener
+                        icon.addEventListener("dblclick", ()=> {
+                            // Redirect the user
+                            window.open(a.href, "_blank");
+                        });
+                        // Add a right click option
+                        icon.addEventListener("contextmenu", (event) => {
+                            // Prevent default right click
+                            event.preventDefault();
+                            // Add options to the options list
+                            fileOptions = [];
+                            fileOptions.push(a.cloneNode(true));
+                            fileOptions.push(edit.cloneNode(true));
+                            fileOptions.push(nameChange.cloneNode(true));
+                            fileOptions.push(copy.cloneNode(true));
+                            fileOptions.push(move.cloneNode(true));
+                            fileOptions.push(erase.cloneNode(true));
+                            // Create the right click menu
+                            const contextmenu = this.rightClick(fileOptions, 
+                                {
+                                    "object": fileObject,
+                                    "filename": fileName,
+                                    "type": type,
+                                    "path": path,
+                                    "back": backBtn
+                                }
+                            );
+                            // Activate the right click menu
+                            this.activateContextMenu(contextmenu, event);
+                            // Append the right click menu to the body
+                            document.body.prepend(contextmenu);
+                        });
                     } else {
                         // Append the name object with the span element
                         fileObject.append(icon);
@@ -1022,6 +1038,31 @@ export default class DocumentManager {
                                 optionsContainer.append(erase);
                                 optionsContainer.append(backBtn);
                             });
+                            // Add a right click option
+                            icon.addEventListener("contextmenu", (event) => {
+                                // Prevent default right click
+                                event.preventDefault();
+                                // Add options to the options list
+                                fileOptions = [];
+                                fileOptions.push(nameChange.cloneNode(true));
+                                fileOptions.push(copy.cloneNode(true));
+                                fileOptions.push(move.cloneNode(true));
+                                fileOptions.push(erase.cloneNode(true));
+                                // Create the right click menu
+                                const contextmenu = this.rightClick(fileOptions, 
+                                    {
+                                        "object": fileObject,
+                                        "filename": fileName,
+                                        "type": type,
+                                        "path": path,
+                                        "back": backBtn
+                                    }
+                                );
+                                // Activate the right click menu
+                                this.activateContextMenu(contextmenu, event);
+                                // Append the right click menu to the body
+                                document.body.prepend(contextmenu);
+                            });
                         } else if(type == "css" || type == "js" || type == "txt"){
                             // If the file is a css or JavaScript file
                             // Add event listener
@@ -1042,6 +1083,32 @@ export default class DocumentManager {
                                 optionsContainer.append(erase);
                                 // Add back button
                                 optionsContainer.append(backBtn);
+                            });
+                            // Add a right click option
+                            icon.addEventListener("contextmenu", (event) => {
+                                // Prevent default right click
+                                event.preventDefault();
+                                // Add options to the options list
+                                fileOptions = [];
+                                fileOptions.push(edit.cloneNode(true));
+                                fileOptions.push(nameChange.cloneNode(true));
+                                fileOptions.push(copy.cloneNode(true));
+                                fileOptions.push(move.cloneNode(true));
+                                fileOptions.push(erase.cloneNode(true));
+                                // Create the right click menu
+                                const contextmenu = this.rightClick(fileOptions,
+                                    {
+                                        "object": fileObject,
+                                        "filename": fileName,
+                                        "type": type,
+                                        "path": path,
+                                        "back": backBtn
+                                    }
+                                );
+                                // Activate the right click menu
+                                this.activateContextMenu(contextmenu, event);
+                                // Append the right click menu to the body
+                                document.body.prepend(contextmenu);
                             });
                         } else if (type == "video") {
                             // Create a video element
@@ -1076,6 +1143,31 @@ export default class DocumentManager {
                                 optionsContainer.append(copy);
                                 optionsContainer.append(erase);
                                 optionsContainer.append(backBtn);
+                            });
+                            // Add a right click option
+                            icon.addEventListener("contextmenu", (event) => {
+                                // Prevent default right click
+                                event.preventDefault();
+                                // Add options to the options list
+                                fileOptions = [];
+                                fileOptions.push(nameChange.cloneNode(true));
+                                fileOptions.push(copy.cloneNode(true));
+                                fileOptions.push(move.cloneNode(true));
+                                fileOptions.push(erase.cloneNode(true));
+                                // Create the right click menu
+                                const contextmenu = this.rightClick(fileOptions,
+                                    {
+                                        "object": fileObject,
+                                        "filename": fileName,
+                                        "type": type,
+                                        "path": path,
+                                        "back": backBtn
+                                    }
+                                );
+                                // Activate the right click menu
+                                this.activateContextMenu(contextmenu, event);
+                                // Append the right click menu to the body
+                                document.body.prepend(contextmenu);
                             });
                         } else if (type == "blog") {
                             // Create a link to edit the blog
@@ -1163,7 +1255,7 @@ export default class DocumentManager {
                             deleteBlogBtn.classList.add("erase");
                             // Create tooltip
                             const deleteBlogToolTip = document.createElement("p");
-                            deleteBlogToolTip.innerHTML = "Delete permanently";
+                            deleteBlogToolTip.innerHTML = "Delete";
                             deleteBlogToolTip.classList.add("description");
                             deleteBlogBtn.append(deleteBlogToolTip);
                             // Add an eventlistener
@@ -1200,6 +1292,33 @@ export default class DocumentManager {
                             name.addEventListener("dblclick", ()=> {
                                 // Redirect the user
                                 window.open(a.href, "_blank");
+                            });
+                            // Add a right click option
+                            icon.addEventListener("contextmenu", (event) => {
+                                // Prevent default right click
+                                event.preventDefault();
+                                // Add options to the options list
+                                fileOptions = [];
+                                fileOptions.push(a.cloneNode(true));
+                                fileOptions.push(editBlog.cloneNode(true));
+                                fileOptions.push(renameBtn.cloneNode(true));
+                                fileOptions.push(copy.cloneNode(true));
+                                fileOptions.push(move.cloneNode(true));
+                                fileOptions.push(deleteBlogBtn.cloneNode(true));
+                                // Create the right click menu
+                                const contextmenu = this.rightClick(fileOptions, 
+                                    {
+                                        "object": fileObject,
+                                        "filename": fileName,
+                                        "type": type,
+                                        "path": path,
+                                        "back": backBtn
+                                    }
+                                );
+                                // Activate the right click menu
+                                this.activateContextMenu(contextmenu, event);
+                                // Append the right click menu to the body
+                                document.body.prepend(contextmenu);
                             });
                         } else if (type == "pdf") {
                             // Create hyper-link
@@ -1242,6 +1361,32 @@ export default class DocumentManager {
                                 // Redirect the user
                                 window.open(a.href, "_blank");
                             });
+                            // Add a right click option
+                            icon.addEventListener("contextmenu", (event) => {
+                                // Prevent default right click
+                                event.preventDefault();
+                                // Add options to the options list
+                                fileOptions = [];
+                                fileOptions.push(a.cloneNode(true));
+                                fileOptions.push(nameChange.cloneNode(true));
+                                fileOptions.push(copy.cloneNode(true));
+                                fileOptions.push(move.cloneNode(true));
+                                fileOptions.push(erase.cloneNode(true));
+                                // Create the right click menu
+                                const contextmenu = this.rightClick(fileOptions,
+                                    {
+                                        "object": fileObject,
+                                        "filename": fileName,
+                                        "type": type,
+                                        "path": path,
+                                        "back": backBtn
+                                    }
+                                );
+                                // Activate the right click menu
+                                this.activateContextMenu(contextmenu, event);
+                                // Append the right click menu to the body
+                                document.body.prepend(contextmenu);
+                            });
                         } else if (type == "unsupported") {
                             // If the file is a unsupported file format
                             // Add eventlistener
@@ -1257,8 +1402,32 @@ export default class DocumentManager {
                                 // Append back button
                                 optionsContainer.append(backBtn);
                             });
+                            // Add a right click option
+                            icon.addEventListener("contextmenu", (event) => {
+                                // Prevent default right click
+                                event.preventDefault();
+                                // Add options to the options list
+                                fileOptions = [];
+                                fileOptions.push(nameChange.cloneNode(true));
+                                fileOptions.push(copy.cloneNode(true));
+                                fileOptions.push(move.cloneNode(true));
+                                fileOptions.push(erase.cloneNode(true));
+                                // Create the right click menu
+                                const contextmenu = this.rightClick(fileOptions,
+                                    {
+                                        "object": fileObject,
+                                        "filename": fileName,
+                                        "type": type,
+                                        "path": path,
+                                        "back": backBtn
+                                    }
+                                );
+                                // Activate the right click menu
+                                this.activateContextMenu(contextmenu, event);
+                                // Append the right click menu to the body
+                                document.body.prepend(contextmenu);
+                            });
                         }
-
                     }
                     fileObject.append(name);
                     ul.append(fileObject);
@@ -1701,6 +1870,7 @@ export default class DocumentManager {
         // Create button element
         const element = document.createElement("button");
         // Add classnames
+        element.className = "";
         element.classList.add("btn");
         element.classList.add("popUp");
         element.classList.add("optionsIcon");
@@ -1721,4 +1891,261 @@ export default class DocumentManager {
         console.log(`Copying \"${file}\" from ${path}`);
         console.log(".....");
     }
+    // Helper function to create a "RightClick" element
+    rightClick(options = [], extras = {}){
+        // Create a container
+        const container = document.createElement("div");
+        // Add an id
+        container.style.id = "rightClick";
+        const popUp = document.createElement("div");
+        popUp.style.display = "flex";
+        popUp.style.flexDirection = "column";
+        // Strip and remodel the optioin elements
+        for (let i = 0; i < options.length; i++) {
+            const element = options[i];
+            // Add an eventlistener
+            element.addEventListener("mouseup", () => {
+                let p = element.querySelector("p").innerHTML;
+                if (p == "Edit") this.editListener(extras["filename"], extras["type"]);
+                else if (p == "Rename") this.renameListener(extras["filename"], extras["type"], extras["path"]);
+                else if (p == "Copy") this.copyListener(extras["filename"], extras["path"]);
+                else if (p == "Move") this.moveListener(extras["filename"], extras["path"]);
+                else if (p == "Delete") this.eraseListener(extras["filename"], extras["type"], extras["path"], extras["back"], extras["object"]);
+                // Hide the container when the user choose an option
+                if (p != "Rename")container.style.display = "none";
+            });
+            // Remove any and all classnames
+            element.className = "";
+            // Add new classes
+            if (i != 0) {
+                element.classList.add("overline");
+            }
+            element.classList.add("option");
+            // Append the options to the container
+            popUp.append(element);
+        }
+        container.append(popUp);
+        return container;
+    }
+    // Helper function to toggle the grayscreen for the rightclick menu
+    activateContextMenu(element, event){
+        // Add an id to the menu
+        element.id = "rightClick";
+        // Add the position to the menu
+        element.style.left = event.clientX + "px";
+        element.style.top = event.clientY + "px";
+        // Only toggle the grayscreen if it isn't displaying in block mode
+        if (this.grayScreen.style.display !== "block"){
+            // Display the grayscreen in block mode
+            this.grayScreen.style.display = "block";
+            this.grayScreen.style.backgroundColor = "rgba(154, 160, 166, 0)";
+            // Remove the grayscreen and the rightclick menu if the grayscreen is clicked
+            this.grayScreen.addEventListener("click", () => {
+                element.remove();
+                this.grayScreen.style.backgroundColor = " rgba(154, 160, 166, 0.5)";
+                this.grayScreen.style.display = "none";
+            });
+        }
+    }
+    // Helper function to add an eventlistener to the edit button
+    async editListener(fileName, type) {
+        // Get the current path
+        const path = document.getElementById("path");
+        // If the path isn't root
+        if (path != null && path.textContent != "") {
+            // Fetch the file content from the server
+            const content = await this.fetchFileContent(fileName, type, path.textContent);
+            // Empty the files container
+            document.getElementById("filesContainer").innerHTML = "";
+            // Initialize the editor with the fetched content
+            if (type == "js") this.showEditor(content, "javascript", type, fileName);
+            else this.showEditor(content, type, type, fileName);
+        // If the path is root
+        } else {
+            const content = await this.fetchFileContent(fileName, type, "");
+            // Empty the files container
+            document.getElementById("filesContainer").innerHTML = "";
+            // Initialize the editor with the fetched content
+            if (type == "js") this.showEditor(content, "javascript", type, fileName);
+            else this.showEditor(content, type, type, fileName);
+        }
+        // Create a back button
+        const backBtn = document.createElement("button");
+        backBtn.className = "btn";
+        backBtn.innerHTML = "↑";
+        // Add an eventlistener
+        backBtn.addEventListener("click", () => {
+            // Get the path
+            const path = document.getElementById("path");
+            // Hide the editor
+            document.getElementById("editor").style.display = "none";
+            // Display the creat buttons
+            document.getElementById("createButtons").style.display = "block";
+            // Display the files in the current directory
+            if (path != null && path.textContent != "") this.getFiles(path.textContent);
+            else this.getFiles("");
+            // Remove the back button
+            backBtn.remove();
+            optionsContainer.innerHTML = "";
+        });
+        optionsContainer.append(backBtn);
+    }
+
+    renameListener (fileName, type, path) {
+        // Show greyscreen
+        this.grayScreen.style.display = "block";
+        const currentFileName = document.createElement("p");
+        currentFileName.innerHTML = fileName;
+        currentFileName.classList.add("center");
+        // Create a input for the new name
+        const nameInput     = document.createElement("input");
+        nameInput.type      = "text";
+        nameInput.id        = "newName";
+        nameInput.classList.add("textInput");
+        nameInput.classList.add("center");
+        // Add an eventlistener to the input
+        let isValid = false;
+        nameInput.addEventListener("input", () => {
+            if (!isValidFileName(nameInput.value, true)) {
+                nameInput.style.color = "red";
+                isValid = false;
+            } else {
+                nameInput.style.color = "";
+                isValid = true;
+            }
+        });
+        // Create an element to display the file extension
+        const extension     = document.createElement("span");
+        if(fileName.endsWith("/")){
+            extension.innerHTML = "/";
+        } else {
+            extension.innerHTML = "." + fileName.split(".")[1];
+        }
+        // Create a container
+        const nameChangeContainer = document.createElement("div");
+        nameChangeContainer.id = "nameChangeContainer";
+        nameChangeContainer.className = "grayWindow";
+        nameChangeContainer.style.display = "block";
+        // Create a title for the container
+        const h2 = document.createElement("h2");
+        h2.innerHTML = "Change filename";
+        h2.classList.add("grayTitle");
+        // Create a button container
+        const buttonContainer = document.createElement("div");
+        buttonContainer.className = "spaceBetween";
+        // Create a cancel button
+        const cancel = document.createElement("button");
+        cancel.classList.add("btn");
+        cancel.classList.add("cancel");
+        cancel.addEventListener("click", () => {
+            nameChangeContainer.remove();
+            this.grayScreen.style.display = "none";
+        });
+        // Give the input a submit button
+        const confirm       = document.createElement("button");
+        confirm.classList.add("btn");
+        confirm.classList.add("check");
+        confirm.addEventListener("click", async () => {
+            let oldName = fileName;
+            let newName = nameInput.value + "." + type;
+            if (!isValid) {
+                alert("Invalid input!");
+            } 
+            else if (type == "folder") newName = nameInput.value + "/";
+            else if (type == "img" || type == "video") {
+                const extension = fileName.split(".").pop();
+                newName = nameInput.value + "." + extension;
+            }
+            if (nameInput.value && nameInput.value.replace(" ", "") != "") {
+                // Send a request to change the name of the file
+                await moveIt(path + oldName, path + newName);
+                nameChangeContainer.remove();
+                this.grayScreen.style.display = "none";
+                document.getElementById("displayContainer").innerHTML = "";
+                this.getFiles(path);
+            } else {
+                alert("Name fail");
+            }
+        });
+        console.log("name change");
+        
+        // Append the input and submit button
+        nameChangeContainer.append(h2);
+        nameChangeContainer.append(currentFileName);
+        nameChangeContainer.append(nameInput);
+        nameChangeContainer.append(extension);
+        buttonContainer.append(confirm);
+        buttonContainer.append(cancel);
+        nameChangeContainer.append(buttonContainer);
+        this.grayScreen.append(nameChangeContainer);
+    }
+    copyListener (fileName, path) {
+        // Start the copying proccess
+        this.copy(fileName, path);
+        // Create a paste button
+        const paste = this.optionsButton("paste", "Paste");
+        // Add an eventlistener
+        paste.addEventListener("click", async () => {
+            // Get the current path
+            const targetPath = document.getElementById("path").innerHTML;
+            // Build the source and the target
+            let source = sessionStorage.getItem("copyPath") + sessionStorage.getItem("file");
+            let target = targetPath + sessionStorage.getItem("file");
+            // Paste the file in the current path
+            await copyIt(source, target);
+            // Remove the paste button
+            paste.remove();
+            // Update the current path
+            this.getFiles(targetPath);
+        });
+        // Append the paste button
+        const container = document.getElementById("createButtons");
+        container.append(paste);
+    }
+    moveListener (fileName, path) {
+        // Start the copying proccess
+        this.copy(fileName, path);
+        // Create a paste button
+        const paste = this.optionsButton("paste", "Paste");
+        // Add an eventlistener
+        paste.addEventListener("click", async () => {
+            // Get the current path
+            const targetPath = document.getElementById("path").innerHTML;
+            // Build the source and the target
+            let source = sessionStorage.getItem("copyPath") + sessionStorage.getItem("file");
+            let target = targetPath + sessionStorage.getItem("file");
+            // Paste the file in the current path
+            await moveIt(source, target);
+            // Remove the paste button
+            paste.remove();
+            // Update the current path
+            this.getFiles(targetPath);
+        });
+        // Append the paste button
+        const container = document.getElementById("createButtons");
+        container.append(paste);
+    }
+    async eraseListener (fileName, type, path, backBtn, object) {
+        // Confirm deletion
+        if (confirm(`Are you sure you want to delete "${fileName}" permanently? `)){
+            // Call the delete function
+            if (path.endsWith("/")) {
+                console.log("Sending path: " + path);
+                await this.deleteFile(fileName, type, path);
+            } else {
+                console.log("No path: " + path);
+                await this.deleteFile(fileName, type);
+            }
+        } else {
+            console.log("Aborting...")
+        }
+        const optionsContainer = document.getElementById("optionsContainer");
+        optionsContainer.innerHTML = "";
+        optionsContainer.append(backBtn);
+        // Empty the display container
+        this.emptyDisplayContainer();
+        // Remove the element
+        object.remove();
+    }
 }
+// Norlund J. Lukas

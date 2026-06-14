@@ -87,6 +87,28 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
+#rightClick {
+  position: fixed;
+  z-index: 9999;
+  display: block;
+
+  background: white;
+  color: #111;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.overline {
+  border-top: solid gray 1px;
+}
+
+.option:hover {
+  background-color: gray;
+}
+
 #grayScreen {
   display: none;
   z-index: 1000;
@@ -607,6 +629,10 @@ header h1 {
 
 #txtList li span {
   background-image: url(../img/txt-file.svg);
+}
+
+#unsupportedList li span {
+  background-image: url(../img/unsupported-file.svg);
 }
 
 .fileName {
