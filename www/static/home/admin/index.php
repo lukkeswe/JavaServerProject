@@ -70,6 +70,7 @@ if (isset($_COOKIE["javasession"])){
 </head>
 <body>
     <div id="tooltip"></div>
+    <div id="transScreen"></div>
     <div id="grayScreen">
         <div id="miniExplorer" style="display:none;">
             <button class="createBtn" id="createFolderBtnMini"></button>
@@ -357,9 +358,11 @@ if (isset($_COOKIE["javasession"])){
             });
         }
         droppZone.addEventListener('dragover', e => e.preventDefault());
-        // !!!
+
         document.getElementById("cancel").addEventListener("click", ()=> {
-            document.getElementById("uploadBtnMini").remove();
+            const uploadBtn = document.getElementById("uploadBtnMini");
+            if (uploadBtn) uploadBtn.remove();
+            miniExplorer.style.display = "none";
             grayScreen.style.display = "none";
         });
         createFile.addEventListener("click", ()=>{

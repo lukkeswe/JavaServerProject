@@ -322,7 +322,7 @@ public class Main {
                             // Cycle through the supported file formats
                             for (String extension : IMAGE_EXTENSIONS){
                                 // If the extention match a suppported format set the content type to "octet-stream"
-                                if (resolvePath.toString().endsWith(extension)) {
+                                if (resolvePath.toString().toLowerCase().endsWith(extension)) {
                                     isImage = true;
                                     contentType = "application/octet-stream";
                                     if (extension.equals(".svg")) {

@@ -16,6 +16,7 @@ export default class DocumentManager {
         this.db;
         this.pathContainer  = document.getElementById("pathContainer");
         this.pathContainerMini  = document.getElementById("pathContainerMini");
+        this.transScreen    = document.getElementById("transScreen");
         this.grayScreen     = document.getElementById("grayScreen");
         this.textInputContainer = document.getElementById("textInputContainer");
         this.textInput      = document.getElementById("textInput");
@@ -1935,15 +1936,14 @@ export default class DocumentManager {
         element.style.left = event.clientX + "px";
         element.style.top = event.clientY + "px";
         // Only toggle the grayscreen if it isn't displaying in block mode
-        if (this.grayScreen.style.display !== "block"){
+        if (this.transScreen.style.display !== "block"){
             // Display the grayscreen in block mode
-            this.grayScreen.style.display = "block";
-            this.grayScreen.style.backgroundColor = "rgba(154, 160, 166, 0)";
+            this.transScreen.style.display = "block";
+            this.transScreen.style.backgroundColor = "rgba(154, 160, 166, 0)";
             // Remove the grayscreen and the rightclick menu if the grayscreen is clicked
-            this.grayScreen.addEventListener("click", () => {
+            this.transScreen.addEventListener("click", () => {
                 element.remove();
-                this.grayScreen.style.backgroundColor = " rgba(154, 160, 166, 0.5)";
-                this.grayScreen.style.display = "none";
+                this.transScreen.style.display = "none";
             });
         }
     }
