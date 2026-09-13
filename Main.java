@@ -304,13 +304,13 @@ public class Main {
                         }
                     }
                     // Check if it is a CSS or JavaScript file
-                    if (resolvePath.toString().endsWith(".css") || resolvePath.toString().endsWith(".js") || resolvePath.toString().endsWith(".pdf")){
+                    if (resolvePath.toString().endsWith(".css") || resolvePath.toString().endsWith(".js") || resolvePath.toString().toLowerCase().endsWith(".pdf")){
                         // Set the full target path to the resolvePath
                         fullPath = resolvePath;
                         // Set the content type
                         if (resolvePath.toString().endsWith(".css")) contentType = "text/css";
                         else if (resolvePath.toString().endsWith(".js")) contentType = "application/javascript";
-                        else if (resolvePath.toString().endsWith(".pdf")) contentType = "application/pdf";
+                        else if (resolvePath.toString().toLowerCase().endsWith(".pdf")) contentType = "application/pdf";
                     } else {
                         // Check if the file is an image or video file
                         boolean isImage = false;
@@ -922,7 +922,7 @@ public class Main {
                             json.append("\"").append(type).append("\": [");
                             boolean first = true;
                             for (String file : files){
-                                if (file.endsWith("." + type) || (file.endsWith("/") && type.equals("folder"))) {
+                                if (file.toLowerCase().endsWith("." + type) || (file.endsWith("/") && type.equals("folder"))) {
                                     if(!first) json.append(", ");
                                     json.append("\"").append(escapeJson(file)).append("\"");
                                     first = false;
