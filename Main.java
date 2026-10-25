@@ -141,6 +141,8 @@ public class Main {
             String htmlFilePath = ADMIN_DIR + "/static/index.html";
             // If no html file is specified target the index file
             String targetFile = "index.html";
+            // Default content type
+            String contentType = "text/html";
             // Initial path
             String userPath = DomainsConfig.domainMap.getOrDefault(host, null);
             if (userPath == null) {
@@ -149,10 +151,18 @@ public class Main {
             }
             // Initial response
             byte[] response = null;
+            // Initial media status
+            boolean isImage = false;
+            boolean isVideo = false;
+            // Resolve path
+            Path resolvePath = Paths.get(userPath, "static", requestPath).normalize();
             // If the requested file is a html file
             if (requestPath.endsWith(".html")) {
+                System.out.println("-- Requested HTML file --");
                 targetFile = requestSplit[requestSplit.length - 1];
+                if (Files.exists(resolvePath)) response = Files.readAllBytes(resolvePath);
             } else if (requestPath.endsWith(".php")){
+                System.out.println("-- Requested PHP file --");
                 // Proccess the requested PHP file
                 byte[] requestedPhp = runPhp(exchange);
                 // If the result isn't null
@@ -170,8 +180,24 @@ public class Main {
                     return;
                 }
 
+            } else if (requestPath.endsWith("/") && requestPath != "/") {
+                System.out.println("-- Requested a path (\"/\") --");
+                System.out.println("    : " + resolvePath.toString() + "/");
+                if (Files.exists(Paths.get(resolvePath.toString() + "/index.html"))) {
+                    contentType = "text/html";
+                    response = Files.readAllBytes(Paths.get(resolvePath.toString() + "/index.html"));
+                } else if (Files.exists(Paths.get(resolvePath.toString() + "/index.php"))) {
+                    contentType = "text/html";
+                    
+                    System.out.println("Proccessing: " + resolvePath.toString() + "/index.php");
+                    // Proccess the requested PHP file
+                    response = runPhp(exchange);
+                } else if (Files.exists(Paths.get(userPath, "blog", requestPath, "index.blog"))) {
+                    contentType = "text/html";
+                    response = Files.readAllBytes(Paths.get(userPath, "blog", requestPath, "index.blog"));
+                }
             } else if (requestPath.endsWith(".blog")){
-                System.out.println("-- Looking for blog --");
+                System.out.println("-- Requested BLOG file --");
                 Path blogPath = Paths.get(userPath, "blog", requestPath.replace(".blog", ".html"));
                 System.out.println("-- Path: " + blogPath.toString() + " --");
                 if (Files.exists(blogPath)) {
@@ -195,7 +221,7 @@ public class Main {
                     return;
                 }
             } else if (requestPath.endsWith(".zip")) {
-                System.out.println("-- Looking for Zip file --");
+                System.out.println("-- Requested ZIP file --");
                 Path zipPath = Paths.get(userPath, "static", requestPath);
                 System.out.println("-- Path: " + zipPath.toString() + " --");
                 if (Files.exists(zipPath)){
@@ -227,198 +253,65 @@ public class Main {
                     exchange.close();
                     return;
                 }
-            }
-            
-            // If the host is the development url
-            if (
-                host.equalsIgnoreCase("dev.norlund-johan-lukas.com") || 
-                host.equalsIgnoreCase("ludwig.norlund-johan-lukas.com")
-                ){
-                htmlFilePath = userPath;
-            } else if (!requestPath.equals("/") && !requestPath.endsWith(".php")) {
-                System.out.println("Iregular path: " + requestPath);
-                // Check if the path points to real directory
-                Path fullPath = Paths.get(userPath, "static", requestPath);
-                String contentType = "text/html";
-                if (!requestPath.endsWith(".html")) {
-                    // If the file isn't an HTML file, check if it is a valid static file format
-                    Path resolvePath = Paths.get(userPath, "static", requestPath).normalize();
-                    System.out.println("Looking for: " + resolvePath.toString());
-                    if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
-                        //Look for a HTML file
-                        resolvePath = Paths.get(userPath, "static", requestPath, "index.html").normalize();
-                        System.out.println("Looking for: " + resolvePath.toString());
-                        if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
-                            // Look for a PHP file
-                            resolvePath = Paths.get(userPath, "static", requestPath, "index.php").normalize();
-                            System.out.println("Looking for: " + resolvePath.toString());
-                            if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
-                                resolvePath = Paths.get(userPath, "static", requestPath, "index.blog").normalize();
-                                System.out.println("Looking for: " + resolvePath.toString());
-                                if (!Files.exists(resolvePath) || !Files.isRegularFile(resolvePath)) {
-                                    System.out.println("Invalid path:" + resolvePath.toString());
-                                    response = Files.readAllBytes(Paths.get("www/static/notfound.html"));
-                                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
-                                    exchange.sendResponseHeaders(404, response.length);
-                                    OutputStream os = exchange.getResponseBody();
-                                    os.write(response);
-                                    os.close();
-                                    exchange.close();
-                                    return;
-                                } else {
-                                    response = Files.readAllBytes(Paths.get(userPath, "blog", requestPath, "index.html"));
-                                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
-                                    exchange.sendResponseHeaders(200, response.length);
-                                    OutputStream os = exchange.getResponseBody();
-                                    os.write(response);
-                                    os.close();
-                                    exchange.close();
-                                    return;
-                                }
-                            } else {
-                                System.out.println("Proccessing: " + resolvePath.toString());
-                                // Proccess the requested PHP file
-                                byte[] requestedPhp = runPhp(exchange);
-                                // If the result isn't null
-                                if (requestedPhp != null) {
-                                    exchange.getResponseHeaders().set("Content-Type", contentType + "; charset=UTF-8");
-                                    exchange.sendResponseHeaders(200, requestedPhp.length);
-                                    OutputStream os = exchange.getResponseBody();
-                                    os.write(requestedPhp);
-                                    os.close();
-                                    exchange.close();
-                                    return;
-                                // Else break the exchange
-                                } else {
-                                    response = Files.readAllBytes(Paths.get("www/static/notfound.html"));
-                                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
-                                    exchange.sendResponseHeaders(404, response.length);
-                                    OutputStream os = exchange.getResponseBody();
-                                    os.write(response);
-                                    os.close();
-                                    exchange.close();
-                                    return;
-                                }
-                            }
-                    
-                        }
+            } else if (requestPath.endsWith(".mp4")) {
+                System.out.println("-- Requested MP4 file --");
+                isVideo = true;
+                contentType = "video/mp4";
+                Path videoPath = Paths.get(userPath, "static", requestPath);
+                if (Files.exists(videoPath)) {
+                    if (ACTIVE_STREAMS.incrementAndGet() > MAX_STREAMS) {
+                        exchange.sendResponseHeaders(503, -1);
+                        exchange.close();
+                        return;
                     }
-                    // Check if it is a CSS or JavaScript file
-                    if (resolvePath.toString().endsWith(".css") || resolvePath.toString().endsWith(".js") || resolvePath.toString().toLowerCase().endsWith(".pdf")){
-                        // Set the full target path to the resolvePath
-                        fullPath = resolvePath;
-                        // Set the content type
-                        if (resolvePath.toString().endsWith(".css")) contentType = "text/css";
-                        else if (resolvePath.toString().endsWith(".js")) contentType = "application/javascript";
-                        else if (resolvePath.toString().toLowerCase().endsWith(".pdf")) contentType = "application/pdf";
-                    } else {
-                        // Check if the file is an image or video file
-                        boolean isImage = false;
-                        boolean isVideo = false;
-                        if (resolvePath.toString().endsWith(".mp4")) {
-                            isVideo = true;
-                            contentType = "video/mp4";
-                        } else {
-                            // Cycle through the supported file formats
-                            for (String extension : IMAGE_EXTENSIONS){
-                                // If the extention match a suppported format set the content type to "octet-stream"
-                                if (resolvePath.toString().toLowerCase().endsWith(extension)) {
-                                    isImage = true;
-                                    contentType = "application/octet-stream";
-                                    if (extension.equals(".svg")) {
-                                        contentType = "image/svg+xml";
-                                    }
-                                    break;
+                    long fileLength = Files.size(videoPath);
+                    String range = exchange.getRequestHeaders().getFirst("Range");
+
+                    exchange.getResponseHeaders().set("Content-Type", contentType);
+                    exchange.getResponseHeaders().set("Accept-Ranges", "bytes");
+                    exchange.getResponseHeaders().set("Connection", "close");
+
+                    if (range == null) {
+                        // No range request (send whole file)
+                        exchange.getResponseHeaders().set("Content-Length", String.valueOf(fileLength));
+                        exchange.sendResponseHeaders(200, fileLength);
+                        try (OutputStream os = exchange.getResponseBody()){
+                            Files.copy(videoPath, os);
+                        } finally {
+                            ACTIVE_STREAMS.decrementAndGet();
+                        }                     
+                    } else { 
+                        // Parse range header: e.g. "bytes=1000-"
+                        String[] parts = range.replace("bytes=", "").split("-");
+                        long start = Long.parseLong(parts[0]);
+                        long end = (parts.length > 1 && !parts[1].isEmpty()) ? Long.parseLong(parts[1]) : fileLength - 1;
+                        // Clamp range (void out of bounds)
+                        start = Math.max(0, start);
+                        end = Math.min(fileLength - 1, end);
+
+                        long length = end - start + 1;
+
+                        exchange.getResponseHeaders().set("Content-Range", "bytes " + start + "-" + end + "/" + fileLength);
+                        exchange.sendResponseHeaders(206, length);
+
+                        try (FileChannel fileChannel = FileChannel.open(videoPath, StandardOpenOption.READ);
+                            OutputStream os = exchange.getResponseBody();
+                            WritableByteChannel outChannel = Channels.newChannel(os)){
+                                fileChannel.position(start);
+                                long transferred = 0;
+                                while (transferred < length) {
+                                    long bytes = fileChannel.transferTo(start + transferred, length - transferred, outChannel);
+                                    if (bytes <= 0) break;
+                                    transferred += bytes;
                                 }
-                            }
-                        }
-                        // Set the full target path to the resolve path if the file is an image or video
-                        if (isImage || isVideo) fullPath = resolvePath;
-                        // If the requested file isn't a supported static file, append "index.html" (fallback)
-                        else fullPath = Paths.get(fullPath.toString(), targetFile);
-                    }
-                }
-                
-                if (!Files.exists(fullPath)){
-                    // Serve 404 if path does not exist
-                    System.out.println("invalid path: " + fullPath.toString());
-                    response = Files.readAllBytes(Paths.get("www/static/notfound.html"));
-                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
-                    exchange.sendResponseHeaders(404, response.length);
-                } else {
-                    if (fullPath.toString().endsWith(".mp4")) {
-                        if (ACTIVE_STREAMS.incrementAndGet() > MAX_STREAMS) {
-                            exchange.sendResponseHeaders(503, -1);
-                            exchange.close();
-                            return;
-                        }
-                        long fileLength = Files.size(fullPath);
-                        String range = exchange.getRequestHeaders().getFirst("Range");
-
-                        exchange.getResponseHeaders().set("Content-Type", contentType);
-                        exchange.getResponseHeaders().set("Accept-Ranges", "bytes");
-                        exchange.getResponseHeaders().set("Connection", "close");
-
-                        if (range == null) {
-                            // No range request (send whole file)
-                            exchange.getResponseHeaders().set("Content-Length", String.valueOf(fileLength));
-                            exchange.sendResponseHeaders(200, fileLength);
-                            try (OutputStream os = exchange.getResponseBody()){
-                                Files.copy(fullPath, os);
                             } finally {
                                 ACTIVE_STREAMS.decrementAndGet();
-                            }                     
-                        } else { 
-                            // Parse range header: e.g. "bytes=1000-"
-                            String[] parts = range.replace("bytes=", "").split("-");
-                            long start = Long.parseLong(parts[0]);
-                            long end = (parts.length > 1 && !parts[1].isEmpty()) ? Long.parseLong(parts[1]) : fileLength - 1;
-                            // Clamp range (void out of bounds)
-                            start = Math.max(0, start);
-                            end = Math.min(fileLength - 1, end);
+                            }
 
-                            long length = end - start + 1;
-
-                            exchange.getResponseHeaders().set("Content-Range", "bytes " + start + "-" + end + "/" + fileLength);
-                            exchange.sendResponseHeaders(206, length);
-
-                            try (FileChannel fileChannel = FileChannel.open(fullPath, StandardOpenOption.READ);
-                                OutputStream os = exchange.getResponseBody();
-                                WritableByteChannel outChannel = Channels.newChannel(os)){
-                                    fileChannel.position(start);
-                                    long transferred = 0;
-                                    while (transferred < length) {
-                                        long bytes = fileChannel.transferTo(start + transferred, length - transferred, outChannel);
-                                        if (bytes <= 0) break;
-                                        transferred += bytes;
-                                    }
-                                } finally {
-                                    ACTIVE_STREAMS.decrementAndGet();
-                                }
-
-                            exchange.close();
-                            return;
-                        }
-                    } else {
-                        response = Files.readAllBytes(fullPath);
-                        exchange.getResponseHeaders().set("Content-Type", contentType + "; charset=UTF-8");
-                        exchange.sendResponseHeaders(200, response.length);
+                        exchange.close();
+                        return;
                     }
-                }
-                OutputStream os = exchange.getResponseBody();
-                os.write(response);
-                os.close();
-                exchange.close();
-                return;
-            } else {
-                // Every other case other than the develpment url
-                htmlFilePath = userPath + "/static/" + targetFile;
-            }
-            // If the requested file isn't a PHP file
-            if (!requestPath.endsWith(".php")){
-                Path path = Paths.get(htmlFilePath);
-                // Check if the  file exists
-                if (!Files.exists(path) || !Files.isRegularFile(path)){
+                } else {
                     // Fallback if the file does not exist (404: not found :( )
                     response = Files.readAllBytes(Paths.get("www/static/notfound.html"));
                     exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
@@ -428,15 +321,89 @@ public class Main {
                     os.close();
                     exchange.close();
                     return;
-                } else {
-                    // If the file exist, load it into the response
-                    response = Files.readAllBytes(Paths.get(htmlFilePath));
                 }
             }
-            // Set the Content-Type header for HTML
-            exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+            // Check if it is a CSS or JavaScript file
+            else if (requestPath.endsWith(".css") || requestPath.endsWith(".js") || requestPath.toLowerCase().endsWith(".pdf")){
+                System.out.println("-- Requested a CSS, JavaScript or PDF file");
+                // Set the content type
+                if (resolvePath.toString().endsWith(".css")) contentType = "text/css";
+                else if (resolvePath.toString().endsWith(".js")) contentType = "application/javascript";
+                else if (resolvePath.toString().toLowerCase().endsWith(".pdf")) contentType = "application/pdf";
+                // Check if the file exists
+                System.out.println("    : " + resolvePath.toString());
+                if (Files.exists(resolvePath)) response = Files.readAllBytes(resolvePath);
+                else contentType = "text/html";
+            }
+            // Game files
+            else if (resolvePath.endsWith(".br")){
+                exchange.getResponseHeaders().set("Content-Encoding", "br");
+                if (resolvePath.endsWith(".js.br")) contentType = "application/javascript";
+                else if (resolvePath.endsWith(".wasm.br")) contentType = "application/wasm";
+                else if (resolvePath.endsWith(".data.br")) contentType = "application/octet-stream";
+                
+                if (Files.exists(resolvePath)) response = Files.readAllBytes(resolvePath);
+
+            } else if (requestPath.endsWith(".unityweb")){
+                exchange.getResponseHeaders().set("Content-Encoding", "gzip");
+
+                if (resolvePath.toString().contains(".wasm")) {
+                    contentType = "application/wasm";
+                } else if (resolvePath.toString().contains(".js")){
+                    contentType = "application/javascript";
+                } else if (resolvePath.toString().contains(".data")){
+                    contentType = "application/octet-stream";
+                } else {
+                    contentType = "application/octet-stream";
+                }
+
+                if (Files.exists(resolvePath)) response = Files.readAllBytes(resolvePath);
+
+            }
+            if (response == null) {
+                // Cycle through the supported file formats
+                for (String extension : IMAGE_EXTENSIONS){
+                    // If the extention match a suppported format set the content type to "octet-stream"
+                    if (resolvePath.toString().toLowerCase().endsWith(extension)) {
+                        System.out.println("-- Requested an image file --");
+                        isImage = true;
+                        contentType = "application/octet-stream";
+                        if (extension.equals(".svg")) {
+                            contentType = "image/svg+xml";
+                        }
+                        break;
+                    }
+                }
+                if (isImage && Files.exists(resolvePath)) response = Files.readAllBytes(resolvePath);
+            }
+            
+            // If the requested file isn't a PHP file
+            // if (!requestPath.endsWith(".php")){
+            //     Path path = Paths.get(htmlFilePath);
+            //     // Check if the  file exists
+            //     if (!Files.exists(path) || !Files.isRegularFile(path)){
+            //         // Fallback if the file does not exist (404: not found :( )
+            //         response = Files.readAllBytes(Paths.get("www/static/notfound.html"));
+            //         exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+            //         exchange.sendResponseHeaders(404, response.length);
+            //         OutputStream os = exchange.getResponseBody();
+            //         os.write(response);
+            //         os.close();
+            //         exchange.close();
+            //         return;
+            //     } else {
+            //         // If the file exist, load it into the response
+            //         response = Files.readAllBytes(Paths.get(htmlFilePath));
+            //     }
+            // }
+            // Set the Content-Type header
+            exchange.getResponseHeaders().set("Content-Type", contentType + "; charset=UTF-8");
             // Create the response
-            exchange.sendResponseHeaders(200, response.length);
+            if (!Files.exists(resolvePath)) {
+                response = Files.readAllBytes(Paths.get("www/static/notfound.html"));
+                exchange.sendResponseHeaders(404, response.length);
+            }
+            else exchange.sendResponseHeaders(200, response.length);
             OutputStream os = exchange.getResponseBody();
             os.write(response);
             os.close();
