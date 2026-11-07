@@ -612,7 +612,6 @@ export default class DocumentManager {
                 // Add an eventlistener
                 backBtn.addEventListener("click", async () => {
                     const slice = path.split("/");
-                    console.log("slice: " + slice);
                     
                     for (let i = 0; i < slice.length - 2; i++) {
                         previousPath = previousPath + slice[i] + "/";
@@ -691,40 +690,16 @@ export default class DocumentManager {
                         if (path != null && path.textContent != "") {
                             // Fetch the file content from the server
                             const content = await this.fetchFileContent(fileName, type, path.textContent);
-                            // Empty the files container
-                            document.getElementById("filesContainer").innerHTML = "";
                             // Initialize the editor with the fetched content
                             if (type == "js") this.showEditor(content, "javascript", type, fileName);
                             else this.showEditor(content, type, type, fileName);
                         // If the path is root
                         } else {
                             const content = await this.fetchFileContent(fileName, type, "");
-                            // Empty the files container
-                            document.getElementById("filesContainer").innerHTML = "";
                             // Initialize the editor with the fetched content
                             if (type == "js") this.showEditor(content, "javascript", type, fileName);
                             else this.showEditor(content, type, type, fileName);
                         }
-                        // Create a back button
-                        const backBtn = document.createElement("button");
-                        backBtn.className = "btn";
-                        backBtn.innerHTML = "↑";
-                        // Add an eventlistener
-                        backBtn.addEventListener("click", () => {
-                            // Get the path
-                            const path = document.getElementById("path");
-                            // Hide the editor
-                            document.getElementById("editor").style.display = "none";
-                            // Display the creat buttons
-                            document.getElementById("createButtons").style.display = "block";
-                            // Display the files in the current directory
-                            if (path != null && path.textContent != "") this.getFiles(path.textContent);
-                            else this.getFiles("");
-                            // Remove the back button
-                            backBtn.remove();
-                            optionsContainer.innerHTML = "";
-                        });
-                        optionsContainer.append(backBtn);
                     });
                     // Create a name change button
                     const nameChange = this.optionsButton("namechange", "Rename");
@@ -1548,6 +1523,13 @@ export default class DocumentManager {
     }
     // Initialize the editor
     showEditor (content, mode, type, filename) {
+        const path = document.getElementById("path");
+        const optionsContainer = document.getElementById("optionsContainer");
+        // Hide the explorer
+        const filesContainer = document.getElementById("filesContainer");
+        filesContainer.style.display = "none";
+        const explorerTab = document.getElementById("explorerTab");
+        explorerTab.classList.remove("current");
         // Initialize Ace editor
         const editor = ace.edit("editor");
         editor.setTheme("ace/theme/monokai");  // choose theme
@@ -1576,7 +1558,6 @@ export default class DocumentManager {
         save.append(saveToolTip);
         // Add an eventlistener
         save.addEventListener("click", async () => {
-            const path = document.getElementById("path");
             // Call the function in Upmanager.jp to save the file
             if (path != null && path.textContent != ""){
                 await saveContentToFile(path.textContent, type, filename, editor.getValue());
@@ -1649,6 +1630,61 @@ export default class DocumentManager {
         document.getElementById("optionsContainer").append(saveAs);
         // Subtract the filecontainer's padding
         document.getElementById("filesContainer").style.padding = "0px";
+         // Create a tab for the editor
+        const tab = document.createElement("div");
+        tab.classList.add("tab");
+        tab.classList.add("popUp");
+        tab.classList.add("current");
+        // Create tab label
+        const label = document.createElement("span");
+        label.innerHTML = filename;
+        label.addEventListener("click", () => {
+            // Hide the "create buttons"
+            document.getElementById("createButtons").style.display = "none";
+            // List all tabs
+            const tabs = document.querySelectorAll(".tab");
+            // Empty the options container
+            optionsContainer.innerHTML = "";
+            // Initialize the editor
+            editor.session.setMode("ace/mode/" + mode); // syntax mode
+            editor.setValue(content, -1); // Append the content
+            document.getElementById("editor").style.display = "block"; // Display the editor
+            filesContainer.style.display = "none";
+            if (!tab.classList.contains("current")) {
+                tabs.forEach(element => {
+                    if (element.classList.contains("current")) element.classList.remove("current");
+                });
+                tab.classList.add("current");
+            }
+            // Append options to container
+            optionsContainer.append(save);
+            optionsContainer.append(saveAs);
+        });
+        tab.append(label);
+        // Create a close button for the tab
+        const closeBtn = document.createElement("span");
+        closeBtn.innerHTML = "x";
+        // Add an eventlistener to the close button
+        closeBtn.addEventListener("click", ()=> {
+            document.getElementById("createButtons").style.display = "flex";
+            document.getElementById("displayContainer").innerHTML = "";
+            optionsContainer.innerHTML = ""
+            if (tab.classList.contains("current")){
+                document.getElementById("editor").style.display = "none";
+                filesContainer.style.display = "flex";
+                explorerTab.classList.add("current");
+            }
+            // Remove the tab
+            tab.remove();
+        });
+        tab.append(closeBtn);
+        // Create a tool tip that shows the path
+        const popUp = document.createElement("p");
+        popUp.classList.add("description");
+        popUp.innerHTML = "/" + path.textContent + filename;
+        tab.append(popUp);
+
+        document.getElementById("tabContainer").append(tab);
     }
     // Create a new file
     async createFile(fileName, type){
@@ -1657,7 +1693,7 @@ export default class DocumentManager {
         // Create a list of comments with correct syntax for each language
         const comment = {"html": "<!-- Code here -->", "css": "/* Code here */", "js": "// Code here", "php": "// Code here"};
         // Initialize the editor with the fetched content
-        if (type == "js") this.showEditor(comment[type], "javascript", type, fileName);
+        if (type == "js") this.showEditor(comment[type], "javascript", type, fileName, );
         else this.showEditor(comment[type], type, type, fileName);
     }
     async fetchFileContent (file, type, path = "") {
@@ -1955,40 +1991,16 @@ export default class DocumentManager {
         if (path != null && path.textContent != "") {
             // Fetch the file content from the server
             const content = await this.fetchFileContent(fileName, type, path.textContent);
-            // Empty the files container
-            document.getElementById("filesContainer").innerHTML = "";
             // Initialize the editor with the fetched content
             if (type == "js") this.showEditor(content, "javascript", type, fileName);
             else this.showEditor(content, type, type, fileName);
         // If the path is root
         } else {
             const content = await this.fetchFileContent(fileName, type, "");
-            // Empty the files container
-            document.getElementById("filesContainer").innerHTML = "";
             // Initialize the editor with the fetched content
             if (type == "js") this.showEditor(content, "javascript", type, fileName);
             else this.showEditor(content, type, type, fileName);
         }
-        // Create a back button
-        const backBtn = document.createElement("button");
-        backBtn.className = "btn";
-        backBtn.innerHTML = "↑";
-        // Add an eventlistener
-        backBtn.addEventListener("click", () => {
-            // Get the path
-            const path = document.getElementById("path");
-            // Hide the editor
-            document.getElementById("editor").style.display = "none";
-            // Display the creat buttons
-            document.getElementById("createButtons").style.display = "block";
-            // Display the files in the current directory
-            if (path != null && path.textContent != "") this.getFiles(path.textContent);
-            else this.getFiles("");
-            // Remove the back button
-            backBtn.remove();
-            optionsContainer.innerHTML = "";
-        });
-        optionsContainer.append(backBtn);
     }
 
     renameListener (fileName, type, path) {

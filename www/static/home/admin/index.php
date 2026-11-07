@@ -109,7 +109,7 @@ if (isset($_COOKIE["javasession"])){
     <div id="loadImage" style="width: 50%;margin:0 auto;display:none;">
       <img src="img/muppet-load.gif" alt="muppet load image">
     </div>
-    <header><h1>ファイル管理</h1></header>
+    <header><h1>File manager</h1></header>
     <div id="container">
         <main id="main-content">
             <div id="upload-container">
@@ -138,6 +138,7 @@ if (isset($_COOKIE["javasession"])){
             </div>
             <div id="explorer">
                 <div id="pathContainer"><span><?php echo $db->domain; ?>/</span><p id="path"></p></div>
+                <div id="tabContainer"><div id="explorerTab" class="tab filesTab current"><span>Explorer</span><span>x</span></div></div>
                 <div id="filesContainer"></div>
                 <div id="editor"></div>
                 <div id="exLoad"> <img src="img/load.gif" alt="load image"></div>
@@ -415,6 +416,50 @@ if (isset($_COOKIE["javasession"])){
                 await dm.getFilesMini("");
             }
             document.getElementById("newFolderOptionsMini").style.display = "none";
+        });
+        document.getElementById("explorerTab").addEventListener("click", () => {
+            // Show the "create buttons"
+            document.getElementById("createButtons").style.display = "flex";
+            // Hide the editor
+            document.getElementById("editor").style.display = "none";
+            // Highlight the explorer tab and opress the other tabs
+            if (!document.getElementById("explorerTab").classList.contains("current")){
+                const tabs = document.querySelectorAll(".tab");
+                tabs.forEach(tab => {
+                    tab.classList.remove("current");
+                });
+                document.getElementById("explorerTab").classList.add("current");
+                // Show the explorer
+                document.getElementById("filesContainer").style.display = "flex";
+            }
+            // Empty the optioinscontainer
+            document.getElementById("optionsContainer").innerHTML = "";
+            // Create a back button
+            const currentPath = document.getElementById("path").innerHTML;
+            if (currentPath && !currentPath == "") {
+                const backBtn = document.createElement("btn");
+                backBtn.innerHTML = "↑";
+                backBtn.className = "btn";
+                // Generate the parent path
+                const slice = currentPath.split("/");
+                let previousPath = "";
+                for (let i = 0; i < slice.length - 2; i++) {
+                    previousPath = previousPath + slice[i] + "/";
+                }
+                // Add an eventlistener to the back button
+                backBtn.addEventListener("click", async () => {
+                    // Show loading screen
+                    document.getElementById("exLoad").style.display = "block";
+                    // Load the content from the parent folder
+                    await dm.getFiles(previousPath);
+                    // Hide loading screen
+                    document.getElementById("exLoad").style.display = "none";
+                    // Update the current path
+                    document.getElementById("path").innerHTML = previousPath;
+                });
+                // Append the back button to the options container
+                document.getElementById("optionsContainer").append(backBtn);
+            }
         });
         
         function createFileFunc() {

@@ -9,14 +9,14 @@
     <title>Server</title>
 </head>
 <body>
-    <h1 class="welcome">ようこそ！</h1>
+    <h1 class="welcome">Welcome!</h1>
     <form id="loginContainer" method="post" action="/home/">
-        <label for="username">メールアドレス：</label><br>
+        <label for="username">E-mail:</label><br>
         <input type="text" name="email" id="email" class="textInput"><br>
-        <label for="password">パスワード：</label><br>
+        <label for="password">Password:</label><br>
         <input type="password" name="password" id="password" class="textInput"><br>
-        <button type="submit" class="btn" id="loginBtn">ログイン</button><br>
-        <a id="contactBtn" href="/contact/">連絡先</a>
+        <button type="submit" class="btn" id="loginBtn">Login</button><br>
+        <a id="contactBtn" href="/contact/">Contact</a>
     </form>
 </body>
 </html>
