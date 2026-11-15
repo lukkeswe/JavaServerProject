@@ -1680,7 +1680,7 @@ export default class DocumentManager {
         // Create a tool tip that shows the path
         const popUp = document.createElement("p");
         popUp.classList.add("description");
-        popUp.innerHTML = "/" + path.textContent + filename;
+        popUp.innerHTML = "/" + path + filename;
         tab.append(popUp);
 
         document.getElementById("tabContainer").append(tab);
