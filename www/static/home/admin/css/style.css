@@ -517,11 +517,17 @@ header h1 {
 /* Tab container */
 #tabContainer {
   display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  overflow-y: hidden;
   padding-left: 8px;
 }
 
 .tab {
   display: flex;
+  flex-direction: row;
+  flex-shrink: 0;
+  overflow: visible;
   padding: 8px;
   width: max-content;
   background: var(--bg);
@@ -531,7 +537,7 @@ header h1 {
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
   justify-content: space-between;
-  min-width: 128px;
+  width: 128px;
   cursor: default;
 }
 
@@ -542,6 +548,8 @@ header h1 {
 
 .tab span {
   width: max-content;
+  max-width: 120px;
+  overflow: hidden;
 }
 
 /* Files panel container (a card inside explorer) */
@@ -778,6 +786,14 @@ footer {
   #main-content { flex-direction: column; padding: 12px;}
   #upload-container { width: 100%; min-width: auto; padding-top: 42px; }
   #createButtons {left: unset; right: 12px;}
+  #tabContainer {
+    flex-direction: column;
+    height: 64px;
+    overflow: scroll;
+  }
+  .tab {
+    width: 100%;
+  }
   #filesContainer {
       display: block;
       padding: 12px;
