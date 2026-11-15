@@ -691,14 +691,14 @@ export default class DocumentManager {
                             // Fetch the file content from the server
                             const content = await this.fetchFileContent(fileName, type, path.textContent);
                             // Initialize the editor with the fetched content
-                            if (type == "js") this.showEditor(content, "javascript", type, fileName);
-                            else this.showEditor(content, type, type, fileName);
+                            if (type == "js") this.showEditor(content, "javascript", type, fileName, path.textContent);
+                            else this.showEditor(content, type, type, fileName, path.textContent);
                         // If the path is root
                         } else {
                             const content = await this.fetchFileContent(fileName, type, "");
                             // Initialize the editor with the fetched content
-                            if (type == "js") this.showEditor(content, "javascript", type, fileName);
-                            else this.showEditor(content, type, type, fileName);
+                            if (type == "js") this.showEditor(content, "javascript", type, fileName, path.textContent);
+                            else this.showEditor(content, type, type, fileName, path.textContent);
                         }
                     });
                     // Create a name change button
@@ -1522,8 +1522,7 @@ export default class DocumentManager {
         }
     }
     // Initialize the editor
-    showEditor (content, mode, type, filename) {
-        const path = document.getElementById("path");
+    showEditor (content, mode, type, filename, path) {
         const optionsContainer = document.getElementById("optionsContainer");
         // Hide the explorer
         const filesContainer = document.getElementById("filesContainer");
@@ -1559,8 +1558,8 @@ export default class DocumentManager {
         // Add an eventlistener
         save.addEventListener("click", async () => {
             // Call the function in Upmanager.jp to save the file
-            if (path != null && path.textContent != ""){
-                await saveContentToFile(path.textContent, type, filename, editor.getValue());
+            if (path != null && path != ""){
+                await saveContentToFile(path, type, filename, editor.getValue());
             } else {
                 await saveContentToFile("", type, filename, editor.getValue());
             }
@@ -1584,13 +1583,11 @@ export default class DocumentManager {
             document.getElementById("grayScreen").style.display = "block";
             document.getElementById("miniExplorer").style.display = "block";
             if(document.getElementById("miniExplorer")) console.log("found it");
-            // Get the current path
-            let currentPath = document.getElementById("path");
             // Get the files
-            if (currentPath) this.getFilesMini(currentPath.textContent);
+            if (path) this.getFilesMini(path);
             else this.getFilesMini("");
             // Update the mini path
-            if (currentPath) document.getElementById("pathMini").innerHTML = currentPath.textContent;
+            if (path) document.getElementById("pathMini").innerHTML = path;
             // Create a save button
             const uploadBtnContainer = document.getElementById("uploadBtnContainerMini");
             const uploadBtn = document.createElement("button");
@@ -1609,14 +1606,14 @@ export default class DocumentManager {
                 const filename = document.getElementById("filename").value;
                 // Get the current path
                 let savePath = "";
-                currentPath = document.getElementById("pathMini");
-                if (currentPath && currentPath.innerHTML != ""){
-                savePath = currentPath.textContent;
+                path = document.getElementById("pathMini");
+                if (path && path != ""){
+                savePath = path;
                 }
                 // Save the file to the server
                 await saveContentToFile(savePath, type, filename + "." + type, editor.getValue());
                 // Update the current path
-                document.getElementById("path").textContent = currentPath.textContent;
+                document.getElementById("path").textContent = path;
                 // Remove the temporary upload button
                 uploadBtn.remove();
                 // Close the explorer
