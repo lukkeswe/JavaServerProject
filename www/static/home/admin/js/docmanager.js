@@ -1661,8 +1661,6 @@ export default class DocumentManager {
         // Create a close button for the tab
         const closeBtn = document.createElement("span");
         closeBtn.innerHTML = "x";
-        closeBtn.style.backgroundColor = "#1e1e1f";
-        closeBtn.style.paddingLeft = "8px";
         // Add an eventlistener to the close button
         closeBtn.addEventListener("click", ()=> {
             document.getElementById("createButtons").style.display = "flex";
